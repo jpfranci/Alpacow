@@ -25,3 +25,14 @@ People are feeling more isolated than ever, since they must stay at least 2 mete
 * Cash/crypto gifting system (JipTip)
 * Cooler interactions with posts (emoji reacts)
 * Hot reload posts (show replies as they come in)
+
+## Prototypes
+
+### Main Screen with Posts
+![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view1.jpg)
+
+### Create a Post Screen
+![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view2.jpg)
+
+## How to Contribute
+[Visit the contributing readme](CONTRIBUTING.md)
