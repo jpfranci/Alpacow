@@ -15,6 +15,7 @@ People are feeling more isolated than ever, since they must stay at least 2 mete
 
 ## Standard Requirements
 * Choose location with autocomplete
+* Vote on posts
 * Comment on each other’s posts
 * Personalize post recommendations based on location
 * Personalize post recommendations based on upvotes
@@ -30,9 +31,13 @@ People are feeling more isolated than ever, since they must stay at least 2 mete
 
 ### Main Screen with Posts
 ![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view1.jpg)
+Shown are key features including voting on posts with the most reputable being shown first to the user.
+It also includes the navigation bar where the user can further filter posts and also visit/edit their profile.
+Users can click on the replies text to view replies and participate.
 
 ### Create a Post Screen
 ![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view2.jpg)
+Shown is the screen where you can create a new post with an optional title and anonymity options.
 
 ## How to Contribute
 [Visit the contributing readme](CONTRIBUTING.md)
