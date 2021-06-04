@@ -3,7 +3,7 @@ import "./App.css";
 import NavBar from "./pages/common/nav";
 import { Redirect, Route, Switch } from "react-router";
 import { HOME_PAGE } from "./common/links";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/core/styles";
 import HomePage from "./pages/home/home";
 import theme from "./common/theme";
 
