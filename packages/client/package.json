@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "alpacow-client",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -38,7 +38,8 @@
     "prettier": "lint-staged",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "dev": "yarn run start"
   },
   "eslintConfig": {
     "extends": [

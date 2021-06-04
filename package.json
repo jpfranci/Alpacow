@@ -1,9 +1,14 @@
 {
   "scripts": {
-    "frontend:prettier": "cd client && yarn run prettier",
-    "prepare": "husky install"
+    "prettier": "lerna exec yarn prettier",
+    "prepare": "husky install",
+    "bootstrap": "lerna bootstrap",
+    "dev": "lerna run dev"
   },
   "devDependencies": {
-    "husky": "^6.0.0"
-  }
+    "@lerna/bootstrap": "^4.0.0",
+    "husky": "^6.0.0",
+    "lerna": "^4.0.0"
+  },
+  "name": "alpacow"
 }
