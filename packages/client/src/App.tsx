@@ -13,7 +13,7 @@ const App = () => {
       <NavBar />
       <Switch>
         <Route path={HOME_PAGE} component={HomePage} />
-        <Redirect to={HomePage} />
+        <Redirect to={HOME_PAGE} />
       </Switch>
     </ThemeProvider>
   );
