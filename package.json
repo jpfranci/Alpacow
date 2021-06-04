@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "frontend:prettier": "cd client && yarn prettier"
+  },
+  "devDependencies": {
+    "husky": "^6.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run frontend:prettier"
+    }
+  }
+}

@@ -28,7 +28,6 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "husky": "^6.0.0",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.0"
   },
@@ -36,6 +35,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "prettier": "lint-staged",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
@@ -56,11 +56,6 @@
       }
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
@@ -69,7 +64,8 @@
     "*.{html,css,less,ejs}": [
       "prettier --write",
       "git add"
-    ]
+    ],
+    "*.{js,css,md}": "prettier --write"
   },
   "browserslist": {
     "production": [
