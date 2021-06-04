@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "frontend:prettier": "cd client && yarn run prettier"
+    "frontend:prettier": "cd client && yarn run prettier",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "husky": "^6.0.0"
