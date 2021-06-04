@@ -1,21 +1,22 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import NavBar from "./pages/common/nav";
+import { Redirect, Route, Switch } from "react-router";
+import { HOME_PAGE } from "./common/links";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import HomePage from "./pages/home/home";
+import theme from "./common/theme";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <NavBar />
+      <Switch>
+        <Route path={HOME_PAGE} component={HomePage} />
+        <Redirect to={HomePage} />
+      </Switch>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;

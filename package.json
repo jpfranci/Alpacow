@@ -3,7 +3,8 @@
     "prettier": "lerna exec yarn prettier",
     "prepare": "husky install",
     "bootstrap": "yarn install && lerna bootstrap",
-    "dev": "lerna exec yarn dev"
+    "dev": "lerna exec yarn dev",
+    "storybook": "lerna exec yarn storybook"
   },
   "devDependencies": {
     "husky": "^6.0.0",
