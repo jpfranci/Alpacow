@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "frontend:prettier": "cd client && yarn prettier"
+    "frontend:prettier": "cd client && yarn run prettier"
   },
   "devDependencies": {
     "husky": "^6.0.0"
