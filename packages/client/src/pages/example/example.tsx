@@ -13,7 +13,7 @@ const ExamplePage = () => {
 };
 
 const UserExample = () => {
-  // misc state for <input> tags
+  // misc local component state
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
@@ -52,6 +52,7 @@ const UserExample = () => {
               login({ username: loginUsername, password: loginPassword }),
             )
               .then(unwrapResult) // this is how you can access thunk return values in a nice format
+              // (store has already been updated from action dispatch as this point, but you might want action result to do some component logic)
               .then((data) => setUserNotification("login succeeded"))
               .catch((error) => {
                 setUserNotification("login failed, bad credentials NOOOOO");

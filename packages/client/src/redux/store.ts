@@ -3,6 +3,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { userSlice } from "./slices/userSlice";
 
 // TODO write instructions for setting up db.json
+// TODO implement Posts, Location, Current Filter, App (Dark mode, other settings) slices
 
 const store = configureStore({
   reducer: {

@@ -47,6 +47,9 @@ export const login = createAsyncThunk(
   },
 );
 
+// TODO implement add post action
+// TODO implement logout action?
+
 export const userSlice = createSlice({
   name: prefix,
   initialState,
@@ -67,7 +70,7 @@ export const userSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
-export const {} = userSlice.actions;
+// TODO fill if we have any synchronous actions
+// export const {} = userSlice.actions;
 
 export default userSlice.reducer;

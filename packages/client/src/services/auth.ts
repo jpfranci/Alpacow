@@ -13,6 +13,8 @@ export type SignupInfo = {
   email: string;
 };
 
+// TODO add return types once backend types are done
+
 const signup = async (signupInfo: SignupInfo) => {
   // TODO this route should be sth like axios.post(`${baseUrl/signup}`, signupInfo)
   const response = await axios.post(`/users`, signupInfo);
