@@ -1,15 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService, { LoginCredentials, SignupInfo } from "../../services/auth";
-import postService, { NewPost } from "../../services/posts";
+import postService from "../../services/posts";
+import { NewPost, Post } from "./postSlice";
 
 const prefix = "user";
 
-export type UserState = {
+type UserState = {
   id?: string;
   username?: string;
   email?: string;
   // password?: string (shouldn't be stored on client)
-  posts: string[];
+  posts: Post[];
 };
 
 const initialState: UserState = {
@@ -62,6 +63,8 @@ export const createPost = createAsyncThunk(
 );
 
 // TODO implement getPosts action
+// TODO implement update action
+// TODO implement delete action
 // TODO implement logout action
 
 export const userSlice = createSlice({

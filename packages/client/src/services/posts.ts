@@ -1,24 +1,9 @@
 import axios from "axios";
+import { NewPost, PartialPost } from "../redux/slices/postSlice";
 
 const baseUrl = "/api/posts";
 
 // TODO add return types once backend types are done
-
-export type NewPost = {
-  title: string;
-  location: string; // TODO prob change
-  createdAt: number;
-  upvotes: number;
-  downvotes: number;
-  tag: string; // TODO prob change
-  userID: string;
-  // reacts: string[] // TODO stretch goal
-  // comments: string[] // TODO prob generate on backend
-};
-
-export type PartialPost = {
-  [key in keyof NewPost]?: NewPost[key];
-};
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, newPost);
