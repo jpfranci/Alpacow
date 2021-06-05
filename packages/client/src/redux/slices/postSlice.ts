@@ -23,13 +23,20 @@ export type PartialPost = {
   [key in keyof NewPost]?: NewPost[key];
 };
 
+export enum PostFilter {
+  POPULAR = "popular",
+  NEW = "new",
+}
+
 type PostState = {
   posts: Post[];
+  filter: PostFilter;
   currentPost?: Post;
 };
 
 const initialState: PostState = {
   posts: [],
+  filter: PostFilter.POPULAR,
 };
 
 // TODO add a filter param (getting all posts will suffice for now)
