@@ -1,5 +1,7 @@
 # Starting Guide
-Run `yarn bootstrap` to install dependencies on all packages (client and server)
+Run `yarn setup` when you first clone this project.
+
+Run `yarn bootstrap` to install any new dependencies on packages (client and server) 
 
 Run `yarn dev` to run hot reload mode on all packages (client and server)
 
