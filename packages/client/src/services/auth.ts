@@ -13,16 +13,19 @@ export type SignupInfo = {
   email: string;
 };
 
-// TODO improve typing
 const signup = async (signupInfo: SignupInfo) => {
+  // TODO this route should be sth like axios.post(`${baseUrl/signup}`, signupInfo)
   const response = await axios.post(`/users`, signupInfo);
-  return response.data;
+  return response;
 };
 
 const login = async (credentials: LoginCredentials) => {
-  // TODO this route should be axios.post(`${baseUrl/login}`, credentials)
-  const response = await axios.get(`/users/1`);
-  return response.data;
+  // TODO this route should be sth like axios.post(`${baseUrl/login}`, credentials)
+  const { username, password } = credentials;
+  const response = await axios.get(
+    `/users?username=${username}&password=${password}`,
+  );
+  return response;
 };
 
 const authService = {
