@@ -2,7 +2,8 @@
   "scripts": {
     "prettier": "lerna exec yarn prettier",
     "prepare": "husky install",
-    "bootstrap": "yarn install && lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
+    "setup": "yarn install && yarn bootstrap",
     "dev": "lerna exec yarn dev",
     "storybook": "lerna exec yarn storybook"
   },
