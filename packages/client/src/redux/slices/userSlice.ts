@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService, { LoginCredentials, SignupInfo } from "../../services/auth";
+import postService, { NewPost } from "../../services/posts";
 
 const prefix = "user";
 
@@ -47,8 +48,21 @@ export const login = createAsyncThunk(
   },
 );
 
-// TODO implement add post action
-// TODO implement logout action?
+export const createPost = createAsyncThunk(
+  `${prefix}/createPost`,
+  async (newPost: NewPost, { rejectWithValue }) => {
+    try {
+      const response = await postService.create(newPost);
+
+      return { post: response.data };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+// TODO implement getPosts action
+// TODO implement logout action
 
 export const userSlice = createSlice({
   name: prefix,
@@ -70,7 +84,7 @@ export const userSlice = createSlice({
   },
 });
 
-// TODO fill if we have any synchronous actions
+// TODO fill if we ever get any synchronous actions
 // export const {} = userSlice.actions;
 
 export default userSlice.reducer;
