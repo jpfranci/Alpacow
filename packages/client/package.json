@@ -54,7 +54,7 @@
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
-    "run-testdb": "json-server --watch db.json --routes routes.json --port 3001"
+    "mock-server": "json-server --watch db.json --routes routes.json --port 3001"
   },
   "eslintConfig": {
     "extends": [
