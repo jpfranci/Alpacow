@@ -7,6 +7,8 @@ export interface Post extends NewPost {
   id: string;
   upvotes: number;
   downvotes: number;
+  // createdAt: number; // TODO generate on backend
+  // comments: string[] // TODO generate on backend
 }
 
 export type NewPost = {
@@ -15,9 +17,6 @@ export type NewPost = {
   tag: string;
   location: string; // TODO consider changing (maybe lat & lon)
   userID: string;
-  // reacts: sth[] // TODO stretch goal
-  // createdAt: number; // TODO prob generate on backend
-  // comments: string[] // TODO prob generate on backend
 };
 
 export type PartialPost = {
@@ -56,7 +55,7 @@ export const createPost = createAsyncThunk(
   },
 );
 
-// TODO add some filter param (getting all posts will suffice for now)
+// TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {

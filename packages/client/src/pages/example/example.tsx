@@ -29,8 +29,8 @@ const UserExample = () => {
   const [signupEmail, setSignupEmail] = useState("");
 
   // store state + action dispatcher
-  const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
 
   const handleLogin = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     dispatch(login({ username: loginUsername, password: loginPassword }))
@@ -38,7 +38,7 @@ const UserExample = () => {
       // (store has already been updated from action dispatch as this point, but you might want action result to do some component logic)
       .then((data) => alert("login succeeded"))
       .catch((error) => {
-        alert("login failed, bad credentials NOOOOO");
+        alert("login failed, bad credentials prob NOOOOO");
       });
   };
 
@@ -124,6 +124,7 @@ const PostExample = () => {
   const [bodyText, setBodyText] = useState("");
 
   // store state + action dispatcher
+  const dispatch = useAppDispatch();
   const locationFilter = useAppSelector((state) => state.post.locationFilter);
   const user = useAppSelector((state) => state.user);
   const posts = useAppSelector((state) =>
@@ -133,7 +134,6 @@ const PostExample = () => {
       (post) => post.location === state.post.locationFilter,
     ),
   );
-  const dispatch = useAppDispatch();
 
   // fetch all posts on initial render (in reality we prob won't fetch ALL posts, just ones in curr location)
   useEffect(() => {
@@ -159,7 +159,7 @@ const PostExample = () => {
           alert("post creation failed NOOOOO");
         });
     } else {
-      alert("only site users can create posts, please login first");
+      alert("you must be logged in to create a post");
     }
   };
 
@@ -173,7 +173,7 @@ const PostExample = () => {
         <option value="vancouver">Yellowknife</option>
       </select>
       <div>
-        <h3>Create Post</h3>
+        <h3>Create Post (adds new post to db and adds them to the store)</h3>
         <div>
           <label>title</label>
           <input value={title} onChange={(e) => setTitle(e.target.value)} />

@@ -38,7 +38,7 @@ export const login = createAsyncThunk(
     try {
       const response = await authService.login(credentials);
 
-      // TODO adjust code after we implement endpoint
+      // TODO adjust code after we implement this endpoint
       return response.data.length <= 0
         ? rejectWithValue("user doesn't exist")
         : { user: response.data[0] };
@@ -71,8 +71,5 @@ export const userSlice = createSlice({
     });
   },
 });
-
-// TODO fill if we ever get any synchronous actions
-// export const {} = userSlice.actions;
 
 export default userSlice.reducer;

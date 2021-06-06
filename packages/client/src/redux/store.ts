@@ -4,7 +4,6 @@ import postReducer from "./slices/postSlice";
 import userReducer from "./slices/userSlice";
 
 // TODO write instructions for setting up db.json
-// TODO implement Posts, Location, Current Filter, App (Dark mode, other settings) slices
 
 const store = configureStore({
   reducer: {
