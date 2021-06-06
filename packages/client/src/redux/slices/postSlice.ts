@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
 
-const prefix = "posts";
+const prefix = "post";
 
 export interface Post extends NewPost {
   id: string;
@@ -23,21 +23,22 @@ export type PartialPost = {
   [key in keyof NewPost]?: NewPost[key];
 };
 
-export enum PostFilter {
+export enum PostSortType {
   POPULAR = "popular",
   NEW = "new",
 }
 
 type PostState = {
   posts: Post[];
-  filter: PostFilter;
-  location: string; // TODO consider moving to its own reducer
-  currentPost?: Post; // TODO use index/id instead?
+  sortType: PostSortType;
+  location: string;
+  tagFilter?: string;
+  currentPostID?: string;
 };
 
 const initialState: PostState = {
   posts: [],
-  filter: PostFilter.POPULAR,
+  sortType: PostSortType.POPULAR,
   location: "vancouver",
 };
 
@@ -64,11 +65,14 @@ export const postSlice = createSlice({
   name: prefix,
   initialState,
   reducers: {
-    setFilter: (state, action: PayloadAction<PostFilter>) => {
-      state.filter = action.payload;
+    setSortType: (state, action: PayloadAction<PostSortType>) => {
+      state.sortType = action.payload;
     },
     setLocation: (state, action: PayloadAction<string>) => {
       state.location = action.payload;
+    },
+    setTagFilter: (state, action: PayloadAction<string>) => {
+      state.tagFilter = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -81,5 +85,5 @@ export const postSlice = createSlice({
   },
 });
 
-export const { setFilter, setLocation } = postSlice.actions;
+export const { setSortType, setLocation, setTagFilter } = postSlice.actions;
 export default postSlice.reducer;
