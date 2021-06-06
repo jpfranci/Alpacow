@@ -1,4 +1,3 @@
 {
-  "/api/auth/:endpoint": "/users",
   "/api/*": "/$1"
 }

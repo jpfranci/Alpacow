@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService, { LoginCredentials, SignupInfo } from "../../services/auth";
-import postService from "../../services/posts";
-import { NewPost, Post } from "./postSlice";
+import { Post } from "./postSlice";
 
 const prefix = "user";
 
@@ -51,7 +50,6 @@ export const login = createAsyncThunk(
 
 // TODO implement getPosts action
 // TODO implement update action
-// TODO implement delete action
 // TODO implement logout action
 
 export const userSlice = createSlice({

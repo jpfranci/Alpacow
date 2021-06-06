@@ -5,14 +5,15 @@ const prefix = "post";
 
 export interface Post extends NewPost {
   id: string;
+  upvotes: number;
+  downvotes: number;
 }
 
 export type NewPost = {
   title: string;
-  location: string; // TODO consider changing (maybe lat & lon)
-  upvotes: number;
-  downvotes: number;
+  bodyText: string;
   tag: string;
+  location: string; // TODO consider changing (maybe lat & lon)
   userID: string;
   // reacts: sth[] // TODO stretch goal
   // createdAt: number; // TODO prob generate on backend
@@ -20,7 +21,7 @@ export type NewPost = {
 };
 
 export type PartialPost = {
-  [key in keyof NewPost]?: NewPost[key];
+  [key in keyof Post]?: Post[key];
 };
 
 export enum PostSortType {
@@ -31,7 +32,7 @@ export enum PostSortType {
 type PostState = {
   posts: Post[];
   sortType: PostSortType;
-  location: string;
+  locationFilter: string;
   tagFilter?: string;
   currentPostID?: string;
 };
@@ -39,10 +40,9 @@ type PostState = {
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
-  location: "vancouver",
+  locationFilter: "vancouver",
 };
 
-// TODO decide if we want to do this here or in post slice (i.e. how do we want post feed to update?)
 export const createPost = createAsyncThunk(
   `${prefix}/createPost`,
   async (newPost: NewPost, { rejectWithValue }) => {
@@ -56,9 +56,9 @@ export const createPost = createAsyncThunk(
   },
 );
 
-// TODO add a filter param (getting all posts will suffice for now)
+// TODO add some filter param (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk(
-  `${prefix}/signup`,
+  `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
     try {
       const response = await postService.getAll();
@@ -82,8 +82,8 @@ export const postSlice = createSlice({
     setSortType: (state, action: PayloadAction<PostSortType>) => {
       state.sortType = action.payload;
     },
-    setLocation: (state, action: PayloadAction<string>) => {
-      state.location = action.payload;
+    setLocationFilter: (state, action: PayloadAction<string>) => {
+      state.locationFilter = action.payload;
     },
     setTagFilter: (state, action: PayloadAction<string>) => {
       state.tagFilter = action.payload;
@@ -102,5 +102,6 @@ export const postSlice = createSlice({
   },
 });
 
-export const { setSortType, setLocation, setTagFilter } = postSlice.actions;
+export const { setSortType, setLocationFilter, setTagFilter } =
+  postSlice.actions;
 export default postSlice.reducer;

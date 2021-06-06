@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = "/api/auth";
+// const baseUrl = "/api/auth";
 
 export type LoginCredentials = {
   username: string;
