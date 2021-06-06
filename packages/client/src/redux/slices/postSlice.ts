@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
 
 const prefix = "posts";
@@ -31,12 +31,14 @@ export enum PostFilter {
 type PostState = {
   posts: Post[];
   filter: PostFilter;
-  currentPost?: Post;
+  location: string; // TODO consider moving to its own reducer
+  currentPost?: Post; // TODO use index/id instead?
 };
 
 const initialState: PostState = {
   posts: [],
   filter: PostFilter.POPULAR,
+  location: "vancouver",
 };
 
 // TODO add a filter param (getting all posts will suffice for now)
@@ -61,7 +63,14 @@ export const getPosts = createAsyncThunk(
 export const postSlice = createSlice({
   name: prefix,
   initialState,
-  reducers: {},
+  reducers: {
+    setFilter: (state, action: PayloadAction<PostFilter>) => {
+      state.filter = action.payload;
+    },
+    setLocation: (state, action: PayloadAction<string>) => {
+      state.location = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
       state.posts = action.payload.posts;
@@ -72,7 +81,5 @@ export const postSlice = createSlice({
   },
 });
 
-// TODO fill if we ever get any synchronous actions
-// export const {} = userSlice.actions;
-
+export const { setFilter, setLocation } = postSlice.actions;
 export default postSlice.reducer;
