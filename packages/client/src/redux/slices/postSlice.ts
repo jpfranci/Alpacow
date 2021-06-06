@@ -42,6 +42,20 @@ const initialState: PostState = {
   location: "vancouver",
 };
 
+// TODO decide if we want to do this here or in post slice (i.e. how do we want post feed to update?)
+export const createPost = createAsyncThunk(
+  `${prefix}/createPost`,
+  async (newPost: NewPost, { rejectWithValue }) => {
+    try {
+      const response = await postService.create(newPost);
+
+      return { post: response.data };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // TODO add a filter param (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk(
   `${prefix}/signup`,
@@ -81,6 +95,9 @@ export const postSlice = createSlice({
     });
     builder.addCase(getPosts.rejected, (state, action) => {
       return { ...initialState };
+    });
+    builder.addCase(createPost.fulfilled, (state, action) => {
+      state.posts.push(action.payload.post);
     });
   },
 });

@@ -49,19 +49,6 @@ export const login = createAsyncThunk(
   },
 );
 
-export const createPost = createAsyncThunk(
-  `${prefix}/createPost`,
-  async (newPost: NewPost, { rejectWithValue }) => {
-    try {
-      const response = await postService.create(newPost);
-
-      return { post: response.data };
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
-
 // TODO implement getPosts action
 // TODO implement update action
 // TODO implement delete action
