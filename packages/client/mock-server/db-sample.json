@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "joshbrown",
+      "password": "password",
+      "email": "joshbrown@gmail.com"
+    }
+  ],
+  "posts": [
+    {
+      "title": "Looking for computer parts",
+      "bodyText": "i am looking for computer parts",
+      "tag": "computers",
+      "location": "vancouver",
+      "userID": 1,
+      "id": 1
+    }
+  ]
+}
