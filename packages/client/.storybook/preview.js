@@ -2,13 +2,19 @@ import React from "react";
 
 import { ThemeProvider, StylesProvider } from "@material-ui/core/styles";
 import theme from "../src/common/theme";
+import { Provider } from "react-redux";
+import store from "../src/redux/store";
+import { addDecorator } from "@storybook/react";
+import { withHeadless } from "storybook-addon-headless";
 
 export const decorators = [
   (Story) => (
     <StylesProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <Story />
-      </ThemeProvider>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <Story />
+        </ThemeProvider>
+      </Provider>
     </StylesProvider>
   ),
 ];

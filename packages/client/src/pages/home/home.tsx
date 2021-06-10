@@ -1,7 +1,8 @@
 import React from "react";
+import ActionGroup from "./action-group/action-group";
 
 const HomePage = () => {
-  return <div />;
+  return <ActionGroup />;
 };
 
 export default HomePage;

@@ -16,5 +16,28 @@
       "userID": 1,
       "id": 1
     }
+  ],
+  "tags": [
+    {
+      "name": "sports"
+    },
+    {
+      "name": "pets"
+    },
+    {
+      "name": "dogs"
+    },
+    {
+      "name": "lucky is better"
+    },
+    {
+      "name": "cats"
+    },
+    {
+      "name": "pc parts"
+    },
+    {
+      "name": "clean mustaches"
+    }
   ]
 }
