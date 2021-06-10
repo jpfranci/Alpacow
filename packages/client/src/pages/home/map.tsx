@@ -9,9 +9,10 @@ import { CSSProperties } from "@material-ui/styles";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 import { getLocation, setLocation } from "../../redux/slices/locationSlice";
+import REACT_APP_GOOGLE_API_KEY from "../../env";
 
 //TODO: Move out of component because it causes performance issue
-const google_libraries: Libraries = ["places"];
+const GOOGLE_LIBRARIES: Libraries = ["places"];
 
 const containerStyle = {
   width: "80%",
@@ -64,16 +65,19 @@ const Map = () => {
 
   const onPlaceChanged = async () => {
     if (currLocation !== null) {
+      const newLat = currLocation.getPlace().geometry.location.lat();
+      const newLon = currLocation.getPlace().geometry.location.lng();
+      const newName = currLocation.getPlace().formatted_address;
       setCtr({
-        lat: currLocation.getPlace().geometry.location.lat(),
-        lng: currLocation.getPlace().geometry.location.lng(),
+        lat: newLat,
+        lng: newLon,
       });
-      setName(currLocation.getPlace().formatted_address);
+      setName(newName);
 
       updateStore(
-        currLocation.getPlace().geometry.location.lat(),
-        currLocation.getPlace().geometry.location.lng(),
-        currLocation.getPlace().formatted_address
+        newLat,
+        newLon,
+        newName
       );
     }
   };
@@ -94,11 +98,11 @@ const Map = () => {
         }
       }
   }
-
+  
   return (
     <LoadScript
-      googleMapsApiKey=""
-      libraries={google_libraries}>
+      googleMapsApiKey={REACT_APP_GOOGLE_API_KEY}
+      libraries={GOOGLE_LIBRARIES}>
       <GoogleMap mapContainerStyle={containerStyle} center={ctr} zoom={12}>
         <Autocomplete
           onLoad={onAutoCompleteLoad}
