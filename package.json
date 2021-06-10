@@ -11,5 +11,9 @@
     "husky": "^6.0.0",
     "lerna": "^4.0.0"
   },
-  "name": "bumble-for-cats"
+  "name": "bumble-for-cats",
+  "dependencies": {
+    "@react-google-maps/api": "^2.2.0",
+    "@types/react": "^17.0.9"
+  }
 }
