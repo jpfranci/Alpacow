@@ -97,7 +97,7 @@ const Map = () => {
 
   return (
     <LoadScript
-      googleMapsApiKey="AIzaSyByPJxeMYuxpuud2csQ3aui0iydKeNXubc"
+      googleMapsApiKey=""
       libraries={google_libraries}>
       <GoogleMap mapContainerStyle={containerStyle} center={ctr} zoom={12}>
         <Autocomplete
