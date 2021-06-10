@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 import { getLocation, setLocation } from "../../redux/slices/locationSlice";
 
-//TODO: Move out of component
+//TODO: Move out of component because it causes performance issue
 const google_libraries: Libraries = ["places"];
 
 const containerStyle = {
@@ -57,8 +57,10 @@ const Map = () => {
   const [ctr, setCtr] = React.useState({ lat: location.lat, lng: location.lon });
   const [name, setName] = React.useState(location.name);
 
-  const updateOnDrag = (e: any) =>
+  const updateOnDrag = (e: any) => {
     setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    updateStore(e.latLng.lat(), e.latLng.lng(), name);
+  }
 
   const onPlaceChanged = async () => {
     if (currLocation !== null) {
@@ -68,21 +70,30 @@ const Map = () => {
       });
       setName(currLocation.getPlace().formatted_address);
 
-      try {
-        await dispatch(
+      updateStore(
+        currLocation.getPlace().geometry.location.lat(),
+        currLocation.getPlace().geometry.location.lng(),
+        currLocation.getPlace().formatted_address
+      );
+    }
+  };
+
+  const updateStore = async (lat: number, lon: number, newName: string | undefined) => {
+    try {
+      const response = await dispatch(
           setLocation({
-            name: name,
-            lat: ctr.lat,
-            lon: ctr.lng
+            name: newName !== undefined ? newName : name,
+            lat: lat,
+            lon: lon
           })
         );
+      return response.payload;
       } catch (error) {
-        if (error) {
+      if (error) {
           alert("location not got NOOOOOO");
         }
       }
-    }
-  };
+  }
 
   return (
     <LoadScript

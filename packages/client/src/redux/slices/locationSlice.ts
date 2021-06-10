@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import locationService from "../../services/location";
 
 export type Location = {
@@ -13,11 +13,24 @@ export const initialState: Location = {
   lon: -123.22,
 };
 
+export const setLocation = createAsyncThunk(
+  `location`,
+  async (location: Location, { rejectWithValue }) => {
+    try {
+      const response = await locationService.setLoc(location);
+
+      return { location: response.data };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+)
+
 export const getLocation = createAsyncThunk(
-  `location/getLocation`,
+  `location`,
   async (_, { rejectWithValue }) => {
     try {
-      const response= await locationService.getLoc();
+      const response = await locationService.getLoc();
 
       return { location: response.data };
     } catch (error) {
@@ -34,11 +47,7 @@ export const getLocation = createAsyncThunk(
 export const locationSlice = createSlice({
   name: "location",
   initialState,
-  reducers: {
-    setLocation: (state, action: PayloadAction<Location>) => {
-      state = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(getLocation.fulfilled, (state, action) => {
       state = action.payload.location;
@@ -49,6 +58,4 @@ export const locationSlice = createSlice({
   },
 });
 
-export const { setLocation } =
-  locationSlice.actions;
 export default locationSlice.reducer;
