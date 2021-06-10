@@ -4,8 +4,6 @@ import { ThemeProvider, StylesProvider } from "@material-ui/core/styles";
 import theme from "../src/common/theme";
 import { Provider } from "react-redux";
 import store from "../src/redux/store";
-import { addDecorator } from "@storybook/react";
-import { withHeadless } from "storybook-addon-headless";
 
 export const decorators = [
   (Story) => (
