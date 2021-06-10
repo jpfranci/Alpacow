@@ -1,12 +1,24 @@
-import React from "react";
-import { GoogleMap, LoadScript, Marker, Autocomplete } from "@react-google-maps/api";
+import React, { useEffect } from "react";
+import {
+  GoogleMap,
+  LoadScript,
+  Marker,
+  Autocomplete,
+} from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
+import { getLocation, setLocation } from "../../redux/slices/locationSlice";
+
+//TODO: Move out of component
+const google_libraries: Libraries = ["places"];
 
 const containerStyle = {
   width: "80%",
   height: "10em",
 };
 
+//TODO: Use built in material ui styles
 const autocompleteStyle: CSSProperties = {
   boxSizing: "border-box",
   border: "1px solid transparent",
@@ -24,57 +36,70 @@ const autocompleteStyle: CSSProperties = {
 };
 
 /**
- * Initial center is at UBC in case the user doesn't have location enabled browser
+ * For autocomplete to populate when the user actually selects something
  */
-const center = {
-  lat: 49.26,
-  lng: -123.22,
-};
+let currLocation: any = null;
 
-navigator.geolocation.getCurrentPosition(function (position) {
-  center.lat = position.coords.latitude;
-  center.lng = position.coords.longitude;
-});
-
-const onLoad = (marker: any) => {
-  console.log("marker: ", marker);
-};
-
-const autocomplete: any = null;
-
-const onAutoCompleteLoad = (autocomplete:any) => {
+const onAutoCompleteLoad = (autocomplete: any) => {
   console.log("autocomplete: ", autocomplete);
 
-  autocomplete = autocomplete;
-}
-
-const onPlaceChanged = () => {
-  if (autocomplete !== null) {
-    console.log(autocomplete.getPlace());
-  } else {
-    console.log("Autocomplete is not loaded yet!");
-  }
-}
+  currLocation = autocomplete;
+};
 
 const Map = () => {
-  const [ctr, setCtr] = React.useState(center);
-  const forceUpdate = (e: any) => setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+  const dispatch = useAppDispatch();
+  const location = useAppSelector((state) => state.location);
+
+  useEffect(() => {
+    dispatch(() => getLocation());
+  }, [dispatch]);
+
+  const [ctr, setCtr] = React.useState({ lat: location.lat, lng: location.lon });
+  const [name, setName] = React.useState(location.name);
+
+  const updateOnDrag = (e: any) =>
+    setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+
+  const onPlaceChanged = async () => {
+    if (currLocation !== null) {
+      setCtr({
+        lat: currLocation.getPlace().geometry.location.lat(),
+        lng: currLocation.getPlace().geometry.location.lng(),
+      });
+      setName(currLocation.getPlace().formatted_address);
+
+      try {
+        await dispatch(
+          setLocation({
+            name: name,
+            lat: ctr.lat,
+            lon: ctr.lng
+          })
+        );
+      } catch (error) {
+        if (error) {
+          alert("location not got NOOOOOO");
+        }
+      }
+    }
+  };
+
   return (
-    <LoadScript googleMapsApiKey="AIzaSyByPJxeMYuxpuud2csQ3aui0iydKeNXubc" libraries={["places"]}>
+    <LoadScript
+      googleMapsApiKey="AIzaSyByPJxeMYuxpuud2csQ3aui0iydKeNXubc"
+      libraries={google_libraries}>
       <GoogleMap mapContainerStyle={containerStyle} center={ctr} zoom={12}>
-        <Autocomplete onLoad={onAutoCompleteLoad} onPlaceChanged={onPlaceChanged}>
+        <Autocomplete
+          onLoad={onAutoCompleteLoad}
+          onPlaceChanged={onPlaceChanged}
+          fields={["geometry.location", "formatted_address"]}>
           <input
             type="text"
             placeholder="Enter location"
             style={autocompleteStyle}
           />
         </Autocomplete>
-        <Marker
-          onLoad={onLoad}
-          position={ctr}
-          draggable={true}
-          onDragEnd={forceUpdate}
-        />
+        <Marker position={ctr} draggable={true} onDragEnd={updateOnDrag} />
       </GoogleMap>
     </LoadScript>
   );

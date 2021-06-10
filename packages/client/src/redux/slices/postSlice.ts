@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
+import { Location } from "./locationSlice";
 
 const prefix = "post";
 
@@ -15,7 +16,7 @@ export type NewPost = {
   title: string;
   bodyText: string;
   tag: string;
-  location: string; // TODO consider changing (maybe lat & lon)
+  location: Location;
   userID: string;
 };
 
@@ -31,7 +32,7 @@ export enum PostSortType {
 type PostState = {
   posts: Post[];
   sortType: PostSortType;
-  locationFilter: string;
+  locationFilter: Location;
   tagFilter?: string;
   currentPostID?: string;
 };
@@ -39,7 +40,11 @@ type PostState = {
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
-  locationFilter: "vancouver",
+  locationFilter: {
+    name: "Vancouver",
+    lat: 49.26,
+    lon: -123.22
+  }
 };
 
 export const createPost = createAsyncThunk(
@@ -81,7 +86,7 @@ export const postSlice = createSlice({
     setSortType: (state, action: PayloadAction<PostSortType>) => {
       state.sortType = action.payload;
     },
-    setLocationFilter: (state, action: PayloadAction<string>) => {
+    setLocationFilter: (state, action: PayloadAction<Location>) => {
       state.locationFilter = action.payload;
     },
     setTagFilter: (state, action: PayloadAction<string>) => {

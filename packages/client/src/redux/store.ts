@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import postReducer from "./slices/postSlice";
 import userReducer from "./slices/userSlice";
+import locationReducer from "./slices/locationSlice";
 
 // TODO write instructions for setting up db.json
 
 const store = configureStore({
   reducer: {
+    location: locationReducer,
     user: userReducer,
     post: postReducer,
   },
