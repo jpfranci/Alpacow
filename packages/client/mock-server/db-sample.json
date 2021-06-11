@@ -21,5 +21,28 @@
     "name": "Vancouver, BC",
     "lat": 49.26,
     "lon": -123.22
-  }
+  },
+  "tags": [
+    {
+      "name": "sports"
+    },
+    {
+      "name": "pets"
+    },
+    {
+      "name": "dogs"
+    },
+    {
+      "name": "lucky is better"
+    },
+    {
+      "name": "cats"
+    },
+    {
+      "name": "pc parts"
+    },
+    {
+      "name": "clean mustaches"
+    }
+  ]
 }
