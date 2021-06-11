@@ -17,6 +17,11 @@
       "id": 1
     }
   ],
+  "location": {
+    "name": "Vancouver, BC",
+    "lat": 49.26,
+    "lon": -123.22
+  },
   "tags": [
     {
       "name": "sports"
