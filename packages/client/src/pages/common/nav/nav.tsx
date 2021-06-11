@@ -13,6 +13,9 @@ const useStyles = makeStyles((theme: any) => ({
   iconContainer: {
     flexGrow: 1,
   },
+  profileButton: {
+    textTransform: "none",
+  }
 }));
 
 const NavBar = () => {
@@ -29,7 +32,7 @@ const NavBar = () => {
             <img src="./logo.png" alt="official alpacow logo" width={75} height={45}/>
           </ButtonBase>
         </div>
-        <Button color="inherit">
+        <Button color="inherit" className={classes.profileButton}>
           JoshBrown
           <ArrowDropDownIcon />
         </Button>
