@@ -1,16 +1,16 @@
 import React from "react";
 import "./App.css";
-import NavBar from "./pages/common/nav";
+import NavBar from "./pages/common/nav/nav";
 import { Redirect, Route, Switch } from "react-router";
 import { EXAMPLE_PAGE, HOME_PAGE } from "./common/links";
 import { ThemeProvider } from "@material-ui/core/styles";
 import HomePage from "./pages/home/home";
-import theme from "./common/theme";
+import darkTheme from "./common/theme";
 import ExamplePage from "./pages/example/example";
 
 const App = () => {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={darkTheme}>
       <NavBar />
       <Switch>
         <Route path={HOME_PAGE} component={HomePage} />
