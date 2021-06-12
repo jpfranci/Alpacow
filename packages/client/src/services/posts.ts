@@ -1,12 +1,18 @@
 import axios from "axios";
-import { NewPost, PartialPost } from "../redux/slices/postSlice";
+import { NewPost, Post } from "../redux/slices/post-slice";
 
 const baseUrl = "/api/posts";
 
 // TODO add return types once backend types are done
 
 const create = async (newPost: NewPost) => {
-  const response = await axios.post(`${baseUrl}`, newPost);
+  const response = await axios.post(`${baseUrl}`, {
+    ...newPost,
+    // TODO delete below eventually - these props should be generated on backend
+    upvotes: Math.floor(Math.random() * 10),
+    downvotes: Math.floor(Math.random() * 10),
+    createdAt: Date.now(),
+  });
   return response;
 };
 
@@ -20,7 +26,7 @@ const getByID = async (id: string) => {
   return response;
 };
 
-const update = async (id: string, partialPost: PartialPost) => {
+const update = async (id: string, partialPost: Partial<Post>) => {
   const response = await axios.put(`${baseUrl}/${id}`, partialPost);
   return response;
 };

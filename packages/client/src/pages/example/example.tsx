@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import {
   createPost,
   getPosts,
-  setLocationFilter
-} from "../../redux/slices/postSlice";
-import { login, signup } from "../../redux/slices/userSlice";
-import { Location } from "../../redux/slices/locationSlice";
+  setLocationFilter,
+} from "../../redux/slices/post-slice";
+import { login, signup } from "../../redux/slices/user-slice";
+import { Location } from "../../redux/slices/location-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const ExamplePage = () => {
@@ -167,12 +167,19 @@ const PostExample = () => {
   const vancouver: Location = { name: "Vancouver", lat: 49.26, lon: -123.22 };
   const surrey: Location = { name: "Surry", lat: 49.26, lon: -123.22 };
   const richmond: Location = { name: "Richmond", lat: 49.26, lon: -123.22 };
-  const yellowknife: Location = { name: "Yellowknife", lat: 49.26, lon: -123.22 };
+  const yellowknife: Location = {
+    name: "Yellowknife",
+    lat: 49.26,
+    lon: -123.22,
+  };
 
   return (
     <div>
       <h2>Post example</h2>
-      <select onChange={(e) => dispatch(setLocationFilter(JSON.parse(e.target.value)))}>
+      <select
+        onChange={(e) =>
+          dispatch(setLocationFilter(JSON.parse(e.target.value)))
+        }>
         <option value={JSON.stringify(vancouver)}>{vancouver.name}</option>
         <option value={JSON.stringify(surrey)}>{surrey.name}</option>
         <option value={JSON.stringify(richmond)}>{richmond.name}</option>

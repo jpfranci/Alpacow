@@ -4,7 +4,7 @@ import debounce from "lodash/debounce";
 import { getDefaultTags, searchByTag } from "../../../services/tags";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
-import { setTagFilter } from "../../../redux/slices/postSlice";
+import { setTagFilter } from "../../../redux/slices/post-slice";
 
 const fetchSearchString = debounce((searchTerm, callback) => {
   searchByTag(searchTerm).then((tags: string[]) => callback(tags));
