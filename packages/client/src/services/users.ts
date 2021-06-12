@@ -1,6 +1,5 @@
 import axios from "axios";
-
-// const baseUrl = "/api/auth";
+import { UserState } from "../redux/slices/user-slice";
 
 export type LoginCredentials = {
   username: string;
@@ -35,9 +34,15 @@ const login = async (credentials: LoginCredentials) => {
   return response;
 };
 
+const update = async (id: string, partialUser: Partial<UserState>) => {
+  const response = await axios.put(`/users/${id}`, partialUser);
+  return response;
+};
+
 const authService = {
   signup,
   login,
+  update,
 };
 
 export default authService;

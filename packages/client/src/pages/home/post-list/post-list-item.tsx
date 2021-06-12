@@ -50,10 +50,10 @@ interface PostProps {
 
 const PostListItem: React.FC<PostProps> = ({ post }) => {
   const dispatch = useAppDispatch();
-  const userVotedPosts = useAppSelector((state) => state.user.votedPosts);
+  const user = useAppSelector((state) => state.user);
 
   const voteCount = post.upvotes - post.downvotes;
-  const didUserUpvote: boolean | undefined = userVotedPosts[post.id]?.upvoted;
+  const didUserUpvote: boolean | undefined = user.votedPosts[post.id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
 
@@ -72,7 +72,7 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
           {/* TODO disable voting for non-logged in users */}
 
           <IconButton
-            onClick={() => dispatch(upvote(post))}
+            onClick={() => dispatch(upvote({ post, user }))}
             disabled={shouldDisableUpvote}>
             <UpvoteIcon />
           </IconButton>
@@ -80,7 +80,7 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
           <IconButton
-            onClick={() => dispatch(downvote(post))}
+            onClick={() => dispatch(downvote({ post, user }))}
             disabled={shouldDisableDownvote}>
             <DownvoteIcon />
           </IconButton>

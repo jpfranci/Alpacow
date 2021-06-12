@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
+import userService from "../../services/users";
 import { Location } from "./location-slice";
+import { UserState } from "./user-slice";
 
 const prefix = "post";
 
@@ -70,37 +72,51 @@ export const getPosts = createAsyncThunk<Post[]>(
 );
 
 // TODO vote actions have race condition, should be updating on server
-export const upvote = createAsyncThunk<Partial<Post> & { id: string }, Post>(
-  `${prefix}/upvote`,
-  async (post, { rejectWithValue }) => {
-    try {
-      const response = await postService.update(post.id, {
-        ...post,
-        upvotes: post.upvotes + 1,
-      });
+export const upvote = createAsyncThunk<
+  Partial<Post> & { id: string },
+  { post: Post; user: UserState }
+>(`${prefix}/upvote`, async ({ post, user }, { rejectWithValue }) => {
+  try {
+    const response = await postService.update(post.id, {
+      ...post,
+      upvotes: post.upvotes + 1,
+    });
 
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
+    // TODO we should make one route each for upvoting/downvoting so we don't have to make redundant server calls
+    // TODO do this logic when we implement auth
+    // // update user
+    // user.votedPosts[post.id] = { upvoted: true };
+    // await userService.update(user.id as string, {
+    //   ...user,
+    // });
 
-export const downvote = createAsyncThunk<Partial<Post> & { id: string }, Post>(
-  `${prefix}/downvote`,
-  async (post, { rejectWithValue }) => {
-    try {
-      const response = await postService.update(post.id, {
-        ...post,
-        downvotes: post.downvotes + 1,
-      });
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
+export const downvote = createAsyncThunk<
+  Partial<Post> & { id: string },
+  { post: Post; user: UserState }
+>(`${prefix}/downvote`, async ({ post, user }, { rejectWithValue }) => {
+  try {
+    const response = await postService.update(post.id, {
+      ...post,
+      downvotes: post.downvotes + 1,
+    });
+
+    // // update user
+    // user.votedPosts[post.id] = { upvoted: true };
+    // await userService.update(user.id as string, {
+    //   ...user,
+    // });
+
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
 // TODO implement getPostByID action
 // TODO implement comment action
