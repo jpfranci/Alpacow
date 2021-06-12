@@ -1,5 +1,5 @@
 import axios from "axios";
-import { NewPost, PartialPost } from "../redux/slices/post-slice";
+import { NewPost, Post } from "../redux/slices/post-slice";
 
 const baseUrl = "/api/posts";
 
@@ -26,7 +26,7 @@ const getByID = async (id: string) => {
   return response;
 };
 
-const update = async (id: string, partialPost: PartialPost) => {
+const update = async (id: string, partialPost: Partial<Post>) => {
   const response = await axios.put(`${baseUrl}/${id}`, partialPost);
   return response;
 };

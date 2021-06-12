@@ -17,7 +17,12 @@ export type SignupInfo = {
 
 const signup = async (signupInfo: SignupInfo) => {
   // TODO this route should be sth like axios.post(`${baseUrl/signup}`, signupInfo)
-  const response = await axios.post(`/users`, signupInfo);
+  const response = await axios.post(`/users`, {
+    ...signupInfo,
+    // TODO delete below eventually - these props should be generated on backend
+    posts: [],
+    votedPosts: [],
+  });
   return response;
 };
 

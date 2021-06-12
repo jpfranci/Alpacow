@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
-import { useAppDispatch } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 
 const PostContainer = styled.div`
   display: flex;
@@ -50,8 +50,12 @@ interface PostProps {
 
 const PostListItem: React.FC<PostProps> = ({ post }) => {
   const dispatch = useAppDispatch();
+  const userVotedPosts = useAppSelector((state) => state.user.votedPosts);
 
   const voteCount = post.upvotes - post.downvotes;
+  const didUserUpvote: boolean | undefined = userVotedPosts[post.id]?.upvoted;
+  const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
+  const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
 
   return (
     <PostContainer>
@@ -59,18 +63,25 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
       <BodyText>{post.bodyText}</BodyText>
       <PostFooter>
         <PostFooterSection>
-          {/* TODO change this once createdAt props exists */}
           <DateText>{new Date(post.createdAt).toDateString()}</DateText>
           <Button variant="contained" color="primary" size="small">
             {post.tag}
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton onClick={() => dispatch(upvote(post))}>
+          {/* TODO disable voting for non-logged in users */}
+
+          <IconButton
+            onClick={() => dispatch(upvote(post))}
+            disabled={shouldDisableUpvote}>
             <UpvoteIcon />
           </IconButton>
+
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
-          <IconButton onClick={() => dispatch(downvote(post))}>
+
+          <IconButton
+            onClick={() => dispatch(downvote(post))}
+            disabled={shouldDisableDownvote}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>

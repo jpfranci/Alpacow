@@ -20,10 +20,6 @@ export type NewPost = {
   userID: string;
 };
 
-export type PartialPost = {
-  [key in keyof Post]?: Post[key];
-};
-
 export enum PostSortType {
   POPULAR = "popular",
   NEW = "new",
@@ -74,7 +70,7 @@ export const getPosts = createAsyncThunk<Post[]>(
 );
 
 // TODO vote actions have race condition, should be updating on server
-export const upvote = createAsyncThunk<PartialPost, Post>(
+export const upvote = createAsyncThunk<Partial<Post> & { id: string }, Post>(
   `${prefix}/upvote`,
   async (post, { rejectWithValue }) => {
     try {
@@ -90,7 +86,7 @@ export const upvote = createAsyncThunk<PartialPost, Post>(
   },
 );
 
-export const downvote = createAsyncThunk<PartialPost, Post>(
+export const downvote = createAsyncThunk<Partial<Post> & { id: string }, Post>(
   `${prefix}/downvote`,
   async (post, { rejectWithValue }) => {
     try {

@@ -1,15 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService, { LoginCredentials, SignupInfo } from "../../services/auth";
-import { Post } from "./post-slice";
+import { createPost, downvote, Post, upvote } from "./post-slice";
 
 const prefix = "user";
 
 type UserState = {
-  id?: string;
+  id?: string; // if id doesn't exist, user is not logged in
   username?: string;
   email?: string;
   // password?: string (shouldn't be stored on client)
   posts: Post[];
+  votedPosts: { [id: string]: { upvoted: boolean } }; // TODO idk if this is best way to do it
 };
 
 const initialState: UserState = {
@@ -17,6 +18,7 @@ const initialState: UserState = {
   username: undefined,
   email: undefined,
   posts: [],
+  votedPosts: {},
 };
 
 export const signup = createAsyncThunk<UserState, SignupInfo>(
@@ -68,6 +70,19 @@ export const userSlice = createSlice({
     });
     builder.addCase(login.rejected, (state, action) => {
       return { ...initialState };
+    });
+    builder.addCase(createPost.fulfilled, (state, action) => {
+      state.posts.push(action.payload);
+    });
+    builder.addCase(upvote.fulfilled, (state, action) => {
+      state.votedPosts[action.payload.id] = {
+        upvoted: true,
+      };
+    });
+    builder.addCase(downvote.fulfilled, (state, action) => {
+      state.votedPosts[action.payload.id] = {
+        upvoted: false,
+      };
     });
   },
 });
