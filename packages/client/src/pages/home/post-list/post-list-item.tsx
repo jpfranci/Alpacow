@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useAppSelector } from "../../../redux/store";
 import { Post } from "../../../redux/slices/postSlice";
 
-const PostListItemContainer = styled.div`
+const PostContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -25,16 +25,35 @@ const BodyText = styled.p`
   font-size: 0.9em;
 `;
 
+const PostFooter = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75em;
+`;
+
+const DateText = styled.div`
+  // margin: 0.5em;
+`;
+
 interface PostProps {
   post: Post;
 }
 
 const PostListItem: React.FC<PostProps> = ({ post }) => {
   return (
-    <PostListItemContainer>
+    <PostContainer>
       <TitleText>{post.title}</TitleText>
       <BodyText>{post.bodyText}</BodyText>
-    </PostListItemContainer>
+      <PostFooter>
+        {/* TODO change this once createdAt props exists */}
+        <DateText>May 4, 2020</DateText>
+        <Button variant="contained" color="primary" size="small">
+          {post.tag}
+        </Button>
+      </PostFooter>
+    </PostContainer>
   );
 };
 
