@@ -7,4 +7,16 @@ const theme = createMuiTheme({
   },
 });
 
-export default theme;
+/**
+ * Dark theme conflicts with action group colours at the moment
+ */
+const darkTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#303030',
+    },
+    // type: 'dark',
+  },
+});
+
+export default darkTheme;

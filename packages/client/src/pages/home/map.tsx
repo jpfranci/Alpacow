@@ -23,6 +23,7 @@ const googleMapStyle: CSSProperties = {
 const StyledContainer = styled.div`
   display: flex;
   justify-content: center;
+  margin-top: 1em;
 `;
 
 //TODO: Use built in material ui styles
