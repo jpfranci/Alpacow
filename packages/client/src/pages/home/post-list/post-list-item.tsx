@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
-import { downvote, Post, upvote } from "../../../redux/slices/postSlice";
+import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
 import { useAppDispatch } from "../../../redux/store";

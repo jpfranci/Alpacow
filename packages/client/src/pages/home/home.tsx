@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { getPosts } from "../../redux/slices/postSlice";
+import { getPosts } from "../../redux/slices/post-slice";
 import { useAppDispatch } from "../../redux/store";
 import ActionGroup from "./action-group/action-group";
 import Map from "./map";

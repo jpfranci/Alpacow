@@ -2,7 +2,7 @@ import React from "react";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { Tooltip } from "@material-ui/core";
 import ToggleButton from "@material-ui/lab/ToggleButton";
-import { PostSortType, setSortType } from "../../../redux/slices/postSlice";
+import { PostSortType, setSortType } from "../../../redux/slices/post-slice";
 import WhatshotIcon from "@material-ui/icons/Whatshot";
 import FiberNewIcon from "@material-ui/icons/FiberNew";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";

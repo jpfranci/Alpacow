@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService, { LoginCredentials, SignupInfo } from "../../services/auth";
-import { Post } from "./postSlice";
+import { Post } from "./post-slice";
 
 const prefix = "user";
 

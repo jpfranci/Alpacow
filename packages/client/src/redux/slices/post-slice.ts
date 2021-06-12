@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { Location } from "./locationSlice";
+import { Location } from "./location-slice";
 
 const prefix = "post";
 
@@ -52,14 +52,7 @@ export const createPost = createAsyncThunk<Post, NewPost>(
   async (newPost, { rejectWithValue }) => {
     try {
       const response = await postService.create(newPost);
-
-      return {
-        ...response.data,
-        // TODO delete eventually - these props should be generated on backend
-        upvotes: Math.random() * 10,
-        downvotes: Math.random() * 10,
-        createdAt: Date.now(),
-      };
+      return response.data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -67,13 +60,13 @@ export const createPost = createAsyncThunk<Post, NewPost>(
 );
 
 // TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
-export const getPosts = createAsyncThunk<{ posts: Post[] }>(
+export const getPosts = createAsyncThunk<Post[]>(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
     try {
       const response = await postService.getAll();
 
-      return { posts: response.data };
+      return response.data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -132,7 +125,7 @@ export const postSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
-      state.posts = action.payload.posts;
+      state.posts = action.payload;
     });
     builder.addCase(getPosts.rejected, (state, action) => {
       return { ...initialState };
