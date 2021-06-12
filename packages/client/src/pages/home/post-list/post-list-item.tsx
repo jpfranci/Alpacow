@@ -56,6 +56,7 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
   const didUserUpvote: boolean | undefined = user.votedPosts[post.id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
+  const date = new Date(post.createdAt);
 
   return (
     <PostContainer>
@@ -63,7 +64,9 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
       <BodyText>{post.bodyText}</BodyText>
       <PostFooter>
         <PostFooterSection>
-          <DateText>{new Date(post.createdAt).toDateString()}</DateText>
+          <DateText>
+            {`${date.toLocaleTimeString()} - ${date.toLocaleDateString()}`}
+          </DateText>
           <Button variant="contained" color="primary" size="small">
             {post.tag}
           </Button>
