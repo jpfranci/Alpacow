@@ -1,9 +1,8 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { Button } from "@material-ui/core";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import { useAppSelector } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import PostListItem from "./post-list-item";
-import { PostSortType } from "../../../redux/slices/post-slice";
+import { getPosts, PostSortType } from "../../../redux/slices/post-slice";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -14,6 +13,8 @@ const StyledContainer = styled.div`
 
 // TODO rename file to component name?
 const PostList: React.FC = () => {
+  const dispatch = useAppDispatch();
+
   const posts = useAppSelector((state) => {
     // TODO make a custom selector / decide how post sorting will work
     const result = [...state.post.posts];
@@ -30,6 +31,10 @@ const PostList: React.FC = () => {
 
     return result;
   });
+
+  useEffect(() => {
+    dispatch(getPosts());
+  }, [dispatch]);
 
   return (
     <StyledContainer>
