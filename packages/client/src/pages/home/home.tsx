@@ -3,7 +3,7 @@ import { getPosts } from "../../redux/slices/postSlice";
 import { useAppDispatch } from "../../redux/store";
 import ActionGroup from "./action-group/action-group";
 import Map from "./map";
-import PostList from "./post-list";
+import PostList from "./post-list/post-list";
 
 const HomePage = () => {
   const dispatch = useAppDispatch();

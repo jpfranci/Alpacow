@@ -1,9 +1,10 @@
 import React from "react";
 import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
-import { Post } from "../../../redux/slices/postSlice";
-import UpvoteIcon from "@material-ui/icons/Details";
-import DownvoteIcon from "@material-ui/icons/ChangeHistory";
+import { downvote, Post, upvote } from "../../../redux/slices/postSlice";
+import DownvoteIcon from "@material-ui/icons/Details";
+import UpvoteIcon from "@material-ui/icons/ChangeHistory";
+import { useAppDispatch } from "../../../redux/store";
 
 const PostContainer = styled.div`
   display: flex;
@@ -48,6 +49,8 @@ interface PostProps {
 }
 
 const PostListItem: React.FC<PostProps> = ({ post }) => {
+  const dispatch = useAppDispatch();
+
   const voteCount = post.upvotes - post.downvotes;
 
   return (
@@ -63,11 +66,11 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton>
+          <IconButton onClick={() => dispatch(upvote(post))}>
             <UpvoteIcon />
           </IconButton>
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
-          <IconButton>
+          <IconButton onClick={() => dispatch(downvote(post))}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>
