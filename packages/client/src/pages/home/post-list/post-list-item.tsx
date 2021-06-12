@@ -1,15 +1,16 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { Button } from "@material-ui/core";
+import React from "react";
+import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
-import { useAppSelector } from "../../../redux/store";
 import { Post } from "../../../redux/slices/postSlice";
+import UpvoteIcon from "@material-ui/icons/Details";
+import DownvoteIcon from "@material-ui/icons/ChangeHistory";
 
 const PostContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
   margin: 1em 0;
-  padding: 1.5em 2em;
+  padding: 1.5em 2em 1em 2em;
   background-color: ${(props) => props.theme.palette.secondary.main};
 `;
 
@@ -21,7 +22,7 @@ const TitleText = styled.h3`
 
 const BodyText = styled.p`
   margin-top: 0;
-  margin-bottom: 1em;
+  margin-bottom: 3em;
   font-size: 0.9em;
 `;
 
@@ -33,8 +34,13 @@ const PostFooter = styled.div`
   font-size: 0.75em;
 `;
 
+const PostFooterSection = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const DateText = styled.div`
-  // margin: 0.5em;
+  margin-right: 2em;
 `;
 
 interface PostProps {
@@ -42,16 +48,29 @@ interface PostProps {
 }
 
 const PostListItem: React.FC<PostProps> = ({ post }) => {
+  const voteCount = post.upvotes - post.downvotes;
+
   return (
     <PostContainer>
       <TitleText>{post.title}</TitleText>
       <BodyText>{post.bodyText}</BodyText>
       <PostFooter>
-        {/* TODO change this once createdAt props exists */}
-        <DateText>May 4, 2020</DateText>
-        <Button variant="contained" color="primary" size="small">
-          {post.tag}
-        </Button>
+        <PostFooterSection>
+          {/* TODO change this once createdAt props exists */}
+          <DateText>{new Date(post.createdAt).toDateString()}</DateText>
+          <Button variant="contained" color="primary" size="small">
+            {post.tag}
+          </Button>
+        </PostFooterSection>
+        <PostFooterSection>
+          <IconButton>
+            <UpvoteIcon />
+          </IconButton>
+          {`${voteCount > 0 ? "+" : ""}${voteCount}`}
+          <IconButton>
+            <DownvoteIcon />
+          </IconButton>
+        </PostFooterSection>
       </PostFooter>
     </PostContainer>
   );
