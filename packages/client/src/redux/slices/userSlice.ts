@@ -19,20 +19,20 @@ const initialState: UserState = {
   posts: [],
 };
 
-export const signup = createAsyncThunk(
+export const signup = createAsyncThunk<UserState, SignupInfo>(
   `${prefix}/signup`,
   async (signupInfo: SignupInfo, { rejectWithValue }) => {
     try {
       const response = await authService.signup(signupInfo);
 
-      return { user: response.data };
+      return { ...response.data };
     } catch (error) {
       return rejectWithValue(error);
     }
   },
 );
 
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<UserState, LoginCredentials>(
   `${prefix}/login`,
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
@@ -41,7 +41,7 @@ export const login = createAsyncThunk(
       // TODO adjust code after we implement this endpoint
       return response.data.length <= 0
         ? rejectWithValue("user doesn't exist")
-        : { user: response.data[0] };
+        : response.data[0];
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -58,13 +58,13 @@ export const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload.user };
+      return { ...initialState, ...action.payload };
     });
     builder.addCase(signup.rejected, (state, action) => {
       return { ...initialState };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload.user };
+      return { ...initialState, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
       return { ...initialState };

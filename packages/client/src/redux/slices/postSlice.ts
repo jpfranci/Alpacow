@@ -8,8 +8,8 @@ export interface Post extends NewPost {
   id: string;
   upvotes: number;
   downvotes: number;
-  // createdAt: number; // TODO generate on backend
-  // comments: string[] // TODO generate on backend
+  createdAt: number;
+  // comments: string[]
 }
 
 export type NewPost = {
@@ -43,17 +43,23 @@ const initialState: PostState = {
   locationFilter: {
     name: "Vancouver",
     lat: 49.26,
-    lon: -123.22
-  }
+    lon: -123.22,
+  },
 };
 
-export const createPost = createAsyncThunk(
+export const createPost = createAsyncThunk<Post, NewPost>(
   `${prefix}/createPost`,
-  async (newPost: NewPost, { rejectWithValue }) => {
+  async (newPost, { rejectWithValue }) => {
     try {
       const response = await postService.create(newPost);
 
-      return { post: response.data };
+      return {
+        ...response.data,
+        // TODO delete eventually - these props should be generated on backend
+        upvotes: Math.random() * 10,
+        downvotes: Math.random() * 10,
+        createdAt: Date.now(),
+      };
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -61,13 +67,13 @@ export const createPost = createAsyncThunk(
 );
 
 // TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
-export const getPosts = createAsyncThunk(
+export const getPosts = createAsyncThunk<Post[]>(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
     try {
       const response = await postService.getAll();
 
-      return { posts: response.data };
+      return response.data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -95,13 +101,13 @@ export const postSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
-      state.posts = action.payload.posts;
+      state.posts = action.payload;
     });
     builder.addCase(getPosts.rejected, (state, action) => {
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload.post);
+      state.posts.push(action.payload);
     });
   },
 });

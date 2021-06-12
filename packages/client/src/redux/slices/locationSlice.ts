@@ -13,7 +13,7 @@ export const initialState: Location = {
   lon: -123.22,
 };
 
-export const setLocation = createAsyncThunk(
+export const setLocation = createAsyncThunk<{ location: Location }, Location>(
   `location`,
   async (location: Location, { rejectWithValue }) => {
     try {
@@ -23,10 +23,10 @@ export const setLocation = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
-)
+  },
+);
 
-export const getLocation = createAsyncThunk(
+export const getLocation = createAsyncThunk<{ location: Location }>(
   `location`,
   async (_, { rejectWithValue }) => {
     try {
