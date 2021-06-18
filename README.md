@@ -31,12 +31,17 @@ People are feeling more isolated than ever, since they must stay at least 2 mete
 
 ### Main Screen with Posts
 ![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view1.jpg)
+
 Shown are key features including voting on posts with the most reputable being shown first to the user.
 It also includes the navigation bar where the user can further filter posts and also visit/edit their profile.
 Users can click on the replies text to view replies and participate.
 
+![main screen posts](https://user-images.githubusercontent.com/43103720/122508610-1698a780-cfb7-11eb-8e9f-a4cfe1a91da0.jpg)
+
 ### Create a Post Screen
-![picture](https://github.com/jpfranci/bumble-for-cats/raw/main/prototypes/view2.jpg)
+
+![image](https://user-images.githubusercontent.com/43103720/122508683-38922a00-cfb7-11eb-8995-ccaf1771df70.png)
+
 Shown is the screen where you can create a new post with an optional title and anonymity options.
 
 ## How to Contribute
