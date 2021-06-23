@@ -3,21 +3,24 @@ import "./App.css";
 import NavBar from "./pages/common/nav/nav";
 import { Redirect, Route, Switch } from "react-router";
 import { EXAMPLE_PAGE, HOME_PAGE } from "./common/links";
-import { ThemeProvider } from "@material-ui/core/styles";
+import { MuiThemeProvider } from "@material-ui/core/styles";
 import HomePage from "./pages/home/home";
 import darkTheme from "./common/theme";
 import ExamplePage from "./pages/example/example";
+import { ThemeProvider } from "styled-components";
 
 const App = () => {
   return (
-    <ThemeProvider theme={darkTheme}>
-      <NavBar />
-      <Switch>
-        <Route path={HOME_PAGE} component={HomePage} />
-        <Route path={EXAMPLE_PAGE} component={ExamplePage} />
-        <Redirect to={HOME_PAGE} />
-      </Switch>
-    </ThemeProvider>
+    <MuiThemeProvider theme={darkTheme}>
+      <ThemeProvider theme={darkTheme}>
+        <NavBar />
+        <Switch>
+          <Route path={HOME_PAGE} component={HomePage} />
+          <Route path={EXAMPLE_PAGE} component={ExamplePage} />
+          <Redirect to={HOME_PAGE} />
+        </Switch>
+      </ThemeProvider>
+    </MuiThemeProvider>
   );
 };
 

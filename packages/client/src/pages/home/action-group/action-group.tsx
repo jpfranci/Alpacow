@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@material-ui/core";
 import SortGroup from "./sort-group";
 import TagSearch from "./tag-search";
+import PostDialog from "./post-dialog";
 import styled from "styled-components";
 
 const ActionGroup = () => {
@@ -22,6 +23,10 @@ const ActionGroup = () => {
     margin: 1em;
   `;
 
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
+
   return (
     <StyledContainer>
       <ActionElement>
@@ -36,6 +41,7 @@ const ActionGroup = () => {
           Create Post
         </Button>
       </ActionElement>
+      <PostDialog open={modalOpen} onClose={handleModalClose} />
     </StyledContainer>
   );
 };

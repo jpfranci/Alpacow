@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Location } from "../redux/slices/locationSlice";
+import { Location } from "../redux/slices/location-slice";
 
 const baseUrl = "/location";
 
@@ -16,7 +16,7 @@ const setLoc = async (location: Location) => {
 
 const locationService = {
   getLoc,
-  setLoc
+  setLoc,
 };
 
 export default locationService;
