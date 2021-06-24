@@ -8,7 +8,7 @@ import {
 import { CSSProperties } from "@material-ui/styles";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-import { getLocation, setLocation } from "../../redux/slices/locationSlice";
+import { getLocation, setLocation } from "../../redux/slices/location-slice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
 
@@ -17,7 +17,7 @@ const GOOGLE_LIBRARIES: Libraries = ["places"];
 
 const googleMapStyle: CSSProperties = {
   width: "80%",
-  height: "10em"
+  height: "10em",
 };
 
 const StyledContainer = styled.div`
