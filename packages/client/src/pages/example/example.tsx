@@ -6,7 +6,7 @@ import {
   setLocationFilter,
 } from "../../redux/slices/post-slice";
 import { login, signup } from "../../redux/slices/user-slice";
-import { Location } from "../../redux/slices/location-slice";
+import { Location } from "../../pages/home/map";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const ExamplePage = () => {

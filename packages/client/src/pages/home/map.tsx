@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   GoogleMap,
   LoadScript,
@@ -6,27 +6,16 @@ import {
   Autocomplete,
 } from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-import { getLocation, setLocation } from "../../redux/slices/locationSlice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
 
 //TODO: Move out of component because it causes performance issue
 const GOOGLE_LIBRARIES: Libraries = ["places"];
 
-const googleMapStyle: CSSProperties = {
-  width: "80%",
-  height: "10em"
-};
-
-const StyledContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 1em;
-`;
-
-//TODO: Use built in material ui styles
+/**
+ * Google maps components require CSSProperties type objects
+ */
 const autocompleteStyle: CSSProperties = {
   boxSizing: "border-box",
   border: "1px solid transparent",
@@ -43,34 +32,57 @@ const autocompleteStyle: CSSProperties = {
   marginLeft: "-120px",
 };
 
+const googleMapStyle: CSSProperties = {
+  width: "80%",
+  height: "10em"
+};
+
+const StyledContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+`;
+
+export type Location = {
+  name: string;
+  lat: number;
+  lon: number;
+};
+
+let initialLocation: Location | null = null;
+
 /**
  * For autocomplete to populate when the user actually selects something
  */
 let currLocation: any = null;
 
 const onAutoCompleteLoad = (autocomplete: any) => {
-  console.log("autocomplete: ", autocomplete);
-
   currLocation = autocomplete;
 };
 
 const Map = () => {
-  const dispatch = useAppDispatch();
-  const location = useAppSelector((state) => state.location);
-
-  useEffect(() => {
-    dispatch(() => getLocation());
-  }, [dispatch]);
-
   const [ctr, setCtr] = React.useState({
-    lat: location.lat,
-    lng: location.lon,
+    lat: 49.26,
+    lng: -123.22,
   });
-  const [name, setName] = React.useState(location.name);
+  const [, setName] = React.useState("Vancouver");
+
+  if (initialLocation == null) {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      initialLocation = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+        name: ""
+      };
+      setCtr({
+        lat: initialLocation.lat,
+        lng: initialLocation.lon,
+      });
+    });
+  }
 
   const updateOnDrag = (e: any) => {
     setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    updateStore(e.latLng.lat(), e.latLng.lng(), name);
   };
 
   const onPlaceChanged = async () => {
@@ -83,29 +95,6 @@ const Map = () => {
         lng: newLon,
       });
       setName(newName);
-
-      updateStore(newLat, newLon, newName);
-    }
-  };
-
-  const updateStore = async (
-    lat: number,
-    lon: number,
-    newName: string | undefined,
-  ) => {
-    try {
-      const response = await dispatch(
-        setLocation({
-          name: newName !== undefined ? newName : name,
-          lat: lat,
-          lon: lon,
-        }),
-      );
-      return response.payload;
-    } catch (error) {
-      if (error) {
-        alert("location not got NOOOOOO");
-      }
     }
   };
 
