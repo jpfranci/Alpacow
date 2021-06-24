@@ -56,8 +56,7 @@ const ProfileButton = (props: any) => {
         open={open}
         anchorEl={anchorRef.current}
         role={undefined}
-        transition
-        disablePortal>
+        transition>
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}

@@ -25,8 +25,8 @@ const useStyles = makeStyles((theme: any) => ({
 }));
 
 function profileOptions(user: any, classes: any, setModalOpen: any) {
-  if (user.id) {
-    return (<ProfileButton username={user.username}/>);
+  if (true) {
+    return (<ProfileButton username={"mr_clean_mustache"}/>);
   } else {
     return (
       <div>
