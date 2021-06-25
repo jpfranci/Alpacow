@@ -7,8 +7,10 @@ import {
 } from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
+import { Location, setLocation } from "../../redux/slices/location-slice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 //TODO: Move out of component because it causes performance issue
 const GOOGLE_LIBRARIES: Libraries = ["places"];
@@ -43,13 +45,7 @@ const StyledContainer = styled.div`
   margin-top: 1em;
 `;
 
-export type Location = {
-  name: string;
-  lat: number;
-  lon: number;
-};
-
-let initialLocation: Location | null = null;
+let initialLocation: Location | undefined = undefined;
 
 /**
  * For autocomplete to populate when the user actually selects something
@@ -61,28 +57,55 @@ const onAutoCompleteLoad = (autocomplete: any) => {
 };
 
 const Map = () => {
-  const [ctr, setCtr] = React.useState({
-    lat: 49.26,
-    lng: -123.22,
-  });
-  const [, setName] = React.useState("Vancouver");
+  const dispatch = useAppDispatch();
+  const location = useAppSelector((state) => state.location);
+  const updateStore = async (
+    lat: number,
+    lon: number,
+    newName: string | undefined,
+  ) => {
+    try {
+      const response = await dispatch(
+        setLocation({
+          name: newName !== undefined ? newName : name,
+          lat: lat,
+          lon: lon,
+        }),
+      );
+      return response.payload;
+    } catch (error) {
+      if (error) {
+        alert("location not set NOOOOOO");
+      }
+    }
+  };
 
-  if (initialLocation == null) {
-    navigator.geolocation.getCurrentPosition(function (position) {
-      initialLocation = {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-        name: ""
-      };
-      setCtr({
-        lat: initialLocation.lat,
-        lng: initialLocation.lon,
-      });
-    });
+  const [ctr, setCtr] = React.useState({
+    lat: location.lat,
+    lng: location.lon,
+  });
+  const [name, setName] = React.useState(location.name);
+
+  if (initialLocation === undefined) {
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        initialLocation = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          name: location.name
+        };
+        setCtr({
+          lat: initialLocation.lat,
+          lng: initialLocation.lon,
+        });
+        updateStore(initialLocation.lat, initialLocation.lon, location.name);
+      }
+    );
   }
 
   const updateOnDrag = (e: any) => {
     setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    updateStore(e.latLng.lat(), e.latLng.lng(), name);
   };
 
   const onPlaceChanged = async () => {
@@ -95,6 +118,7 @@ const Map = () => {
         lng: newLon,
       });
       setName(newName);
+      updateStore(newLat, newLon, newName);
     }
   };
 
