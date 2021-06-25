@@ -8,9 +8,9 @@ import locationReducer from "./slices/location-slice";
 
 const store = configureStore({
   reducer: {
-    location: locationReducer,
     user: userReducer,
     post: postReducer,
+    location: locationReducer
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   GoogleMap,
   LoadScript,
@@ -6,27 +6,18 @@ import {
   Autocomplete,
 } from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-import { getLocation, setLocation } from "../../redux/slices/location-slice";
+import { Location, setLocation } from "../../redux/slices/location-slice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 //TODO: Move out of component because it causes performance issue
 const GOOGLE_LIBRARIES: Libraries = ["places"];
 
-const googleMapStyle: CSSProperties = {
-  width: "80%",
-  height: "10em",
-};
-
-const StyledContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 1em;
-`;
-
-//TODO: Use built in material ui styles
+/**
+ * Google maps components require CSSProperties type objects
+ */
 const autocompleteStyle: CSSProperties = {
   boxSizing: "border-box",
   border: "1px solid transparent",
@@ -43,51 +34,31 @@ const autocompleteStyle: CSSProperties = {
   marginLeft: "-120px",
 };
 
+const googleMapStyle: CSSProperties = {
+  width: "80%",
+  height: "10em"
+};
+
+const StyledContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+`;
+
+let initialLocation: Location | undefined = undefined;
+
 /**
  * For autocomplete to populate when the user actually selects something
  */
 let currLocation: any = null;
 
 const onAutoCompleteLoad = (autocomplete: any) => {
-  console.log("autocomplete: ", autocomplete);
-
   currLocation = autocomplete;
 };
 
 const Map = () => {
   const dispatch = useAppDispatch();
   const location = useAppSelector((state) => state.location);
-
-  useEffect(() => {
-    dispatch(() => getLocation());
-  }, [dispatch]);
-
-  const [ctr, setCtr] = React.useState({
-    lat: location.lat,
-    lng: location.lon,
-  });
-  const [name, setName] = React.useState(location.name);
-
-  const updateOnDrag = (e: any) => {
-    setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-    updateStore(e.latLng.lat(), e.latLng.lng(), name);
-  };
-
-  const onPlaceChanged = async () => {
-    if (currLocation !== null) {
-      const newLat = currLocation.getPlace().geometry.location.lat();
-      const newLon = currLocation.getPlace().geometry.location.lng();
-      const newName = currLocation.getPlace().formatted_address;
-      setCtr({
-        lat: newLat,
-        lng: newLon,
-      });
-      setName(newName);
-
-      updateStore(newLat, newLon, newName);
-    }
-  };
-
   const updateStore = async (
     lat: number,
     lon: number,
@@ -104,8 +75,50 @@ const Map = () => {
       return response.payload;
     } catch (error) {
       if (error) {
-        alert("location not got NOOOOOO");
+        alert("location not set NOOOOOO");
       }
+    }
+  };
+
+  const [ctr, setCtr] = React.useState({
+    lat: location.lat,
+    lng: location.lon,
+  });
+  const [name, setName] = React.useState(location.name);
+
+  if (initialLocation === undefined) {
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        initialLocation = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          name: location.name
+        };
+        setCtr({
+          lat: initialLocation.lat,
+          lng: initialLocation.lon,
+        });
+        updateStore(initialLocation.lat, initialLocation.lon, location.name);
+      }
+    );
+  }
+
+  const updateOnDrag = (e: any) => {
+    setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    updateStore(e.latLng.lat(), e.latLng.lng(), name);
+  };
+
+  const onPlaceChanged = async () => {
+    if (currLocation !== null) {
+      const newLat = currLocation.getPlace().geometry.location.lat();
+      const newLon = currLocation.getPlace().geometry.location.lng();
+      const newName = currLocation.getPlace().formatted_address;
+      setCtr({
+        lat: newLat,
+        lng: newLon,
+      });
+      setName(newName);
+      updateStore(newLat, newLon, newName);
     }
   };
 
