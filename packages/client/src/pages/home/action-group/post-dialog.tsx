@@ -20,7 +20,6 @@ import { createPost } from "../../../redux/slices/post-slice";
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
-      padding: "0px 4vw",
       overflow: "hidden",
     },
     label: {
@@ -49,19 +48,19 @@ const DEFAULT_FIELDS = {
   isAnonymous: false,
 };
 
+const StyledContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 10px;
+`;
+
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const classes = useStyles();
   const location = useAppSelector((state) => state.location);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
   const { title, bodyText, tag, isAnonymous } = fields;
-
-  const StyledContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  `;
 
   const handleClose = () => {
     onClose();

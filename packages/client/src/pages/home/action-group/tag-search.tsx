@@ -8,6 +8,8 @@ const fetchSearchString = debounce((searchTerm, callback) => {
   searchByTag(searchTerm).then((tags: string[]) => callback(tags));
 }, 300);
 
+const DEFAULT_TAGS = getDefaultTags();
+
 interface TagSearchProps {
   width?: number;
   selectedTag: string | undefined;
@@ -24,7 +26,6 @@ const TagSearch = ({
 }: TagSearchProps) => {
   const [inputValue, setInputValue] = useState("");
   const [options, setOptions] = useState<string[]>([]);
-  const defaultTags: Promise<string[]> = useMemo(getDefaultTags, []);
 
   const handleTagFilterChange = (
     event: React.ChangeEvent<{}>,
@@ -40,7 +41,7 @@ const TagSearch = ({
           setOptions(fetchedTags);
         });
       } else {
-        const options = await defaultTags;
+        const options = await DEFAULT_TAGS;
         setOptions(options);
       }
     };

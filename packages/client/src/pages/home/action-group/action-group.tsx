@@ -5,19 +5,19 @@ import PostDialog from "./post-dialog";
 import styled from "styled-components";
 import TagFilterGroup from "./tag-filter-group";
 
+const StyledContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
 const ActionGroup = () => {
   const [modalOpen, setModalOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>,
   ] = useState<boolean>(false);
-
-  const StyledContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-  `;
 
   const ActionElement = styled.div`
     margin: 1em;
