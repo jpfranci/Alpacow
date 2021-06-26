@@ -63,6 +63,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const { title, bodyText, tag, isAnonymous } = fields;
 
   const handleClose = () => {
+    setFields(DEFAULT_FIELDS);
     onClose();
   };
 
