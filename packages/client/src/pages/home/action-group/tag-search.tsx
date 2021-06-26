@@ -1,28 +1,36 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import debounce from "lodash/debounce";
 import { getDefaultTags, searchByTag } from "../../../services/tags";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
-import { setTagFilter } from "../../../redux/slices/post-slice";
 
 const fetchSearchString = debounce((searchTerm, callback) => {
   searchByTag(searchTerm).then((tags: string[]) => callback(tags));
 }, 300);
 
-const TagSearch = () => {
-  const selectedTagFilter = useAppSelector((state) => state.post.tagFilter);
+interface TagSearchProps {
+  width?: number;
+  selectedTag: string | undefined;
+  onTagSelect: (selectedTag: string) => any;
+  // any other props
+  [key: string]: any;
+}
+
+const TagSearch = ({
+  width = 300,
+  selectedTag,
+  onTagSelect,
+  ...otherProps
+}: TagSearchProps) => {
   const [inputValue, setInputValue] = useState("");
   const [options, setOptions] = useState<string[]>([]);
-  const dispatch = useAppDispatch();
   const defaultTags: Promise<string[]> = useMemo(getDefaultTags, []);
 
   const handleTagFilterChange = (
     event: React.ChangeEvent<{}>,
     newTagFilter: any,
   ) => {
-    setOptions(newTagFilter ? [newTagFilter, ...options] : options);
-    dispatch(setTagFilter(newTagFilter));
+    onTagSelect(newTagFilter);
   };
 
   useEffect(() => {
@@ -42,10 +50,9 @@ const TagSearch = () => {
   return (
     <Autocomplete
       options={options}
-      style={{ width: 300 }}
+      style={{ width }}
       autoComplete
-      includeInputInList
-      value={selectedTagFilter}
+      value={selectedTag}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -58,6 +65,7 @@ const TagSearch = () => {
       onInputChange={(event, newInputValue) => {
         setInputValue(newInputValue);
       }}
+      {...otherProps}
     />
   );
 };

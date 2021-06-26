@@ -9,8 +9,8 @@ const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
     ...newPost,
     // TODO delete below eventually - these props should be generated on backend
-    upvotes: Math.floor(Math.random() * 10),
-    downvotes: Math.floor(Math.random() * 10),
+    upvotes: 0,
+    downvotes: 0,
     createdAt: Date.now(),
   });
   return response;

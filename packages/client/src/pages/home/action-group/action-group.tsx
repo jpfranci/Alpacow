@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@material-ui/core";
 import SortGroup from "./sort-group";
-import TagSearch from "./tag-search";
 import PostDialog from "./post-dialog";
 import styled from "styled-components";
+import TagFilterGroup from "./tag-filter-group";
 
 const ActionGroup = () => {
   const [modalOpen, setModalOpen]: [
@@ -32,7 +32,7 @@ const ActionGroup = () => {
       <ActionElement>
         <SortGroup />
       </ActionElement>
-      <TagSearch />
+      <TagFilterGroup />
       <ActionElement>
         <Button
           variant="outlined"

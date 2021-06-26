@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Checkbox,
@@ -13,12 +13,15 @@ import {
   TextField,
 } from "@material-ui/core";
 import styled from "styled-components";
-import TagSelect from "./tag-select";
+import TagSearch from "./tag-search";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { createPost } from "../../../redux/slices/post-slice";
 
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
       padding: "0px 4vw",
+      overflow: "hidden",
     },
     label: {
       textTransform: "capitalize",
@@ -29,24 +32,64 @@ const useStyles = makeStyles(() =>
 
 interface PostDialogProps {
   open: boolean;
-  onClose: Dispatch<SetStateAction<boolean>>;
+  onClose: () => any;
 }
 
-// TODO: Submit button, anonymity, and tag selection functionality
-const PostDialog = (props: PostDialogProps) => {
+interface PostDialogFields {
+  title: string;
+  bodyText: string;
+  tag: string | undefined;
+  isAnonymous: boolean;
+}
+
+const DEFAULT_FIELDS = {
+  title: "",
+  bodyText: "",
+  tag: undefined,
+  isAnonymous: false,
+};
+
+const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const classes = useStyles();
+  const location = useAppSelector((state) => state.location);
+  const dispatch = useAppDispatch();
+  const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
+  const { title, bodyText, tag, isAnonymous } = fields;
 
   const StyledContainer = styled.div`
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    margin-top: 10px;
   `;
 
+  const handleClose = () => {
+    onClose();
+  };
+
+  const handleSave = () => {
+    dispatch(
+      createPost({
+        title,
+        bodyText,
+        tag: tag as string,
+        location,
+        // TODO: add proper user id after user creation is hooked up
+        userID: "1",
+      }),
+    );
+    handleClose();
+  };
+
+  const handleFieldChange = (key: string, value: any) => {
+    setFields({
+      ...fields,
+      [key]: value,
+    });
+  };
+
   return (
-    <Dialog
-      open={props.open}
-      onClose={props.onClose}
-      aria-labelledby="form-dialog-title">
+    <Dialog open={open} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create your post</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <DialogContentText>
@@ -59,37 +102,49 @@ const PostDialog = (props: PostDialogProps) => {
           margin="dense"
           autoFocus
           fullWidth
+          value={title}
+          onChange={(event) => handleFieldChange("title", event.target.value)}
         />
         <TextField
           id="post-body-text"
           label="Content"
           variant="outlined"
           margin="dense"
+          value={bodyText}
           required
           multiline
           rows={4}
           rowsMax={6}
           fullWidth
+          onChange={(event) =>
+            handleFieldChange("bodyText", event.target.value)
+          }
         />
         <StyledContainer>
-          <TagSelect />
+          <TagSearch
+            width={200}
+            size="small"
+            selectedTag={tag}
+            onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
+          />
           <FormControlLabel
             control={<Checkbox name="checkedH" color="primary" />}
             label="Post Anonymously"
             classes={{
               label: classes.label,
             }}
+            checked={isAnonymous}
+            onChange={(event: any) =>
+              handleFieldChange("isAnonymous", event.target.checked)
+            }
           />
         </StyledContainer>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => props.onClose(props.open)} color="primary">
+        <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button
-          onClick={() => props.onClose(props.open)}
-          variant="outlined"
-          color="primary">
+        <Button onClick={handleSave} variant="outlined" color="primary">
           Submit
         </Button>
       </DialogActions>
