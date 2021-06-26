@@ -36,7 +36,7 @@ const autocompleteStyle: CSSProperties = {
 
 const googleMapStyle: CSSProperties = {
   width: "80%",
-  height: "10em"
+  height: "10em",
 };
 
 const StyledContainer = styled.div`
@@ -87,20 +87,18 @@ const Map = () => {
   const [name, setName] = React.useState(location.name);
 
   if (initialLocation === undefined) {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        initialLocation = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          name: location.name
-        };
-        setCtr({
-          lat: initialLocation.lat,
-          lng: initialLocation.lon,
-        });
-        updateStore(initialLocation.lat, initialLocation.lon, location.name);
-      }
-    );
+    navigator.geolocation.getCurrentPosition(function (position) {
+      initialLocation = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude,
+        name: location.name,
+      };
+      setCtr({
+        lat: initialLocation.lat,
+        lng: initialLocation.lon,
+      });
+      updateStore(initialLocation.lat, initialLocation.lon, location.name);
+    });
   }
 
   const updateOnDrag = (e: any) => {

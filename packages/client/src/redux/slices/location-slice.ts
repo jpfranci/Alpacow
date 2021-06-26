@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export type Location = {
-  name: string | undefined;
+  name?: string;
   lat: number;
   lon: number;
 };
@@ -21,7 +21,7 @@ export const locationSlice = createSlice({
     },
     getLocation(state) {
       return state;
-    }
+    },
   },
 });
 
