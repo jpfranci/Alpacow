@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
-import PostDialog from "../../home/action-group/post-dialog";
 import {
   AppBar,
   Toolbar,
@@ -10,6 +9,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { useAppSelector } from "../../../redux/store";
 import ProfileButton from "./profile-button";
+import CreateProfileDialog from "./create-profile-dialog";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: any) => ({
 
 const profileOptions = (user: any, classes: any, setModalOpen: any) => {
   if (user.id) {
-    return (<ProfileButton username={"mr_clean_mustache"}/>);
+    return <ProfileButton username={"mr_clean_mustache"} />;
   } else {
     return (
       <div>
@@ -46,7 +46,7 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
       </div>
     );
   }
-}
+};
 
 const NavBar = () => {
   const [modalOpen, setModalOpen]: [
@@ -77,8 +77,7 @@ const NavBar = () => {
           </ButtonBase>
         </div>
         {profileOptions(user, classes, setModalOpen)}
-        {/* TODO: REPLACE THE POSTDIALOG WITH "CREATE PROFILE" DIALOG */}
-        <PostDialog open={modalOpen} onClose={handleModalClose} />
+        <CreateProfileDialog open={modalOpen} onClose={handleModalClose} />
       </Toolbar>
     </AppBar>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Checkbox,
@@ -8,19 +8,28 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
   FormControlLabel,
+  IconButton,
+  Input,
+  InputAdornment,
+  InputLabel,
   makeStyles,
   TextField,
 } from "@material-ui/core";
 import styled from "styled-components";
-import TagSearch from "./tag-search";
+import TagSearch from "../../home/action-group/tag-search";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { createPost } from "../../../redux/slices/post-slice";
+import { Visibility, VisibilityOff } from "@material-ui/icons";
+import { signup } from "../../../redux/slices/user-slice";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
       overflow: "hidden",
+      margin: "10px",
     },
     label: {
       textTransform: "capitalize",
@@ -29,123 +38,121 @@ const useStyles = makeStyles(() =>
   }),
 );
 
-interface PostDialogProps {
+const DEFAULT_FIELDS = {
+  username: "",
+  password: "",
+  email: "",
+  showPassword: false,
+};
+
+interface CreateDialogProps {
+  width?: string;
   open: boolean;
   onClose: () => any;
 }
 
-interface PostDialogFields {
-  title: string;
-  bodyText: string;
-  tag: string | undefined;
-  isAnonymous: boolean;
+interface ProfileState {
+  username: string;
+  password: string;
+  email: string;
+  showPassword: boolean;
 }
 
-const DEFAULT_FIELDS = {
-  title: "",
-  bodyText: "",
-  tag: undefined,
-  isAnonymous: false,
-};
-
-const StyledContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-top: 10px;
-`;
-
-const CreateProfileDialog = ({ open, onClose }: PostDialogProps) => {
+const CreateProfileDialog = ({
+  width = "66%",
+  open,
+  onClose,
+}: CreateDialogProps) => {
   const classes = useStyles();
-  const location = useAppSelector((state) => state.location);
+  const [values, setValues] = React.useState<ProfileState>(DEFAULT_FIELDS);
   const dispatch = useAppDispatch();
-  const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous } = fields;
 
   const handleClose = () => {
-    setFields(DEFAULT_FIELDS);
+    setValues(DEFAULT_FIELDS);
     onClose();
   };
 
-  const handleSave = () => {
+  const handleSignUp = () => {
     dispatch(
-      createPost({
-        title,
-        bodyText,
-        tag: tag as string,
-        location,
-        // TODO: add proper user id after user creation is hooked up
-        userID: "1",
+      signup({
+        username: values.username,
+        password: values.password,
+        email: values.email,
       }),
-    );
+    ).then(unwrapResult);
+    // .then((data) => alert("Signup succeeded!"))
+    // .catch((error) => alert("Signup failed."));
     handleClose();
   };
 
-  const handleFieldChange = (key: string, value: any) => {
-    setFields({
-      ...fields,
-      [key]: value,
-    });
+  const handleChange =
+    (prop: keyof ProfileState) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setValues({ ...values, [prop]: event.target.value });
+    };
+
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
   };
 
   return (
     <Dialog open={open} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Create your post</DialogTitle>
+      <DialogTitle id="form-dialog-title">Sign up for Alpacow ✍️</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <DialogContentText>
-          Please be mindful of what you post. ❤️
+          Create your Alpacow account. {<br />}
+          Keep in mind, your username represents how others see you on Alpacow.
         </DialogContentText>
         <TextField
-          id="post-title"
-          label="Title"
-          variant="outlined"
-          margin="dense"
-          autoFocus
-          fullWidth
-          value={title}
-          onChange={(event) => handleFieldChange("title", event.target.value)}
-        />
-        <TextField
-          id="post-body-text"
-          label="Content"
-          variant="outlined"
-          margin="dense"
-          value={bodyText}
+          id="new-user-email"
+          label="Email"
+          // TODO: Make this style reusable between these elements? (I don't know how I should do it yet)
+          style={{ width }}
+          value={values.email}
+          onChange={handleChange("email")}
           required
-          multiline
-          rows={4}
-          rowsMax={6}
-          fullWidth
-          onChange={(event) =>
-            handleFieldChange("bodyText", event.target.value)
-          }
+          autoFocus
         />
-        <StyledContainer>
-          <TagSearch
-            width={200}
-            size="small"
-            selectedTag={tag}
-            onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
-          />
-          <FormControlLabel
-            control={<Checkbox name="checkedH" color="primary" />}
-            label="Post Anonymously"
-            classes={{
-              label: classes.label,
-            }}
-            checked={isAnonymous}
-            onChange={(event: any) =>
-              handleFieldChange("isAnonymous", event.target.checked)
+        <br />
+        <TextField
+          id="new-user-username"
+          label="Username"
+          style={{ width }}
+          value={values.username}
+          onChange={handleChange("username")}
+        />
+        <br />
+        <FormControl style={{ width }}>
+          <InputLabel htmlFor="adornment-password">Password</InputLabel>
+          <Input
+            id="new-user-password"
+            type={values.showPassword ? "text" : "password"}
+            onChange={handleChange("password")}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}>
+                  {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                </IconButton>
+              </InputAdornment>
             }
           />
-        </StyledContainer>
+        </FormControl>
       </DialogContent>
-      <DialogActions>
+      <DialogActions style={{ margin: "10px" }}>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSave} variant="outlined" color="primary">
-          Submit
+        <Button onClick={handleSignUp} variant="contained" color="primary">
+          Sign Up
         </Button>
       </DialogActions>
     </Dialog>
