@@ -1,6 +1,8 @@
 import axios from "axios";
 import { UserState } from "../redux/slices/user-slice";
 
+const baseUrl = "/api/users";
+
 export type LoginCredentials = {
   username: string;
   password: string;
@@ -16,7 +18,7 @@ export type SignupInfo = {
 
 const signup = async (signupInfo: SignupInfo) => {
   // TODO this route should be sth like axios.post(`${baseUrl/signup}`, signupInfo)
-  const response = await axios.post(`/users`, {
+  const response = await axios.post(`${baseUrl}`, {
     ...signupInfo,
     // TODO delete below eventually - these props should be generated on backend
     posts: [],
@@ -29,7 +31,7 @@ const login = async (credentials: LoginCredentials) => {
   // TODO this route should be sth like axios.post(`${baseUrl/login}`, credentials)
   const { username, password } = credentials;
   const response = await axios.get(
-    `/users?username=${username}&password=${password}`,
+    `${baseUrl}?username=${username}&password=${password}`,
   );
   return response;
 };

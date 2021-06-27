@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Button,
-  Checkbox,
   createStyles,
   Dialog,
   DialogActions,
@@ -9,31 +8,25 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  FormControlLabel,
   IconButton,
   Input,
   InputAdornment,
   InputLabel,
   makeStyles,
+  PropTypes,
   TextField,
 } from "@material-ui/core";
 import styled from "styled-components";
-import TagSearch from "../../home/action-group/tag-search";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import { createPost } from "../../../redux/slices/post-slice";
+import { useAppDispatch } from "../../../redux/store";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import { signup } from "../../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { Variant } from "@material-ui/core/styles/createTypography";
 
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
-      overflow: "hidden",
-      margin: "10px",
-    },
-    label: {
-      textTransform: "capitalize",
-      color: "gray",
+      margin: "1.4rem",
     },
   }),
 );
@@ -46,7 +39,6 @@ const DEFAULT_FIELDS = {
 };
 
 interface CreateDialogProps {
-  width?: string;
   open: boolean;
   onClose: () => any;
 }
@@ -58,11 +50,17 @@ interface ProfileState {
   showPassword: boolean;
 }
 
-const CreateProfileDialog = ({
-  width = "66%",
-  open,
-  onClose,
-}: CreateDialogProps) => {
+const InputFieldProps = {
+  fullWidth: true,
+  margin: "normal" as PropTypes.Margin,
+};
+
+const StyledContainer = styled.div`
+  margin: 1.1rem;
+`;
+
+// TODO: form validation, Firebase hookup
+const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   const classes = useStyles();
   const [values, setValues] = React.useState<ProfileState>(DEFAULT_FIELDS);
   const dispatch = useAppDispatch();
@@ -79,9 +77,10 @@ const CreateProfileDialog = ({
         password: values.password,
         email: values.email,
       }),
-    ).then(unwrapResult);
-    // .then((data) => alert("Signup succeeded!"))
-    // .catch((error) => alert("Signup failed."));
+    )
+      .then(unwrapResult)
+      .then((data) => alert("Signup succeeded!"))
+      .catch((error) => alert("Signup failed.:" + error));
     handleClose();
   };
 
@@ -102,50 +101,71 @@ const CreateProfileDialog = ({
   };
 
   return (
-    <Dialog open={open} aria-labelledby="form-dialog-title">
+    <Dialog open={open} scroll="body" aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Sign up for Alpacow ✍️</DialogTitle>
       <DialogContent className={classes.dialogContent}>
-        <DialogContentText>
-          Create your Alpacow account. {<br />}
-          Keep in mind, your username represents how others see you on Alpacow.
+        <DialogContentText>Create your Alpacow account.</DialogContentText>
+        <DialogContentText variant={"textSecondary" as Variant}>
+          Remember, your username represents how others see you on Alpacow.
         </DialogContentText>
-        <TextField
-          id="new-user-email"
-          label="Email"
-          // TODO: Make this style reusable between these elements? (I don't know how I should do it yet)
-          style={{ width }}
-          value={values.email}
-          onChange={handleChange("email")}
-          required
-          autoFocus
-        />
-        <br />
-        <TextField
-          id="new-user-username"
-          label="Username"
-          style={{ width }}
-          value={values.username}
-          onChange={handleChange("username")}
-        />
-        <br />
-        <FormControl style={{ width }}>
-          <InputLabel htmlFor="adornment-password">Password</InputLabel>
-          <Input
-            id="new-user-password"
-            type={values.showPassword ? "text" : "password"}
-            onChange={handleChange("password")}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}>
-                  {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
-              </InputAdornment>
-            }
+        <StyledContainer>
+          <TextField
+            id="new-user-email"
+            label="Email"
+            value={values.email}
+            onChange={handleChange("email")}
+            required
+            autoFocus
+            variant="standard"
+            {...InputFieldProps}
           />
-        </FormControl>
+          <TextField
+            id="new-user-username"
+            label="Username"
+            value={values.username}
+            onChange={handleChange("username")}
+            variant="standard"
+            {...InputFieldProps}
+          />
+          <FormControl {...InputFieldProps}>
+            <InputLabel htmlFor="adornment-password">Password</InputLabel>
+            <Input
+              id="new-user-password"
+              type={values.showPassword ? "text" : "password"}
+              onChange={handleChange("password")}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}>
+                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+          <FormControl {...InputFieldProps}>
+            <InputLabel htmlFor="adornment-password">
+              Confirm Password
+            </InputLabel>
+            <Input
+              id="new-user-confirm-password"
+              type={values.showPassword ? "text" : "password"}
+              // TODO: confirm password onChange
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}>
+                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+        </StyledContainer>
       </DialogContent>
       <DialogActions style={{ margin: "10px" }}>
         <Button onClick={handleClose} color="primary">
