@@ -124,6 +124,7 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
             label="Username"
             value={values.username}
             onChange={handleChange("username")}
+            required
             variant="standard"
             {...InputFieldProps}
           />
