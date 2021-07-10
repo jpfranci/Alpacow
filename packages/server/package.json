@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "prettier": "lint-staged"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -12,12 +13,32 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "mongodb": "^3.6.10",
     "morgan": "~1.9.1"
   },
   "devDependencies": {
+    "argparse": "^2.0.1",
+    "chance": "^1.1.7",
     "connect-livereload": "^0.6.1",
+    "csv-parser": "^3.0.0",
     "json-server": "^0.16.3",
+    "lint-staged": "^11.0.0",
     "livereload": "^0.9.3",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "prettier": "^2.3.2"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{html,css,less,ejs}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{js,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
