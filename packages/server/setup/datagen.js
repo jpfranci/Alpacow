@@ -4,6 +4,7 @@ const Post = require("../src/data/models/post-model");
 const Upvote = require("../src/data/models/upvote-model");
 const Downvote = require("../src/data/models/downvote-model");
 const User = require("../src/data/models/user-model");
+const Tag = require("../src/data/models/tag-model");
 const { ArgumentParser } = require("argparse");
 const { connectToDb } = require("../src/data/db/db-connect");
 const fs = require("fs");
@@ -157,7 +158,9 @@ class DataGenerator {
     const date = this.generateRandomDate(this.startTime);
     const location = this.generateRandomLocation();
     const id = new ObjectID();
-    const { element: tag } = this.getRandomElementFromArray(this.mockTags);
+    const {
+      element: { tag },
+    } = this.getRandomElementFromArray(this.mockTags);
     const poster = this.getRandomElementFromArray(this.users).element;
     poster.reputation += Math.floor(Number(score));
     const { numUpvotes, numDownvotes } = this.generateVotes(score, id);
@@ -209,7 +212,9 @@ class DataGenerator {
     const rawComments = fs.readFileSync(this.commentsPath);
     this.mockComments = JSON.parse(rawComments);
     const rawTags = fs.readFileSync(this.tagsPath);
-    this.mockTags = JSON.parse(rawTags);
+    this.mockTags = JSON.parse(rawTags).map((tag) => ({
+      tag,
+    }));
   }
 
   generateUsers() {
@@ -231,11 +236,13 @@ class DataGenerator {
     if (this.reset) {
       await mongoose.connection.db.dropDatabase();
     }
+    await Tag.deleteMany({});
     await Promise.all([
-      Post.insertMany(this.posts),
+      Post.insertMany([this.posts]),
       Upvote.insertMany(this.upvotes),
       Downvote.insertMany(this.downvotes),
       User.insertMany(this.users),
+      Tag.insertMany(this.mockTags, { ordered: false }),
     ]);
   }
 }
@@ -289,8 +296,8 @@ parser.add_argument("--max-posts", {
 });
 parser.add_argument("-r", "--reset", {
   default: "false",
-  help: `The maximum number of posts to generate`,
-  dest: "maxPosts",
+  help: `Whether to delete all existing data and reset.`,
+  dest: "reset",
 });
 
 const args = parser.parse_args();
@@ -316,6 +323,5 @@ dataGenerator
     console.log(e);
   })
   .finally(() => {
-    mongoStarter.kill();
     process.exit(0);
   });

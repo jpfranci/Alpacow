@@ -4,19 +4,22 @@ const {
   Types: { ObjectId },
 } = Schema;
 
+const LocationSchema = new Schema({
+  type: String,
+  coordinates: [Number],
+});
+
 const PostSchema = new Schema({
   title: String,
   body: String,
   date: Date,
   numUpvotes: Number,
   numDownvotes: Number,
-  loc: {
-    type: String,
-    coordinates: [Number],
-  },
+  location: LocationSchema,
   comments: [CommentSchema],
   userId: ObjectId,
   username: String,
+  tag: String,
 });
 
 module.exports = PostSchema;
