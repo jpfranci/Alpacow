@@ -7,9 +7,10 @@ const { ObjectID } = require("mongodb");
 const chance = new Chance();
 
 class DataGenerator {
-  constructor({ postsPath, locationPath, daysAgo, numUsers }) {
+  constructor({ postsPath, locationPath, commentsPath, daysAgo, numUsers }) {
     this.postsPath = postsPath;
     this.locationPath = locationPath;
+    this.commentsPath = commentsPath;
     this.numUsers = numUsers;
     this.users = [];
     this.setDayRange(daysAgo);
@@ -66,9 +67,11 @@ class DataGenerator {
     });
   }
 
-  loadLocations() {
+  loadJSONData() {
     const rawLocations = fs.readFileSync(this.locationPath);
     this.locations = JSON.parse(rawLocations);
+    const rawComments = fs.readFileSync(this.commentsPath);
+    this.comments = JSON.parse(rawComments);
   }
 
   generateUsers() {
@@ -82,7 +85,7 @@ class DataGenerator {
   }
 
   async generate() {
-    this.loadLocations();
+    this.loadJSONData();
     this.generateUsers();
     const mockPosts = await this.loadPostsCSV();
     console.log(mockPosts[0]);
@@ -93,14 +96,19 @@ const parser = new ArgumentParser({
   add_help: true,
 });
 parser.add_argument("-p", "--posts", {
-  default: "reddit_wsb.csv",
+  default: "mock-data/reddit_wsb.csv",
   help: "The path to the csv file containing the mock post data",
-  dest: "postPath",
+  dest: "postsPath",
 });
 parser.add_argument("-l", "--locations", {
-  default: "location_bank.json",
+  default: "mock-data/location_bank.json",
   help: "The path to the json file containing mock latitude and longitude data",
   dest: "locationPath",
+});
+parser.add_argument("-c", "--comments", {
+  default: "mock-data/comments_bank.json",
+  help: "The path to the json file containing mock comments data.",
+  dest: "commentsPath",
 });
 parser.add_argument("-d", "--days", {
   default: 14,
@@ -111,19 +119,19 @@ parser.add_argument("-d", "--days", {
 parser.add_argument("-u", "--num-users", {
   default: 100,
   help: `The number of users to generate.`,
-  dest: "days",
-  type: "int",
-});
-parser.add_argument("-c", "--max-comments", {
-  default: 30,
-  help: "The maximum number of comments to generate per post",
-  dest: "maxComments",
+  dest: "numUsers",
   type: "int",
 });
 
 const args = parser.parse_args();
 
-new DataGenerator(args.postPath, args.locationPath, args.days)
+new DataGenerator({
+  postsPath: args.postsPath,
+  locationPath: args.locationPath,
+  commentsPath: args.commentsPath,
+  days: args.days,
+  numUsers: args.numUsers,
+})
   .generate()
   .then(() => {
     console.log("Done generating data");
