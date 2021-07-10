@@ -8,7 +8,7 @@ const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const jsonServer = require("json-server");
 
-const indexRouter = require("./routes/index");
+const indexRouter = require("./routes");
 
 const liveReloadServer = livereload.createServer({
   port: 35730,

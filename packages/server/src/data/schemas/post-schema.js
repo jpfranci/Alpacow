@@ -1,5 +1,8 @@
-const CommentSchema = require("comment-schema");
+const CommentSchema = require("./comment-schema");
 const { Schema } = require("mongoose");
+const {
+  Types: { ObjectId },
+} = Schema;
 
 const PostSchema = new Schema({
   title: String,
@@ -12,6 +15,8 @@ const PostSchema = new Schema({
     coordinates: [Number],
   },
   comments: [CommentSchema],
+  userId: ObjectId,
+  username: String,
 });
 
-export default PostSchema;
+module.exports = PostSchema;

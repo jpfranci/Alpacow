@@ -1,11 +1,16 @@
 require("dotenv").config();
 const csvParser = require("csv-parser");
+const Post = require("../src/data/models/post-model");
+const Upvote = require("../src/data/models/upvote-model");
+const Downvote = require("../src/data/models/downvote-model");
+const User = require("../src/data/models/user-model");
 const { ArgumentParser } = require("argparse");
-const { connectToDb } = require("../data/db/db-connect");
+const { connectToDb } = require("../src/data/db/db-connect");
 const fs = require("fs");
 const Chance = require("chance");
 const { MongoStarter } = require("./mongo-starter");
 const mongoose = require("mongoose");
+
 const {
   mongo: { ObjectID },
 } = mongoose;
@@ -22,6 +27,8 @@ class DataGenerator {
     daysAgo,
     numUsers,
     maxComments,
+    maxPosts,
+    reset,
   }) {
     if (numUsers < 3) {
       throw Error("Number of users to generate must at least be 3");
@@ -30,9 +37,12 @@ class DataGenerator {
     this.locationPath = locationPath;
     this.commentsPath = commentsPath;
     this.tagsPath = tagsPath;
+    this.maxPosts = maxPosts;
+    this.reset = reset;
     this.numUsers = numUsers;
     this.maxComments = Math.min(numUsers, maxComments);
     this.users = [];
+    this.posts = [];
     this.upvotes = [];
     this.downvotes = [];
     this.setDayRange(daysAgo);
@@ -125,6 +135,8 @@ class DataGenerator {
         this.mockComments,
       );
       const { body, score } = commentToUse;
+      const poster = this.getRandomElementFromArray(this.users).element;
+      poster.reputation += Math.floor(Number(score));
       const date = this.generateRandomDate(postObject.date.getTime());
       const { numUpvotes, numDownvotes } = this.generateVotes(score, commentId);
 
@@ -134,6 +146,8 @@ class DataGenerator {
         date,
         numUpvotes,
         numDownvotes,
+        userId: poster._id,
+        username: poster.username,
       });
     }
   }
@@ -144,6 +158,8 @@ class DataGenerator {
     const location = this.generateRandomLocation();
     const id = new ObjectID();
     const { element: tag } = this.getRandomElementFromArray(this.mockTags);
+    const poster = this.getRandomElementFromArray(this.users).element;
+    poster.reputation += Math.floor(Number(score));
     const { numUpvotes, numDownvotes } = this.generateVotes(score, id);
 
     const postObject = {
@@ -157,6 +173,8 @@ class DataGenerator {
       date,
       location,
       tag,
+      userId: poster._id,
+      username: poster.username,
     };
     this.generateCommentsForPost(postObject);
     return postObject;
@@ -164,13 +182,21 @@ class DataGenerator {
 
   loadPostsCSV() {
     return new Promise((resolve) => {
-      this.posts = [];
+      const results = [];
       fs.createReadStream(this.postsPath)
         .pipe(csvParser())
         .on("data", (post) => {
-          this.posts.push(this.generateDataForPost(post));
+          results.push(post);
         })
-        .on("end", () => resolve());
+        .on("end", () => {
+          const postsToGenerate = Math.min(this.maxPosts, results.length);
+          for (let i = 0; i < postsToGenerate; i++) {
+            const { index } = this.getRandomElementFromArray(results);
+            this.posts.push(this.generateDataForPost(results[index]));
+            results.splice(index, 1);
+          }
+          resolve();
+        });
     });
   }
 
@@ -192,6 +218,7 @@ class DataGenerator {
         _id: new ObjectID(),
         username: chance.word({ length: 10 }),
         email: chance.email(),
+        reputation: 0,
       });
     }
   }
@@ -201,6 +228,15 @@ class DataGenerator {
     this.generateUsers();
     await this.loadPostsCSV();
     await connectToDb();
+    if (this.reset) {
+      await mongoose.connection.db.dropDatabase();
+    }
+    await Promise.all([
+      Post.insertMany(this.posts),
+      Upvote.insertMany(this.upvotes),
+      Downvote.insertMany(this.downvotes),
+      User.insertMany(this.users),
+    ]);
   }
 }
 
@@ -245,6 +281,17 @@ parser.add_argument("--max-comments", {
   dest: "maxComments",
   type: "int",
 });
+parser.add_argument("--max-posts", {
+  default: 1000,
+  help: `The maximum number of posts to generate`,
+  dest: "maxPosts",
+  type: "int",
+});
+parser.add_argument("-r", "--reset", {
+  default: "false",
+  help: `The maximum number of posts to generate`,
+  dest: "maxPosts",
+});
 
 const args = parser.parse_args();
 
@@ -256,6 +303,8 @@ const dataGenerator = new DataGenerator({
   daysAgo: args.daysAgo,
   numUsers: args.numUsers,
   maxComments: args.maxComments,
+  maxPosts: args.maxPosts,
+  reset: args.reset === "true",
 });
 dataGenerator
   .generate()
