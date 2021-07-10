@@ -3,7 +3,7 @@
     "prettier": "lerna run --parallel prettier",
     "prepare": "husky install",
     "bootstrap": "lerna bootstrap",
-    "setup": "yarn install && yarn bootstrap",
+    "setup": "yarn install && yarn bootstrap && lerna run --parallel setup",
     "dev": "lerna run --parallel dev",
     "storybook": "lerna exec yarn storybook"
   },

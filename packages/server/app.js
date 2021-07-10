@@ -1,3 +1,4 @@
+require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -9,7 +10,9 @@ const jsonServer = require("json-server");
 
 const indexRouter = require("./routes/index");
 
-const liveReloadServer = livereload.createServer();
+const liveReloadServer = livereload.createServer({
+  port: 35730,
+});
 liveReloadServer.server.once("connection", () => {
   setTimeout(() => {
     liveReloadServer.refresh("/");

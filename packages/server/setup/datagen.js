@@ -3,7 +3,10 @@ const { ArgumentParser } = require("argparse");
 const fs = require("fs");
 const Chance = require("chance");
 const { ObjectID } = require("mongodb");
+const { MongoStarter } = require("./mongo_starter");
 
+const mongoStarter = new MongoStarter();
+mongoStarter.start();
 const chance = new Chance();
 
 class DataGenerator {
@@ -83,7 +86,7 @@ class DataGenerator {
     let numDownvotes;
     // Can't have more votes than number of users we have generated
     const scoreToUse = Math.min(
-      Math.floor(Math.abs(Number(score))),
+      Math.floor(Number(score)),
       Math.floor(this.users.length / 3),
     );
     if (scoreToUse > 0) {
@@ -94,8 +97,8 @@ class DataGenerator {
       numDownvotes = numUpvotes - scoreToUse;
     } else {
       numDownvotes = chance.integer({
-        min: scoreToUse,
-        max: scoreToUse * 2,
+        min: Math.abs(scoreToUse),
+        max: Math.abs(scoreToUse) * 2,
       });
       numUpvotes = numDownvotes + scoreToUse;
     }
@@ -119,12 +122,14 @@ class DataGenerator {
       );
       const { body, score } = commentToUse;
       const date = this.generateRandomDate(postObject.date.getTime());
-      this.generateVotes(score, commentId);
+      const { numUpvotes, numDownvotes } = this.generateVotes(score, commentId);
 
       postObject.comments.push({
         _id: new ObjectID(),
         body,
         date,
+        numUpvotes,
+        numDownvotes,
       });
     }
   }
@@ -155,13 +160,13 @@ class DataGenerator {
 
   loadPostsCSV() {
     return new Promise((resolve) => {
-      const results = [];
+      this.posts = [];
       fs.createReadStream(this.postsPath)
         .pipe(csvParser())
         .on("data", (post) => {
-          results.push(this.generateDataForPost(post));
+          this.posts.push(this.generateDataForPost(post));
         })
-        .on("end", () => resolve(results));
+        .on("end", () => resolve());
     });
   }
 
@@ -187,7 +192,8 @@ class DataGenerator {
   async generate() {
     this.loadJSONData();
     this.generateUsers();
-    const mockPosts = await this.loadPostsCSV();
+    await this.loadPostsCSV();
+    console.log("");
   }
 }
 
@@ -195,22 +201,22 @@ const parser = new ArgumentParser({
   add_help: true,
 });
 parser.add_argument("-p", "--posts", {
-  default: "mock-data/reddit_wsb.csv",
+  default: "setup/mock-data/reddit_wsb.csv",
   help: "The path to the csv file containing the mock post data",
   dest: "postsPath",
 });
 parser.add_argument("-l", "--locations", {
-  default: "mock-data/location_bank.json",
+  default: "setup/mock-data/location_bank.json",
   help: "The path to the json file containing mock latitude and longitude data",
   dest: "locationPath",
 });
 parser.add_argument("-c", "--comments", {
-  default: "mock-data/comments_bank.json",
+  default: "setup/mock-data/comments_bank.json",
   help: "The path to the json file containing mock comments data.",
   dest: "commentsPath",
 });
 parser.add_argument("-t", "--tags", {
-  default: "mock-data/tags_bank.json",
+  default: "setup/mock-data/tags_bank.json",
   help: "The path to the json file containing mock tags data.",
   dest: "tagsPath",
 });
@@ -251,4 +257,8 @@ new DataGenerator({
   .catch((e) => {
     console.log("An error occurred while generating data");
     console.log(e);
+  })
+  .finally(() => {
+    mongoStarter.kill();
+    process.exit(0);
   });

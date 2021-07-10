@@ -3,18 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon",
-    "prettier": "lint-staged"
+    "dev": "node setup/start_mongo.js & nodemon ./bin/www",
+    "prettier": "lint-staged",
+    "setup": "node setup/datagen.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "dotenv": "^10.0.0",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "mongodb": "^3.6.10",
-    "morgan": "~1.9.1"
+    "mongoose": "^5.13.2",
+    "morgan": "~1.9.1",
+    "shelljs": "^0.8.4"
   },
   "devDependencies": {
     "argparse": "^2.0.1",
@@ -26,6 +29,9 @@
     "livereload": "^0.9.3",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.2"
+  },
+  "nodemonConfig": {
+    "ignore": ["setup/*", "mock-server/*"]
   },
   "lint-staged": {
     "*.{js,ts}": [
