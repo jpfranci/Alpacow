@@ -1,10 +1,14 @@
+require("dotenv").config();
 const csvParser = require("csv-parser");
 const { ArgumentParser } = require("argparse");
+const { connectToDb } = require("../data/db/db-connect");
 const fs = require("fs");
 const Chance = require("chance");
-const { ObjectID } = require("mongodb");
-const { MongoStarter } = require("./mongo_starter");
-
+const { MongoStarter } = require("./mongo-starter");
+const mongoose = require("mongoose");
+const {
+  mongo: { ObjectID },
+} = mongoose;
 const mongoStarter = new MongoStarter();
 mongoStarter.start();
 const chance = new Chance();
@@ -172,7 +176,10 @@ class DataGenerator {
 
   loadJSONData() {
     const rawLocations = fs.readFileSync(this.locationPath);
-    this.mockLocations = JSON.parse(rawLocations);
+    this.mockLocations = JSON.parse(rawLocations).map((location) => ({
+      type: "Point",
+      coordinates: [location.lat, location.lng],
+    }));
     const rawComments = fs.readFileSync(this.commentsPath);
     this.mockComments = JSON.parse(rawComments);
     const rawTags = fs.readFileSync(this.tagsPath);
@@ -193,7 +200,7 @@ class DataGenerator {
     this.loadJSONData();
     this.generateUsers();
     await this.loadPostsCSV();
-    console.log("");
+    await connectToDb();
   }
 }
 
@@ -201,22 +208,22 @@ const parser = new ArgumentParser({
   add_help: true,
 });
 parser.add_argument("-p", "--posts", {
-  default: "setup/mock-data/reddit_wsb.csv",
+  default: `${__dirname}/mock-data/reddit_wsb.csv`,
   help: "The path to the csv file containing the mock post data",
   dest: "postsPath",
 });
 parser.add_argument("-l", "--locations", {
-  default: "setup/mock-data/location_bank.json",
+  default: `${__dirname}/mock-data/location_bank.json`,
   help: "The path to the json file containing mock latitude and longitude data",
   dest: "locationPath",
 });
 parser.add_argument("-c", "--comments", {
-  default: "setup/mock-data/comments_bank.json",
+  default: `${__dirname}/mock-data/comments_bank.json`,
   help: "The path to the json file containing mock comments data.",
   dest: "commentsPath",
 });
 parser.add_argument("-t", "--tags", {
-  default: "setup/mock-data/tags_bank.json",
+  default: `${__dirname}/mock-data/tags_bank.json`,
   help: "The path to the json file containing mock tags data.",
   dest: "tagsPath",
 });
@@ -241,7 +248,7 @@ parser.add_argument("--max-comments", {
 
 const args = parser.parse_args();
 
-new DataGenerator({
+const dataGenerator = new DataGenerator({
   postsPath: args.postsPath,
   locationPath: args.locationPath,
   commentsPath: args.commentsPath,
@@ -249,7 +256,8 @@ new DataGenerator({
   daysAgo: args.daysAgo,
   numUsers: args.numUsers,
   maxComments: args.maxComments,
-})
+});
+dataGenerator
   .generate()
   .then(() => {
     console.log("Done generating data");

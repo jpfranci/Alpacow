@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "node setup/start_mongo.js & nodemon ./bin/www",
+    "dev": "node setup/start-mongo.js & nodemon ./bin/www",
     "prettier": "lint-staged",
     "setup": "node setup/datagen.js"
   },
