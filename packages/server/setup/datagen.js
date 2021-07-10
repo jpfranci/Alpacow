@@ -236,7 +236,11 @@ class DataGenerator {
     if (this.reset) {
       await mongoose.connection.db.dropDatabase();
     }
-    await Tag.deleteMany({});
+    await Tag.deleteMany({
+      tag: {
+        $in: [...this.mockTags.map(({ tag }) => tag)],
+      },
+    });
     await Promise.all([
       Post.insertMany([this.posts]),
       Upvote.insertMany(this.upvotes),
