@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "node setup/start-mongo.js & nodemon src/bin/www",
     "prettier": "lint-staged",
-    "setup": "node setup/datagen.js"
+    "setup": "node setup/datagen.js",
+    "datagen": "node setup/datagen.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
