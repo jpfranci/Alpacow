@@ -1,10 +1,10 @@
 {
   "scripts": {
-    "prettier": "lerna run prettier",
+    "prettier": "lerna run --parallel prettier",
     "prepare": "husky install",
     "bootstrap": "lerna bootstrap",
-    "setup": "yarn install && yarn bootstrap",
-    "dev": "lerna exec yarn dev",
+    "setup": "yarn install && yarn bootstrap && lerna run --parallel setup",
+    "dev": "lerna run --parallel dev",
     "storybook": "lerna exec yarn storybook"
   },
   "devDependencies": {
