@@ -242,7 +242,7 @@ class DataGenerator {
       },
     });
     await Promise.all([
-      Post.insertMany([this.posts]),
+      Post.insertMany(this.posts),
       Upvote.insertMany(this.upvotes),
       Downvote.insertMany(this.downvotes),
       User.insertMany(this.users),
