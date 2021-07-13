@@ -76,7 +76,6 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
         body: bodyText,
         tag: tag as string,
         location,
-        // TODO: user ID or username on post creation dialog?
         userId: userId,
       }),
     );
