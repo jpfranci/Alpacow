@@ -7,9 +7,17 @@ const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const jsonServer = require("json-server");
-const { connectToDb } = require("./data/db/db-connect");
+const { connectToDb, getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
 const postRouter = require("./routes/api/posts");
+
+const db = getDb()
+  .then((resolve) => {
+    console.log("db connected successfully");
+  })
+  .catch((err) => {
+    console.log("uh oh bad db", err);
+  });
 
 const liveReloadServer = livereload.createServer({
   port: 35730,
@@ -20,9 +28,10 @@ liveReloadServer.server.once("connection", () => {
   }, 100);
 });
 
-const db = connectToDb().connection;
-
 const app = express();
+app.on("ready", function () {
+  app.listen();
+});
 app.use(connectLiveReload());
 app.set("view engine", "jade");
 
