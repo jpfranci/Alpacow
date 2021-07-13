@@ -7,7 +7,7 @@ const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const jsonServer = require("json-server");
-const { connectToDb, getDb } = require("./data/db/db-connect");
+const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
 const postRouter = require("./routes/api/posts");
 
