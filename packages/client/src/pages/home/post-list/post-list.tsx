@@ -20,10 +20,12 @@ const PostList: React.FC = () => {
     const result = [...state.post.posts];
     switch (state.post.sortType) {
       case PostSortType.NEW:
-        result.sort((p1, p2) => p2.createdAt - p1.createdAt);
+        result.sort(
+          (p1, p2) => new Date(p2.date).getTime() - new Date(p1.date).getTime(),
+        );
         break;
       case PostSortType.POPULAR:
-        result.sort((p1, p2) => p2.upvotes - p1.upvotes);
+        result.sort((p1, p2) => p2.numUpvotes - p1.numUpvotes);
         break;
       default:
         console.log("damn wtf");
@@ -39,7 +41,7 @@ const PostList: React.FC = () => {
   return (
     <StyledContainer>
       {posts.map((post) => (
-        <PostListItem key={post.id} post={post} />
+        <PostListItem key={post._id} post={post} />
       ))}
     </StyledContainer>
   );

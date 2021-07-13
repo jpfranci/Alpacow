@@ -52,16 +52,16 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
 
-  const voteCount = post.upvotes - post.downvotes || 0;
-  const didUserUpvote: boolean | undefined = user.votedPosts[post.id]?.upvoted;
+  const voteCount = post.numUpvotes - post.numDownvotes || 0;
+  const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
-  const date = post.createdAt ? new Date(post.createdAt) : new Date();
+  const date = post.date ? new Date(post.date) : new Date();
 
   return (
     <PostContainer>
       <TitleText>{post.title}</TitleText>
-      <BodyText>{post.bodyText}</BodyText>
+      <BodyText>{post.body}</BodyText>
       <PostFooter>
         <PostFooterSection>
           <DateText>

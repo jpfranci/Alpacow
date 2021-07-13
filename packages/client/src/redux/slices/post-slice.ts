@@ -6,19 +6,20 @@ import { UserState } from "./user-slice";
 const prefix = "post";
 
 export interface Post extends NewPost {
-  id: string;
-  upvotes: number;
-  downvotes: number;
-  createdAt: number;
-  // comments: string[]
+  _id: string;
+  numUpvotes: number;
+  numDownvotes: number;
+  date: string;
+  comments: string[];
+  username: string;
 }
 
 export type NewPost = {
   title: string;
-  bodyText: string;
+  body: string;
   tag: string;
   location: Location;
-  userID: string;
+  userId: string;
 };
 
 export enum PostSortType {
@@ -76,9 +77,9 @@ export const upvote = createAsyncThunk<
   { post: Post; user: UserState }
 >(`${prefix}/upvote`, async ({ post, user }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post.id, {
+    const response = await postService.update(post._id, {
       ...post,
-      upvotes: post.upvotes + 1,
+      numUpvotes: post.numUpvotes + 1,
     });
 
     // TODO we should make one route each for upvoting/downvoting so we don't have to make redundant server calls
@@ -100,9 +101,9 @@ export const downvote = createAsyncThunk<
   { post: Post; user: UserState }
 >(`${prefix}/downvote`, async ({ post, user }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post.id, {
+    const response = await postService.update(post._id, {
       ...post,
-      downvotes: post.downvotes + 1,
+      numDownvotes: post.numDownvotes + 1,
     });
 
     // // update user
@@ -146,20 +147,20 @@ export const postSlice = createSlice({
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post.id === action.payload.id,
+        (post) => post._id === action.payload.id,
       );
 
-      if (postToUpdate && action.payload.upvotes) {
-        postToUpdate.upvotes = action.payload.upvotes;
+      if (postToUpdate && action.payload.numUpvotes) {
+        postToUpdate.numUpvotes = action.payload.numUpvotes;
       }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post.id === action.payload.id,
+        (post) => post._id === action.payload.id,
       );
 
-      if (postToUpdate && action.payload.downvotes) {
-        postToUpdate.downvotes = action.payload.downvotes;
+      if (postToUpdate && action.payload.numDownvotes) {
+        postToUpdate.numDownvotes = action.payload.numDownvotes;
       }
     });
   },

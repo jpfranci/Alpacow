@@ -39,6 +39,7 @@ interface PostDialogFields {
   bodyText: string;
   tag: string | undefined;
   isAnonymous: boolean;
+  userId: string;
 }
 
 const DEFAULT_FIELDS = {
@@ -46,6 +47,7 @@ const DEFAULT_FIELDS = {
   bodyText: "",
   tag: undefined,
   isAnonymous: false,
+  userId: "",
 };
 
 const StyledContainer = styled.div`
@@ -60,7 +62,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const location = useAppSelector((state) => state.location);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous } = fields;
+  const { title, bodyText, tag, isAnonymous, userId } = fields;
 
   const handleClose = () => {
     setFields(DEFAULT_FIELDS);
@@ -71,11 +73,11 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
     dispatch(
       createPost({
         title,
-        bodyText,
+        body: bodyText,
         tag: tag as string,
         location,
-        // TODO: add proper user id after user creation is hooked up
-        userID: "1",
+        // TODO: user ID or username on post creation dialog?
+        userId: userId,
       }),
     );
     handleClose();
