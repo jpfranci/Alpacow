@@ -9,6 +9,7 @@ const connectLiveReload = require("connect-livereload");
 const jsonServer = require("json-server");
 const { connectToDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
+const postRouter = require("./routes/api/posts");
 
 const liveReloadServer = livereload.createServer({
   port: 35730,
@@ -32,7 +33,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/api/posts", indexRouter);
+app.use("/api/posts", postRouter);
 
 // TODO: eventually remove usage of mock-server
 app.use("/api", jsonServer.router("mock-server/db.json"));
