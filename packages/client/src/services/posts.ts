@@ -1,5 +1,5 @@
 import axios from "axios";
-import { NewPost, Post } from "../redux/slices/post-slice";
+import { NewPost, Post, PostState } from "../redux/slices/post-slice";
 
 const baseUrl = "/api/posts";
 
@@ -21,6 +21,20 @@ const getAll = async () => {
   return response;
 };
 
+const getPostsByFilter = async (postState: PostState) => {
+  const { posts, sortType, locationFilter, tagFilter, currentPostID } =
+    postState;
+  const response = await axios.get(
+    `${baseUrl}?` +
+      `sort=${sortType}&` +
+      `location=${locationFilter}&` +
+      `tag=${tagFilter}&` +
+      `id=${currentPostID}`,
+  );
+  console.log(response);
+  return response;
+};
+
 const getByID = async (id: string) => {
   const response = await axios.get(`${baseUrl}/${id}`);
   return response;
@@ -39,6 +53,7 @@ const deleteByID = async (id: string) => {
 const postService = {
   create,
   getAll,
+  getPostsByFilter,
   getByID,
   update,
   deleteByID,

@@ -5,12 +5,21 @@ import { UserState } from "./user-slice";
 
 const prefix = "post";
 
+type Comment = {
+  _id: string;
+  date: string;
+  numUpVotes: number;
+  numDownvotes: number;
+  userId: string;
+  username: string;
+};
+
 export interface Post extends NewPost {
   _id: string;
   numUpvotes: number;
   numDownvotes: number;
   date: string;
-  comments: string[];
+  comments: Comment[];
   username: string;
 }
 
@@ -27,7 +36,7 @@ export enum PostSortType {
   NEW = "new",
 }
 
-type PostState = {
+export type PostState = {
   posts: Post[];
   sortType: PostSortType;
   locationFilter: Location;
@@ -64,6 +73,19 @@ export const getPosts = createAsyncThunk<Post[]>(
     try {
       const response = await postService.getAll();
 
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
+  `${prefix}/getPostsByFilter`,
+  async (postState: PostState, { rejectWithValue }) => {
+    try {
+      const response = await postService.getPostsByFilter(postState);
+      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -140,6 +162,12 @@ export const postSlice = createSlice({
       state.posts = action.payload;
     });
     builder.addCase(getPosts.rejected, (state, action) => {
+      return { ...initialState };
+    });
+    builder.addCase(getPostsByFilter.fulfilled, (state, action) => {
+      state.posts = action.payload;
+    });
+    builder.addCase(getPostsByFilter.rejected, (state, action) => {
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
