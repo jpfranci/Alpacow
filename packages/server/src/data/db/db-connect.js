@@ -10,7 +10,7 @@ const {
   AUTH_SOURCE,
 } = process.env;
 
-const connectToDb = () => {
+const connectToDb = async () => {
   let authString = "";
   let queryParams = "";
   const encodedHost = encodeURIComponent(MONGO_DB_HOST);
@@ -29,4 +29,10 @@ const connectToDb = () => {
   );
 };
 
+const getDb = async () => {
+  const db = await connectToDb();
+  return db.connection;
+};
+
 module.exports.connectToDb = connectToDb;
+module.exports.getDb = getDb;

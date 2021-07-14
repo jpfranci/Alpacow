@@ -7,8 +7,17 @@ const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const jsonServer = require("json-server");
-
+const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
+const postRouter = require("./routes/api/posts");
+
+const db = getDb()
+  .then((resolve) => {
+    console.log("db connected successfully");
+  })
+  .catch((err) => {
+    console.log("uh oh bad db", err);
+  });
 
 const liveReloadServer = livereload.createServer({
   port: 35730,
@@ -20,7 +29,11 @@ liveReloadServer.server.once("connection", () => {
 });
 
 const app = express();
+app.on("ready", function () {
+  app.listen();
+});
 app.use(connectLiveReload());
+app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -29,6 +42,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
+app.use("/api/posts", postRouter);
+
+// TODO: eventually remove usage of mock-server
 app.use("/api", jsonServer.router("mock-server/db.json"));
 
 // catch 404 and forward to error handler
@@ -44,7 +60,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.send(err.message);
 });
 
 module.exports = app;
