@@ -7,7 +7,8 @@ import {
 } from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-import { Location, setLocation } from "../../redux/slices/location-slice";
+import { Location } from "../../redux/slices/location-slice";
+import { setLocationFilter } from "../../redux/slices/post-slice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
@@ -58,7 +59,7 @@ const onAutoCompleteLoad = (autocomplete: any) => {
 
 const Map = () => {
   const dispatch = useAppDispatch();
-  const location = useAppSelector((state) => state.location);
+  const location = useAppSelector((state) => state.post.locationFilter);
   const updateStore = async (
     lat: number,
     lon: number,
@@ -66,7 +67,7 @@ const Map = () => {
   ) => {
     try {
       const response = await dispatch(
-        setLocation({
+        setLocationFilter({
           name: newName !== undefined ? newName : name,
           lat: lat,
           lon: lon,
@@ -84,9 +85,12 @@ const Map = () => {
     lat: location.lat,
     lng: location.lon,
   });
+
   const [name, setName] = React.useState(location.name);
 
   if (initialLocation === undefined) {
+    // TODO: this block is causing getPostsByFilter to be called twice when the page is refreshed
+    // Another issue: user location is fetched here AND in post-slice
     navigator.geolocation.getCurrentPosition(function (position) {
       initialLocation = {
         lat: position.coords.latitude,

@@ -27,11 +27,11 @@ const getPostsByFilter = async (postState: PostState) => {
   const response = await axios.get(
     `${baseUrl}?` +
       `sort=${sortType}&` +
-      `location=${locationFilter}&` +
+      `lat=${locationFilter.lat}&` +
+      `lon=${locationFilter.lon}&` +
       `tag=${tagFilter}&` +
       `id=${currentPostID}`,
   );
-  console.log(response);
   return response;
 };
 

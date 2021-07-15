@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { Location } from "./location-slice";
+import { Location, initialState as initialLocation } from "./location-slice";
 import { UserState } from "./user-slice";
 
 const prefix = "post";
@@ -44,14 +44,20 @@ export type PostState = {
   currentPostID?: string;
 };
 
+let locationFilter: Location = initialLocation;
+
+navigator.geolocation.getCurrentPosition(function (position) {
+  locationFilter = {
+    lat: position.coords.latitude,
+    lon: position.coords.longitude,
+    name: undefined,
+  };
+});
+
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
-  locationFilter: {
-    name: "Vancouver",
-    lat: 49.26,
-    lon: -123.22,
-  },
+  locationFilter: locationFilter,
 };
 
 export const createPost = createAsyncThunk<Post, NewPost>(
@@ -72,7 +78,6 @@ export const getPosts = createAsyncThunk<Post[]>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await postService.getAll();
-
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -85,7 +90,6 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
   async (postState: PostState, { rejectWithValue }) => {
     try {
       const response = await postService.getPostsByFilter(postState);
-      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
