@@ -19,10 +19,6 @@ const StyledContainer = styled.div`
 const PostList: React.FC = () => {
   const dispatch = useAppDispatch();
 
-  const location = useAppSelector((state) => {
-    return state.post.locationFilter;
-  });
-
   const posts = useAppSelector((state) => {
     // TODO make a custom selector / decide how post sorting will work
     const result = [...state.post.posts];
@@ -42,6 +38,8 @@ const PostList: React.FC = () => {
   });
 
   const postState = useAppSelector((state) => state.post);
+
+  const location = useAppSelector((state) => state.post.locationFilter);
 
   useEffect(() => {
     dispatch(getPostsByFilter(postState));
