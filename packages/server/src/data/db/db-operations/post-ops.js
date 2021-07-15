@@ -15,7 +15,7 @@ const getPostsByFilter = async (req) => {
           coordinates: [parseFloat(req.query.lon), parseFloat(req.query.lat)],
         },
         $minDistance: 0,
-        $maxDistance: 1000,
+        $maxDistance: 750,
       },
     },
   });
