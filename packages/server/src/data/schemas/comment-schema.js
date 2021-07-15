@@ -10,8 +10,8 @@ const CommentSchema = new Schema({
   numDownvotes: Number,
   userId: ObjectId,
   username: String,
-  upvoters: [ObjectId],
-  downvoters: [ObjectId],
+  upvoters: { type: [ObjectId], index: true },
+  downvoters: { type: [ObjectId], index: true },
 });
 
 module.exports = CommentSchema;

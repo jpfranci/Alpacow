@@ -17,11 +17,11 @@ const PostSchema = new Schema({
   numDownvotes: Number,
   location: LocationSchema,
   comments: [CommentSchema],
-  userId: ObjectId,
+  userId: { type: ObjectId, index: true },
   username: String,
   tag: String,
-  upvoters: [ObjectId],
-  downvoters: [ObjectId],
+  upvoters: { type: [ObjectId], index: true },
+  downvoters: { type: [ObjectId], index: true },
 });
 
 module.exports = PostSchema;
