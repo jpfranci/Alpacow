@@ -22,4 +22,6 @@ const PostSchema = new Schema({
   tag: String,
 });
 
+PostSchema.index({ location: "2dsphere" });
+
 module.exports = PostSchema;

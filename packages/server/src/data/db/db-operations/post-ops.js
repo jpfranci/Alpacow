@@ -6,8 +6,24 @@ const getPosts = async () => {
   return await Post.aggregate([{ $sample: { size: 50 } }]);
 };
 
+const getPostsByFilter = async (req) => {
+  return await Post.find({
+    location: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [parseFloat(req.query.lon), parseFloat(req.query.lat)],
+        },
+        $minDistance: 0,
+        $maxDistance: 1000,
+      },
+    },
+  });
+};
+
 const operations = {
   getPosts,
+  getPostsByFilter,
 };
 
 module.exports = operations;
