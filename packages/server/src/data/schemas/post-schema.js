@@ -20,6 +20,8 @@ const PostSchema = new Schema({
   userId: ObjectId,
   username: String,
   tag: String,
+  upvoters: [ObjectId],
+  downvoters: [ObjectId],
 });
 
 module.exports = PostSchema;
