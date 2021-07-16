@@ -3,10 +3,14 @@ const router = express.Router();
 const operations = require("../../data/db/db-operations/post-ops");
 
 router.get("/", async function (req, res, next) {
+  const locationFilter = JSON.parse(req.query.locationFilter);
   let posts;
   try {
     if (req.query !== {}) {
-      posts = await operations.getPostsByFilter(req);
+      posts = await operations.getPostsByFilter(
+        locationFilter.lon,
+        locationFilter.lat,
+      );
     } else {
       posts = await operations.getPosts();
     }
