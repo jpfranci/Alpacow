@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import PostListItem from "./post-list-item";
-import { getPosts, PostSortType } from "../../../redux/slices/post-slice";
+import {
+  getPostsByFilter,
+  PostSortType,
+} from "../../../redux/slices/post-slice";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -20,26 +23,31 @@ const PostList: React.FC = () => {
     const result = [...state.post.posts];
     switch (state.post.sortType) {
       case PostSortType.NEW:
-        result.sort((p1, p2) => p2.createdAt - p1.createdAt);
+        result.sort(
+          (p1, p2) => new Date(p2.date).getTime() - new Date(p1.date).getTime(),
+        );
         break;
       case PostSortType.POPULAR:
-        result.sort((p1, p2) => p2.upvotes - p1.upvotes);
+        result.sort((p1, p2) => p2.numUpvotes - p1.numUpvotes);
         break;
       default:
         console.log("damn wtf");
     }
-
     return result;
   });
 
+  const postState = useAppSelector((state) => state.post);
+
+  let location = useAppSelector((state) => state.post.locationFilter);
+
   useEffect(() => {
-    dispatch(getPosts());
-  }, [dispatch]);
+    dispatch(getPostsByFilter(postState));
+  }, [location]);
 
   return (
     <StyledContainer>
       {posts.map((post) => (
-        <PostListItem key={post.id} post={post} />
+        <PostListItem key={post._id} post={post} />
       ))}
     </StyledContainer>
   );

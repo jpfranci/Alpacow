@@ -17,9 +17,13 @@ const PostSchema = new Schema({
   numDownvotes: Number,
   location: LocationSchema,
   comments: [CommentSchema],
-  userId: ObjectId,
+  userId: { type: ObjectId, index: true },
   username: String,
   tag: String,
+  upvoters: { type: [ObjectId], index: true },
+  downvoters: { type: [ObjectId], index: true },
 });
+
+PostSchema.index({ location: "2dsphere" });
 
 module.exports = PostSchema;

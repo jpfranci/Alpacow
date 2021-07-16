@@ -1,8 +1,6 @@
 require("dotenv").config();
 const csvParser = require("csv-parser");
 const Post = require("../src/data/models/post-model");
-const Upvote = require("../src/data/models/upvote-model");
-const Downvote = require("../src/data/models/downvote-model");
 const User = require("../src/data/models/user-model");
 const Tag = require("../src/data/models/tag-model");
 const { ArgumentParser } = require("argparse");
@@ -30,6 +28,7 @@ class DataGenerator {
     maxComments,
     maxPosts,
     reset,
+    maxScore,
   }) {
     if (numUsers < 3) {
       throw Error("Number of users to generate must at least be 3");
@@ -41,11 +40,10 @@ class DataGenerator {
     this.maxPosts = maxPosts;
     this.reset = reset;
     this.numUsers = numUsers;
+    this.maxScore = maxScore;
     this.maxComments = Math.min(numUsers, maxComments);
     this.users = [];
     this.posts = [];
-    this.upvotes = [];
-    this.downvotes = [];
     this.setDayRange(daysAgo);
   }
 
@@ -83,28 +81,26 @@ class DataGenerator {
   }
 
   // Generate votes by sampling the pool of voters without replacement
-  generateVoters(eligibleVoters, mediaId, numVotes, votesArray) {
+  generateVoters(eligibleVoters, numVotes, votesArray) {
     for (let i = 0; i < numVotes; i++) {
       const { index: voterIndex } =
         this.getRandomElementFromArray(eligibleVoters);
-      votesArray.push({
-        userId: eligibleVoters[voterIndex]._id,
-        mediaId,
-      });
+      votesArray.push(eligibleVoters[voterIndex]._id);
 
       eligibleVoters.splice(voterIndex, 1);
     }
   }
 
-  generateVotes(score, id) {
+  generateVotes(score) {
     let numUpvotes;
     let numDownvotes;
     // Can't have more votes than number of users we have generated
     const scoreToUse = Math.min(
-      Math.floor(Number(score)),
+      Math.abs(Math.floor(Number(score))),
       Math.floor(this.users.length / 3),
+      this.maxScore,
     );
-    if (scoreToUse > 0) {
+    if (score > 0) {
       numUpvotes = chance.integer({
         min: scoreToUse,
         max: scoreToUse * 2,
@@ -112,18 +108,22 @@ class DataGenerator {
       numDownvotes = numUpvotes - scoreToUse;
     } else {
       numDownvotes = chance.integer({
-        min: Math.abs(scoreToUse),
-        max: Math.abs(scoreToUse) * 2,
+        min: scoreToUse,
+        max: scoreToUse * 2,
       });
-      numUpvotes = numDownvotes + scoreToUse;
+      numUpvotes = numDownvotes - scoreToUse;
     }
 
     const voters = [...this.users];
-    this.generateVoters(voters, id, numUpvotes, this.upvotes);
-    this.generateVoters(voters, id, numDownvotes, this.downvotes);
+    const upvoters = [];
+    const downvoters = [];
+    this.generateVoters(voters, numUpvotes, upvoters);
+    this.generateVoters(voters, numDownvotes, downvoters);
     return {
-      numUpvotes: numUpvotes,
-      numDownvotes: numDownvotes,
+      numUpvotes,
+      numDownvotes,
+      upvoters,
+      downvoters,
     };
   }
 
@@ -131,7 +131,6 @@ class DataGenerator {
     postObject.comments = [];
     const numComments = this.generateIntInRange(0, this.maxComments);
     for (let i = 0; i < numComments; i++) {
-      const commentId = new ObjectID();
       const { element: commentToUse } = this.getRandomElementFromArray(
         this.mockComments,
       );
@@ -139,16 +138,14 @@ class DataGenerator {
       const poster = this.getRandomElementFromArray(this.users).element;
       poster.reputation += Math.floor(Number(score));
       const date = this.generateRandomDate(postObject.date.getTime());
-      const { numUpvotes, numDownvotes } = this.generateVotes(score, commentId);
+      const votes = this.generateVotes(score);
 
       postObject.comments.push({
-        _id: new ObjectID(),
         body,
         date,
-        numUpvotes,
-        numDownvotes,
         userId: poster._id,
         username: poster.username,
+        ...votes,
       });
     }
   }
@@ -157,19 +154,16 @@ class DataGenerator {
     const { title, score, body } = post;
     const date = this.generateRandomDate(this.startTime);
     const location = this.generateRandomLocation();
-    const id = new ObjectID();
     const {
       element: { tag },
     } = this.getRandomElementFromArray(this.mockTags);
     const poster = this.getRandomElementFromArray(this.users).element;
     poster.reputation += Math.floor(Number(score));
-    const { numUpvotes, numDownvotes } = this.generateVotes(score, id);
+    const votes = this.generateVotes(score);
 
     const postObject = {
-      _id: id,
       title,
-      numUpvotes,
-      numDownvotes,
+      ...votes,
       body: body
         ? body
         : this.getRandomElementFromArray(this.mockComments).element.body,
@@ -207,7 +201,7 @@ class DataGenerator {
     const rawLocations = fs.readFileSync(this.locationPath);
     this.mockLocations = JSON.parse(rawLocations).map((location) => ({
       type: "Point",
-      coordinates: [location.lat, location.lng],
+      coordinates: [location.lng, location.lat],
     }));
     const rawComments = fs.readFileSync(this.commentsPath);
     this.mockComments = JSON.parse(rawComments);
@@ -242,9 +236,7 @@ class DataGenerator {
       },
     });
     await Promise.all([
-      Post.insertMany([this.posts]),
-      Upvote.insertMany(this.upvotes),
-      Downvote.insertMany(this.downvotes),
+      Post.insertMany(this.posts),
       User.insertMany(this.users),
       Tag.insertMany(this.mockTags, { ordered: false }),
     ]);
@@ -303,6 +295,12 @@ parser.add_argument("-r", "--reset", {
   help: `Whether to delete all existing data and reset.`,
   dest: "reset",
 });
+parser.add_argument("--max_score", {
+  default: Infinity,
+  help: "The absolute value of the maximum score that a post can have",
+  dest: "maxScore",
+  type: "int",
+});
 
 const args = parser.parse_args();
 
@@ -316,6 +314,7 @@ const dataGenerator = new DataGenerator({
   maxComments: args.maxComments,
   maxPosts: args.maxPosts,
   reset: args.reset === "true",
+  maxScore: args.maxScore,
 });
 dataGenerator
   .generate()

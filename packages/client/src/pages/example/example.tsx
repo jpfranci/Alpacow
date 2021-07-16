@@ -1,12 +1,12 @@
 import { unwrapResult } from "@reduxjs/toolkit";
 import React, { useEffect, useState } from "react";
 import {
+  Location,
   createPost,
   getPosts,
   setLocationFilter,
 } from "../../redux/slices/post-slice";
 import { login, signup } from "../../redux/slices/user-slice";
-import { Location } from "../../redux/slices/location-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const ExamplePage = () => {
@@ -148,10 +148,10 @@ const PostExample = () => {
       dispatch(
         createPost({
           title,
-          bodyText,
+          body: bodyText,
           tag,
           location: locationFilter,
-          userID: user.id,
+          userId: user.id,
         }),
       )
         .then(unwrapResult)
@@ -208,12 +208,12 @@ const PostExample = () => {
         <h3>Posts (filtered by location)</h3>
         <ul>
           {posts.map((post) => (
-            <li key={post.id}>
+            <li key={post._id}>
               <h3>{post.title}</h3>
-              <p>body: {post.bodyText}</p>
+              <p>body: {post.body}</p>
               <p>tag: {post.tag}</p>
               <p>location: {post.location}</p>
-              <p>created by (id): {post.userID}</p>
+              <p>created by (id): {post.userId}</p>
             </li>
           ))}
         </ul>
