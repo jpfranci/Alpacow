@@ -72,11 +72,12 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const handleSave = () => {
     dispatch(
       createPost({
-        title,
+        title: title,
         body: bodyText,
         tag: tag as string,
-        location,
-        userId: userId,
+        location: location,
+        //TODO use real user id once login is set up
+        userId: "60f138a5910aef4526a82182",
       }),
     );
     handleClose();

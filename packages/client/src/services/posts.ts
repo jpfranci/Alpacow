@@ -7,11 +7,7 @@ const baseUrl = "/api/posts";
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
-    ...newPost,
-    // TODO delete below eventually - these props should be generated on backend
-    upvotes: 0,
-    downvotes: 0,
-    createdAt: Date.now(),
+    params: newPost,
   });
   return response;
 };
@@ -29,6 +25,7 @@ const getPostsByFilter = async (postState: PostState) => {
       locationFilter: postState.locationFilter,
       tagFilter: postState.tagFilter,
       currentPostID: postState.currentPostID,
+      matureFilter: postState.matureFilter,
     },
   });
   return response;

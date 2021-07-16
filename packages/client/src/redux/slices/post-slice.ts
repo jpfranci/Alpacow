@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { truncate } from "lodash";
 import postService from "../../services/posts";
 import { UserState } from "./user-slice";
 
@@ -53,6 +54,7 @@ export type PostState = {
   locationFilter: Location;
   tagFilter?: string;
   currentPostID?: string;
+  matureFilter?: boolean;
 };
 
 let locationFilter: Location = initialLocation;
@@ -61,6 +63,7 @@ const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
   locationFilter: locationFilter,
+  matureFilter: false,
 };
 
 export const createPost = createAsyncThunk<Post, NewPost>(
@@ -162,6 +165,9 @@ export const postSlice = createSlice({
     },
     setTagFilter: (state, action: PayloadAction<string>) => {
       state.tagFilter = action.payload;
+    },
+    setMatureFilter: (state, action: PayloadAction<boolean>) => {
+      state.matureFilter = action.payload;
     },
   },
   extraReducers: (builder) => {
