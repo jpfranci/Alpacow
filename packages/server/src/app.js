@@ -10,6 +10,7 @@ const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
 const { errors } = require("celebrate");
 const postRouter = require("./routes/api/posts/posts-router");
+const tagsRouter = require("./routes/api/tags/tags-router");
 
 getDb()
   .then(() => {
@@ -43,6 +44,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/api/posts", postRouter);
+app.use("/api/tags", tagsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

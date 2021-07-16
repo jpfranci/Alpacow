@@ -23,10 +23,11 @@ const PostList: React.FC = () => {
 
   const location = useAppSelector((state) => state.post.locationFilter);
   const sortType = useAppSelector((state) => state.post.sortType);
+  const tagFilter = useAppSelector((state) => state.post.tagFilter);
 
   useEffect(() => {
     dispatch(getPostsByFilter(postState));
-  }, [location, sortType]);
+  }, [location, sortType, tagFilter]);
 
   return (
     <StyledContainer>
