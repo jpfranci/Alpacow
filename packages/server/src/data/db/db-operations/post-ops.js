@@ -42,7 +42,11 @@ const getPostsByFilter = async ({ lon, lat, tagFilter, sortType }) => {
     },
   });
   aggregationPipeline.push({
-    $sort: sortType === "popular" ? { score: -1 } : { date: -1 },
+    // additional arguments are to break ties
+    $sort:
+      sortType === "popular"
+        ? { score: -1, date: -1, _id: -1 }
+        : { date: -1, _id: -1 },
   });
   return Post.aggregate(aggregationPipeline);
 };

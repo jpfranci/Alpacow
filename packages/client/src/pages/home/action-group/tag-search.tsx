@@ -12,6 +12,8 @@ interface TagSearchProps {
   width?: number;
   selectedTag: string | undefined;
   onTagSelect: (selectedTag: string) => any;
+  inputValue: string;
+  onInputChange: (inputValue: string) => any;
   // any other props
   [key: string]: any;
 }
@@ -20,9 +22,10 @@ const TagSearch = ({
   width = 300,
   selectedTag,
   onTagSelect,
+  inputValue,
+  onInputChange,
   ...otherProps
 }: TagSearchProps) => {
-  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
 
@@ -60,7 +63,8 @@ const TagSearch = ({
       options={options}
       style={{ width }}
       autoComplete
-      value={selectedTag}
+      value={selectedTag ?? null}
+      inputValue={inputValue ?? ""}
       noOptionsText={noOptionsText}
       renderInput={(params) => (
         <TextField
@@ -72,7 +76,7 @@ const TagSearch = ({
       )}
       onChange={handleTagFilterChange}
       onInputChange={(event, newInputValue) => {
-        setInputValue(newInputValue);
+        onInputChange(newInputValue);
       }}
       {...otherProps}
     />

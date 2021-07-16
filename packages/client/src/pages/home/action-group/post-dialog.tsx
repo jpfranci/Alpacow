@@ -40,6 +40,7 @@ interface PostDialogFields {
   tag: string | undefined;
   isAnonymous: boolean;
   userId: string;
+  inputValue: string;
 }
 
 const DEFAULT_FIELDS = {
@@ -48,6 +49,7 @@ const DEFAULT_FIELDS = {
   tag: undefined,
   isAnonymous: false,
   userId: "",
+  inputValue: "",
 };
 
 const StyledContainer = styled.div`
@@ -62,7 +64,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous, userId } = fields;
+  const { title, bodyText, tag, isAnonymous, userId, inputValue } = fields;
 
   const handleClose = () => {
     setFields(DEFAULT_FIELDS);
@@ -126,6 +128,10 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
             width={200}
             size="small"
             selectedTag={tag}
+            inputValue={inputValue}
+            onInputChange={(newInputValue) =>
+              handleFieldChange("inputValue", newInputValue)
+            }
             onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
           />
           <FormControlLabel

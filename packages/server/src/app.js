@@ -34,7 +34,6 @@ app.on("ready", function () {
   app.listen();
 });
 app.use(connectLiveReload());
-app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -42,7 +41,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/tags", tagsRouter);
 

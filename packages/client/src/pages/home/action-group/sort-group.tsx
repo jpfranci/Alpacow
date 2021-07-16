@@ -11,12 +11,12 @@ const SortGroup = () => {
   const sortType = useAppSelector((state) => state.post.sortType);
   const dispatch = useAppDispatch();
 
-  const handleSortTypeChange = async (
+  const handleSortTypeChange = (
     event: React.MouseEvent<HTMLElement>,
     newSortType?: PostSortType,
   ) => {
     if (newSortType) {
-      await dispatch(setSortType(newSortType));
+      dispatch(setSortType(newSortType));
     }
   };
 
