@@ -22,13 +22,19 @@ const getAll = async () => {
 };
 
 const getPostsByFilter = async (postState: PostState) => {
+  const {
+    sortType,
+    locationFilter: { lat, lon },
+    tagFilter,
+    currentPostID,
+  } = postState;
   const response = await axios.get(`${baseUrl}`, {
     params: {
-      posts: [],
-      sortType: postState.sortType,
-      locationFilter: postState.locationFilter,
-      tagFilter: postState.tagFilter,
-      currentPostID: postState.currentPostID,
+      sortType,
+      lat,
+      lon,
+      tagFilter,
+      currentPostID,
     },
   });
   return response;

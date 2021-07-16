@@ -31,8 +31,8 @@ const createPost = async (post) => {
   return PostDb.createPost(postToInsert);
 };
 
-const getPosts = () => {
-  return PostDb.getPosts();
+const getPosts = (query) => {
+  return PostDb.getPostsByFilter(query);
 };
 
 module.exports = {

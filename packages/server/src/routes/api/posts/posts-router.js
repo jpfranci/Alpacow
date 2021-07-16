@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { getPosts, createPost } = require("../../../services/posts-service");
-const { createPostValidationFn } = require("./posts-validation");
+const nocache = require("nocache");
+const {
+  createPostValidationFn,
+  getPostValidationFn,
+} = require("./posts-validation");
 
-router.get("/", async (req, res, next) => {
+router.get("/", [getPostValidationFn, nocache()], async (req, res, next) => {
   try {
-    const posts = await getPosts();
+    const posts = await getPosts(req.query);
     res.json(posts);
   } catch (err) {
     next(err);

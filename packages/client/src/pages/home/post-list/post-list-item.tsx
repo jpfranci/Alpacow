@@ -5,6 +5,7 @@ import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import moment from "moment";
 
 const PostContainer = styled.div`
   display: flex;
@@ -56,7 +57,7 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
   const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
-  const date = post.date ? new Date(post.date) : new Date();
+  const date = moment(post.date).format("MM-DD-YYYY HH:mm");
 
   return (
     <PostContainer>
@@ -64,9 +65,7 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
       <BodyText>{post.body}</BodyText>
       <PostFooter>
         <PostFooterSection>
-          <DateText>
-            {`${date.toLocaleTimeString()} - ${date.toLocaleDateString()}`}
-          </DateText>
+          <DateText>{date}</DateText>
           <Button variant="contained" color="primary" size="small">
             {post.tag}
           </Button>

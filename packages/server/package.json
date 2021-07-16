@@ -21,6 +21,7 @@
     "mongodb": "^3.6.10",
     "mongoose": "^5.13.2",
     "morgan": "~1.9.1",
+    "nocache": "^3.0.1",
     "shelljs": "^0.8.4"
   },
   "devDependencies": {
@@ -42,16 +43,13 @@
   },
   "lint-staged": {
     "*.{js,ts}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*.{html,css,less,ejs}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*.{js,css,md}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   }
 }

@@ -1,6 +1,6 @@
 const { celebrate, Joi, Segments } = require("celebrate");
 
-const createPostSchema = Joi.object({
+const createPostSchema = Joi.object().keys({
   username: Joi.string().min(1).required(),
   email: Joi.string().email().required(),
   title: Joi.string().min(1).required(),
@@ -11,6 +11,23 @@ const createPostSchema = Joi.object({
   tag: Joi.string().min(1).required(),
 });
 
-exports.createPostValidationFn = celebrate({
+const getPostSchema = Joi.object().keys({
+  tagFilter: Joi.string().min(1),
+  lon: Joi.number().required(),
+  lat: Joi.number().required(),
+  sortType: Joi.string().valid("popular", "new").required(),
+  currentPostId: Joi.string().min(24).max(24),
+});
+
+const createPostValidationFn = celebrate({
   [Segments.BODY]: createPostSchema,
 });
+
+const getPostValidationFn = celebrate({
+  [Segments.QUERY]: getPostSchema,
+});
+
+module.exports = {
+  createPostValidationFn,
+  getPostValidationFn,
+};

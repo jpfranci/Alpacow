@@ -8,10 +8,11 @@ const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
+const { errors } = require("celebrate");
 const postRouter = require("./routes/api/posts/posts-router");
 
-const db = getDb()
-  .then((resolve) => {
+getDb()
+  .then(() => {
     console.log("db connected successfully");
   })
   .catch((err) => {
@@ -47,6 +48,8 @@ app.use("/api/posts", postRouter);
 app.use(function (req, res, next) {
   next(createError(404));
 });
+
+app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {
