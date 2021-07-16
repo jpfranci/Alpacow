@@ -24,4 +24,6 @@ const PostSchema = new Schema({
   downvoters: { type: [ObjectId], index: true },
 });
 
+PostSchema.index({ location: "2dsphere" });
+
 module.exports = PostSchema;

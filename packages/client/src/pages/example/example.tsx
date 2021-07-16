@@ -1,12 +1,12 @@
 import { unwrapResult } from "@reduxjs/toolkit";
 import React, { useEffect, useState } from "react";
 import {
+  Location,
   createPost,
   getPosts,
   setLocationFilter,
 } from "../../redux/slices/post-slice";
 import { login, signup } from "../../redux/slices/user-slice";
-import { Location } from "../../redux/slices/location-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const ExamplePage = () => {

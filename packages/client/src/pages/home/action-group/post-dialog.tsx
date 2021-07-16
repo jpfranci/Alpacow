@@ -59,7 +59,7 @@ const StyledContainer = styled.div`
 
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const classes = useStyles();
-  const location = useAppSelector((state) => state.location);
+  const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
   const { title, bodyText, tag, isAnonymous, userId } = fields;

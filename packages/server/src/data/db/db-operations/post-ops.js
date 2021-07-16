@@ -11,8 +11,24 @@ const createPost = async (post) => {
   return createdPost.toObject();
 };
 
+const getPostsByFilter = async (lon, lat) => {
+  return await Post.find({
+    location: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [lon, lat],
+        },
+        $minDistance: 0,
+        $maxDistance: 750,
+      },
+    },
+  });
+};
+
 const operations = {
   getPosts,
+  getPostsByFilter,
   createPost,
 };
 

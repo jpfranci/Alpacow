@@ -1,16 +1,36 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { Location } from "./location-slice";
 import { UserState } from "./user-slice";
 
 const prefix = "post";
+
+export type Location = {
+  name?: string;
+  lat: number;
+  lon: number;
+};
+
+export const initialLocation: Location = {
+  name: undefined,
+  lat: 49.26,
+  lon: -123.22,
+};
+
+type Comment = {
+  _id: string;
+  date: string;
+  numUpVotes: number;
+  numDownvotes: number;
+  userId: string;
+  username: string;
+};
 
 export interface Post extends NewPost {
   _id: string;
   numUpvotes: number;
   numDownvotes: number;
   date: string;
-  comments: string[];
+  comments: Comment[];
   username: string;
 }
 
@@ -27,7 +47,7 @@ export enum PostSortType {
   NEW = "new",
 }
 
-type PostState = {
+export type PostState = {
   posts: Post[];
   sortType: PostSortType;
   locationFilter: Location;
@@ -35,14 +55,12 @@ type PostState = {
   currentPostID?: string;
 };
 
+let locationFilter: Location = initialLocation;
+
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
-  locationFilter: {
-    name: "Vancouver",
-    lat: 49.26,
-    lon: -123.22,
-  },
+  locationFilter: locationFilter,
 };
 
 export const createPost = createAsyncThunk<Post, NewPost>(
@@ -63,7 +81,18 @@ export const getPosts = createAsyncThunk<Post[]>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await postService.getAll();
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
 
+export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
+  `${prefix}/getPostsByFilter`,
+  async (postState: PostState, { rejectWithValue }) => {
+    try {
+      const response = await postService.getPostsByFilter(postState);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -140,6 +169,12 @@ export const postSlice = createSlice({
       state.posts = action.payload;
     });
     builder.addCase(getPosts.rejected, (state, action) => {
+      return { ...initialState };
+    });
+    builder.addCase(getPostsByFilter.fulfilled, (state, action) => {
+      state.posts = action.payload;
+    });
+    builder.addCase(getPostsByFilter.rejected, (state, action) => {
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {

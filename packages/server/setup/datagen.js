@@ -201,7 +201,7 @@ class DataGenerator {
     const rawLocations = fs.readFileSync(this.locationPath);
     this.mockLocations = JSON.parse(rawLocations).map((location) => ({
       type: "Point",
-      coordinates: [location.lat, location.lng],
+      coordinates: [location.lng, location.lat],
     }));
     const rawComments = fs.readFileSync(this.commentsPath);
     this.mockComments = JSON.parse(rawComments);
