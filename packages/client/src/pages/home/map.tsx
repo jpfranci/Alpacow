@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   GoogleMap,
   LoadScript,
@@ -7,7 +7,8 @@ import {
 } from "@react-google-maps/api";
 import { CSSProperties } from "@material-ui/styles";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
-import { Location, setLocation } from "../../redux/slices/location-slice";
+import { Location } from "../../redux/slices/post-slice";
+import { setLocationFilter } from "../../redux/slices/post-slice";
 import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
@@ -58,7 +59,7 @@ const onAutoCompleteLoad = (autocomplete: any) => {
 
 const Map = () => {
   const dispatch = useAppDispatch();
-  const location = useAppSelector((state) => state.location);
+  const location = useAppSelector((state) => state.post.locationFilter);
   const updateStore = async (
     lat: number,
     lon: number,
@@ -66,7 +67,7 @@ const Map = () => {
   ) => {
     try {
       const response = await dispatch(
-        setLocation({
+        setLocationFilter({
           name: newName !== undefined ? newName : name,
           lat: lat,
           lon: lon,
@@ -84,9 +85,10 @@ const Map = () => {
     lat: location.lat,
     lng: location.lon,
   });
+
   const [name, setName] = React.useState(location.name);
 
-  if (initialLocation === undefined) {
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(function (position) {
       initialLocation = {
         lat: position.coords.latitude,
@@ -99,7 +101,7 @@ const Map = () => {
       });
       updateStore(initialLocation.lat, initialLocation.lon, location.name);
     });
-  }
+  }, [dispatch]);
 
   const updateOnDrag = (e: any) => {
     setCtr({ lat: e.latLng.lat(), lng: e.latLng.lng() });

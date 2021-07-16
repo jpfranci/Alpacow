@@ -2,7 +2,10 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import PostListItem from "./post-list-item";
-import { getPosts, PostSortType } from "../../../redux/slices/post-slice";
+import {
+  getPostsByFilter,
+  PostSortType,
+} from "../../../redux/slices/post-slice";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -30,13 +33,16 @@ const PostList: React.FC = () => {
       default:
         console.log("damn wtf");
     }
-
     return result;
   });
 
+  const postState = useAppSelector((state) => state.post);
+
+  let location = useAppSelector((state) => state.post.locationFilter);
+
   useEffect(() => {
-    dispatch(getPosts());
-  }, [dispatch]);
+    dispatch(getPostsByFilter(postState));
+  }, [location]);
 
   return (
     <StyledContainer>
