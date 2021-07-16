@@ -9,12 +9,15 @@
     "datagen": "node setup/datagen.js"
   },
   "dependencies": {
+    "celebrate": "^15.0.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^10.0.0",
+    "escape-string-regexp": "^5.0.0",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "joi": "^17.4.1",
     "mongodb": "^3.6.10",
     "mongoose": "^5.13.2",
     "morgan": "~1.9.1",
@@ -32,7 +35,10 @@
     "prettier": "^2.3.2"
   },
   "nodemonConfig": {
-    "ignore": ["setup/*", "mock-server/*"]
+    "ignore": [
+      "setup/*",
+      "mock-server/*"
+    ]
   },
   "lint-staged": {
     "*.{js,ts}": [

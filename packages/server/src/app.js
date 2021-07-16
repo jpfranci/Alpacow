@@ -6,10 +6,9 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
-const jsonServer = require("json-server");
 const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
-const postRouter = require("./routes/api/posts");
+const postRouter = require("./routes/api/posts/posts-router");
 
 const db = getDb()
   .then((resolve) => {
@@ -43,9 +42,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/api/posts", postRouter);
-
-// TODO: eventually remove usage of mock-server
-app.use("/api", jsonServer.router("mock-server/db.json"));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
