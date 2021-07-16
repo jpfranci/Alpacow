@@ -10,6 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useAppSelector } from "../../../redux/store";
 import ProfileButton from "./profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
+import LoginDialog from "./login-dialog";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
@@ -24,7 +25,12 @@ const useStyles = makeStyles((theme: any) => ({
   },
 }));
 
-const profileOptions = (user: any, classes: any, setModalOpen: any) => {
+const profileOptions = (
+  user: any,
+  classes: any,
+  setSignUpModalOpen: any,
+  setLoginModalOpen: any,
+) => {
   if (user.id) {
     return <ProfileButton username={"mr_clean_mustache"} />;
   } else {
@@ -33,14 +39,14 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
         <Button
           variant="outlined"
           color="inherit"
-          onClick={() => setModalOpen(true)}>
+          onClick={() => setLoginModalOpen(true)}>
           Login
         </Button>
         <Button
           variant="outlined"
           color="inherit"
           className={classes.menuButton}
-          onClick={() => setModalOpen(true)}>
+          onClick={() => setSignUpModalOpen(true)}>
           Sign up
         </Button>
       </div>
@@ -49,12 +55,22 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
 };
 
 const NavBar = () => {
-  const [modalOpen, setModalOpen]: [
+  const [signUpModalOpen, setSignUpModalOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>,
   ] = useState<boolean>(false);
-  const handleModalClose = () => {
-    setModalOpen(false);
+
+  const [loginModalOpen, setLoginModalOpen]: [
+    boolean,
+    Dispatch<SetStateAction<boolean>>,
+  ] = useState<boolean>(false);
+
+  const handleSignUpModalClose = () => {
+    setSignUpModalOpen(false);
+  };
+
+  const handleLoginModalClose = () => {
+    setLoginModalOpen(false);
   };
 
   const user = useAppSelector((state: any) => state.user);
@@ -69,15 +85,18 @@ const NavBar = () => {
         <div className={classes.iconContainer}>
           <ButtonBase className={classes.menuButton}>
             <img
-              src="./logo.png"
+              src="./Alpacow-logo.svg"
               alt="official alpacow logo"
-              width={75}
               height={45}
             />
           </ButtonBase>
         </div>
-        {profileOptions(user, classes, setModalOpen)}
-        <CreateProfileDialog open={modalOpen} onClose={handleModalClose} />
+        {profileOptions(user, classes, setSignUpModalOpen, setLoginModalOpen)}
+        <LoginDialog open={loginModalOpen} onClose={handleLoginModalClose} />
+        <CreateProfileDialog
+          open={signUpModalOpen}
+          onClose={handleSignUpModalClose}
+        />
       </Toolbar>
     </AppBar>
   );
