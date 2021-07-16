@@ -22,16 +22,15 @@ const getAll = async () => {
 };
 
 const getPostsByFilter = async (postState: PostState) => {
-  const { posts, sortType, locationFilter, tagFilter, currentPostID } =
-    postState;
-  const response = await axios.get(
-    `${baseUrl}?` +
-      `sort=${sortType}&` +
-      `lat=${locationFilter.lat}&` +
-      `lon=${locationFilter.lon}&` +
-      `tag=${tagFilter}&` +
-      `id=${currentPostID}`,
-  );
+  const response = await axios.get(`${baseUrl}`, {
+    params: {
+      posts: [],
+      sortType: postState.sortType,
+      locationFilter: postState.locationFilter,
+      tagFilter: postState.tagFilter,
+      currentPostID: postState.currentPostID,
+    },
+  });
   return response;
 };
 

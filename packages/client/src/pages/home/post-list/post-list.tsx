@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { connect } from "react-redux";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import PostListItem from "./post-list-item";
@@ -39,7 +38,7 @@ const PostList: React.FC = () => {
 
   const postState = useAppSelector((state) => state.post);
 
-  const location = useAppSelector((state) => state.post.locationFilter);
+  let location = useAppSelector((state) => state.post.locationFilter);
 
   useEffect(() => {
     dispatch(getPostsByFilter(postState));
