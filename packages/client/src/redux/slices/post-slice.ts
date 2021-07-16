@@ -1,9 +1,20 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { Location, initialState as initialLocation } from "./location-slice";
 import { UserState } from "./user-slice";
 
 const prefix = "post";
+
+export type Location = {
+  name?: string;
+  lat: number;
+  lon: number;
+};
+
+export const initialLocation: Location = {
+  name: undefined,
+  lat: 49.26,
+  lon: -123.22,
+};
 
 type Comment = {
   _id: string;
@@ -45,14 +56,6 @@ export type PostState = {
 };
 
 let locationFilter: Location = initialLocation;
-
-navigator.geolocation.getCurrentPosition(function (position) {
-  locationFilter = {
-    lat: position.coords.latitude,
-    lon: position.coords.longitude,
-    name: undefined,
-  };
-});
 
 const initialState: PostState = {
   posts: [],
