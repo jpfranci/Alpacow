@@ -20,7 +20,7 @@ export const initialLocation: Location = {
 export type Comment = {
   _id: string;
   date: string;
-  numUpVotes: number;
+  numUpvotes: number;
   numDownvotes: number;
   userId: string;
   username: string;

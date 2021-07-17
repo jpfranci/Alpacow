@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import Comment from "./comment";
+import { StyledHR } from "../../common/common";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -52,12 +53,6 @@ const Comments = styled.div`
   flex-direction: column;
 `;
 
-// hr tags inside flex parent els need this to display properly
-const Line = styled.hr`
-  margin-left: 0;
-  margin-right: 0;
-`;
-
 interface PostViewProps {
   post: Post;
 }
@@ -101,9 +96,14 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
             </VoteButtonSection>
           </PostContentFooter>
         </PostContent>
-        <Line />
+        <StyledHR />
         <Comments>
-          <h3>Comments ({post.comments.length})</h3>
+          <div>
+            <h3>Comments ({post.comments.length})</h3>
+            {/* <button>Filter</button>
+            <button>Add</button> */}
+          </div>
+
           {post.comments.map((comment, i) => (
             <Comment key={i} comment={comment} />
           ))}
