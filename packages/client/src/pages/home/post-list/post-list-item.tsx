@@ -72,15 +72,32 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
   const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
-  const date = moment(post.date).format("MM-DD-YYYY HH:mm");
+  const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
-  const handleTagClick = () => {
+  const handleTagClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.stopPropagation();
     dispatch(setTagFilter(post.tag));
   };
 
   const handlePostClick = () => {
     dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
+  };
+
+  const handleUpvoteClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.stopPropagation();
+    dispatch(upvote({ post, user }));
+  };
+
+  const handleDownvoteClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.stopPropagation();
+    dispatch(downvote({ post, user }));
   };
 
   return (
@@ -104,7 +121,7 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
           {/* TODO disable voting for non-logged in users */}
 
           <IconButton
-            onClick={() => dispatch(upvote({ post, user }))}
+            onClick={handleUpvoteClick}
             disabled={shouldDisableUpvote}>
             <UpvoteIcon />
           </IconButton>
@@ -112,7 +129,7 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
           <IconButton
-            onClick={() => dispatch(downvote({ post, user }))}
+            onClick={handleDownvoteClick}
             disabled={shouldDisableDownvote}>
             <DownvoteIcon />
           </IconButton>

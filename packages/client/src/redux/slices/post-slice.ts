@@ -17,13 +17,14 @@ export const initialLocation: Location = {
   lon: -123.22,
 };
 
-type Comment = {
+export type Comment = {
   _id: string;
   date: string;
   numUpVotes: number;
   numDownvotes: number;
   userId: string;
   username: string;
+  body: string;
 };
 
 export interface Post extends NewPost {

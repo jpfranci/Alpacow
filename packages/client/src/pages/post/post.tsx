@@ -6,10 +6,10 @@ import { POST_PAGE } from "../../common/links";
 import { Post } from "../../redux/slices/post-slice";
 import { useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
-import PostView from "./post-view";
+import PostView from "./post-view/post-view";
 
 const StyledContainer = styled.div`
-  margin: 5vh 10vw;
+  margin: 7.5vh 10vw;
 `;
 
 const PostPage = () => {
