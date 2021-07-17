@@ -49,9 +49,15 @@ export enum PostSortType {
   NEW = "new",
 }
 
+export enum CommentSortType {
+  POPULAR = "popular",
+  NEW = "new",
+}
+
 export type PostState = {
   posts: Post[];
   sortType: PostSortType;
+  commentSortType: CommentSortType;
   locationFilter: Location;
   tagFilter?: string;
   currentPostID?: string;
@@ -65,6 +71,7 @@ let locationFilter: Location = initialLocation;
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
+  commentSortType: CommentSortType.NEW,
   locationFilter: locationFilter,
   tagInput: "",
   showMatureContent: false,
@@ -181,6 +188,9 @@ export const postSlice = createSlice({
     setCurrPostIndex: (state, action: PayloadAction<number>) => {
       state.currPostIndex = action.payload;
     },
+    setCommentSortType: (state, action: PayloadAction<CommentSortType>) => {
+      state.commentSortType = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
@@ -226,5 +236,6 @@ export const {
   setTagInput,
   setShowMatureContent,
   setCurrPostIndex,
+  setCommentSortType,
 } = postSlice.actions;
 export default postSlice.reducer;

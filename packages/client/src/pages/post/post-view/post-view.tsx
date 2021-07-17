@@ -6,8 +6,8 @@ import moment from "moment";
 import styled from "styled-components";
 import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import Comment from "./comment";
 import { StyledHR } from "../../common/common";
+import Comments from "./comments";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -46,11 +46,6 @@ const VoteButtonSection = styled.div`
   display: flex;
   align-items: center;
   margin-left: auto;
-`;
-
-const Comments = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 interface PostViewProps {
@@ -97,17 +92,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
           </PostContentFooter>
         </PostContent>
         <StyledHR />
-        <Comments>
-          <div>
-            <h3>Comments ({post.comments.length})</h3>
-            {/* <button>Filter</button>
-            <button>Add</button> */}
-          </div>
-
-          {post.comments.map((comment, i) => (
-            <Comment key={i} comment={comment} />
-          ))}
-        </Comments>
+        <Comments comments={post.comments} />
       </PostViewContainer>
     </div>
   );

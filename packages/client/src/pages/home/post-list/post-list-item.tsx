@@ -84,6 +84,7 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
   const handlePostClick = () => {
     dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
+    window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes
   };
 
   const handleUpvoteClick = (
