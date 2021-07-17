@@ -25,7 +25,7 @@ const getPostsByFilter = async (postState: PostState) => {
       locationFilter: postState.locationFilter,
       tagFilter: postState.tagFilter,
       currentPostID: postState.currentPostID,
-      matureFilter: postState.matureFilter,
+      showMatureContent: postState.showMatureContent,
     },
   });
   return response;

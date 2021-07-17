@@ -38,11 +38,14 @@ const PostList: React.FC = () => {
 
   const postState = useAppSelector((state) => state.post);
 
-  let location = useAppSelector((state) => state.post.locationFilter);
+  const location = useAppSelector((state) => state.post.locationFilter);
+  const showMatureContent = useAppSelector(
+    (state) => state.post.showMatureContent,
+  );
 
   useEffect(() => {
     dispatch(getPostsByFilter(postState));
-  }, [location]);
+  }, [location, showMatureContent]);
 
   return (
     <StyledContainer>
