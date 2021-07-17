@@ -22,6 +22,7 @@ const PostSchema = new Schema({
   tag: String,
   upvoters: { type: [ObjectId], index: true },
   downvoters: { type: [ObjectId], index: true },
+  isMature: Boolean,
 });
 
 PostSchema.index({ location: "2dsphere" });

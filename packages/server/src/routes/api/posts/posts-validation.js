@@ -17,6 +17,7 @@ const getPostSchema = Joi.object().keys({
   lat: Joi.number().required(),
   sortType: Joi.string().valid("popular", "new").required(),
   currentPostId: Joi.string().min(24).max(24),
+  showMatureContent: Joi.boolean().required(),
 });
 
 const createPostValidationFn = celebrate({

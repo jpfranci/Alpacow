@@ -11,7 +11,13 @@ const createPost = async (post) => {
   return createdPost.toObject();
 };
 
-const getPostsByFilter = async ({ lon, lat, tagFilter, sortType }) => {
+const getPostsByFilter = async ({
+  lon,
+  lat,
+  tagFilter,
+  sortType,
+  showMatureContent,
+}) => {
   const aggregationPipeline = [];
   aggregationPipeline.push({
     $geoNear: {
@@ -29,6 +35,9 @@ const getPostsByFilter = async ({ lon, lat, tagFilter, sortType }) => {
       },
     });
   }
+  if (!showMatureContent) {
+    aggregationPipeline.push({ $match: { isMature: false } });
+  }
   aggregationPipeline.push({
     $project: {
       title: true,
@@ -39,6 +48,7 @@ const getPostsByFilter = async ({ lon, lat, tagFilter, sortType }) => {
       username: true,
       tag: true,
       score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+      isMature: true,
     },
   });
   aggregationPipeline.push({
