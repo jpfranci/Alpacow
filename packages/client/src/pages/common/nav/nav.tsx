@@ -6,6 +6,7 @@ import {
   Button,
   ButtonBase,
   Switch,
+  Link,
 } from "@material-ui/core";
 import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -14,6 +15,9 @@ import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import ProfileButton from "./profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
 import { setShowMatureContent } from "../../../redux/slices/post-slice";
+import { Link as RouterLink } from "react-router-dom";
+import { HOME_PAGE } from "../../../common/links";
+import styled from "styled-components";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
@@ -53,6 +57,13 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
   }
 };
 
+const BrandName = styled.h6`
+  & > a {
+    color: black;
+    text-decoration: none;
+  }
+`;
+
 const NavBar = () => {
   const [modalOpen, setModalOpen]: [
     boolean,
@@ -76,7 +87,11 @@ const NavBar = () => {
     <AppBar position="static" color="primary">
       <Toolbar>
         <ButtonBase>
-          <Typography variant="h6">Alpacow</Typography>
+          <Typography variant="h6">
+            <Link component={RouterLink} to={HOME_PAGE} color="inherit">
+              Alpacow
+            </Link>
+          </Typography>
         </ButtonBase>
         <div className={classes.iconContainer}>
           <ButtonBase className={classes.menuButton}>

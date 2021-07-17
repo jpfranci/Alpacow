@@ -4,6 +4,7 @@ import styled from "styled-components";
 import {
   downvote,
   Post,
+  setCurrPostIndex,
   setTagFilter,
   upvote,
 } from "../../../redux/slices/post-slice";
@@ -11,6 +12,7 @@ import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import moment from "moment";
+import { useHistory } from "react-router-dom";
 
 const PostContainer = styled.div`
   display: flex;
@@ -19,6 +21,12 @@ const PostContainer = styled.div`
   margin: 1em 0;
   padding: 1.5em 2em 1em 2em;
   background-color: ${(props) => props.theme.palette.secondary.main};
+  transition: background-color 0.25s ease;
+
+  &:hover {
+    background-color: #bbbbbb;
+    cursor: pointer;
+  }
 `;
 
 const TitleText = styled.h3`
@@ -52,11 +60,13 @@ const DateText = styled.div`
 
 interface PostProps {
   post: Post;
+  index: number;
 }
 
-const PostListItem: React.FC<PostProps> = ({ post }) => {
+const PostListItem: React.FC<PostProps> = ({ post, index }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
+  const history = useHistory();
 
   const voteCount = post.numUpvotes - post.numDownvotes;
   const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
@@ -68,10 +78,17 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
     dispatch(setTagFilter(post.tag));
   };
 
+  const handlePostClick = () => {
+    dispatch(setCurrPostIndex(index));
+    history.push(`/posts/${post._id}`);
+  };
+
   return (
-    <PostContainer>
+    <PostContainer onClick={handlePostClick}>
       <TitleText>{post.title}</TitleText>
-      <BodyText>{post.body}</BodyText>
+      <BodyText>
+        {post.body.length > 1000 ? `${post.body.substr(0, 500)}...` : post.body}
+      </BodyText>
       <PostFooter>
         <PostFooterSection>
           <DateText>{date}</DateText>

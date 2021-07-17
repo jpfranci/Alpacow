@@ -56,6 +56,7 @@ export type PostState = {
   currentPostID?: string;
   tagInput: string;
   showMatureContent?: boolean;
+  currPostIndex: number;
 };
 
 let locationFilter: Location = initialLocation;
@@ -66,6 +67,7 @@ const initialState: PostState = {
   locationFilter: locationFilter,
   tagInput: "",
   showMatureContent: false,
+  currPostIndex: -1,
 };
 
 export const createPost = createAsyncThunk<Post, NewPost>(
@@ -175,6 +177,9 @@ export const postSlice = createSlice({
     setShowMatureContent: (state, action: PayloadAction<boolean>) => {
       state.showMatureContent = action.payload;
     },
+    setCurrPostIndex: (state, action: PayloadAction<number>) => {
+      state.currPostIndex = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
@@ -219,5 +224,6 @@ export const {
   setTagFilter,
   setTagInput,
   setShowMatureContent,
+  setCurrPostIndex,
 } = postSlice.actions;
 export default postSlice.reducer;
