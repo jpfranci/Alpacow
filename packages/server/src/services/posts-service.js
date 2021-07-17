@@ -76,7 +76,12 @@ const getPosts = (query) => {
   return PostDb.getPostsByFilter(query);
 };
 
+const getPostByID = async (id) => {
+  return PostDb.getPostByID(id);
+};
+
 module.exports = {
   createPost,
   getPosts,
+  getPostByID,
 };

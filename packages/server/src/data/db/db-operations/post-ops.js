@@ -61,10 +61,15 @@ const getPostsByFilter = async ({
   return Post.aggregate(aggregationPipeline);
 };
 
+const getPostByID = async (id) => {
+  return await Post.findById(id);
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
   createPost,
+  getPostByID,
 };
 
 module.exports = operations;
