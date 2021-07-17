@@ -106,10 +106,11 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           fullWidth
           value={title}
           onChange={(event) => handleFieldChange("title", event.target.value)}
+          inputProps={{ maxLength: 1024 }}
         />
         <TextField
           id="post-body-text"
-          label="Content"
+          label="Content (max 1,024 chars)"
           variant="outlined"
           margin="dense"
           value={bodyText}
@@ -121,6 +122,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           onChange={(event) =>
             handleFieldChange("bodyText", event.target.value)
           }
+          inputProps={{ maxLength: 1024 }}
         />
         <StyledContainer>
           <TagSearch
