@@ -7,7 +7,14 @@ const baseUrl = "/api/posts";
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
-    params: newPost,
+    params: {
+      userId: newPost.userId,
+      title: newPost.title,
+      body: newPost.body,
+      lon: newPost.location.lon,
+      lat: newPost.location.lat,
+      tag: newPost.tag,
+    },
   });
   return response;
 };
@@ -18,14 +25,21 @@ const getAll = async () => {
 };
 
 const getPostsByFilter = async (postState: PostState) => {
+  const {
+    sortType,
+    locationFilter: { lat, lon },
+    tagFilter,
+    currentPostID,
+    showMatureContent,
+  } = postState;
   const response = await axios.get(`${baseUrl}`, {
     params: {
-      posts: [],
-      sortType: postState.sortType,
-      locationFilter: postState.locationFilter,
-      tagFilter: postState.tagFilter,
-      currentPostID: postState.currentPostID,
-      showMatureContent: postState.showMatureContent,
+      sortType,
+      lat,
+      lon,
+      tagFilter,
+      currentPostID,
+      showMatureContent,
     },
   });
   return response;

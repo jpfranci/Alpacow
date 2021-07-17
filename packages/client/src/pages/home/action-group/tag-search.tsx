@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import debounce from "lodash/debounce";
-import { getDefaultTags, searchByTag } from "../../../services/tags";
+import { searchByTag } from "../../../services/tags";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 
@@ -8,12 +8,12 @@ const fetchSearchString = debounce((searchTerm, callback) => {
   searchByTag(searchTerm).then((tags: string[]) => callback(tags));
 }, 300);
 
-const DEFAULT_TAGS = getDefaultTags();
-
 interface TagSearchProps {
   width?: number;
   selectedTag: string | undefined;
   onTagSelect: (selectedTag: string) => any;
+  inputValue: string;
+  onInputChange: (inputValue: string) => any;
   // any other props
   [key: string]: any;
 }
@@ -22,9 +22,11 @@ const TagSearch = ({
   width = 300,
   selectedTag,
   onTagSelect,
+  inputValue,
+  onInputChange,
   ...otherProps
 }: TagSearchProps) => {
-  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<string[]>([]);
 
   const handleTagFilterChange = (
@@ -37,23 +39,33 @@ const TagSearch = ({
   useEffect(() => {
     const loadOptions = async () => {
       if (inputValue) {
+        setIsLoading(true);
         fetchSearchString(inputValue, (fetchedTags: string[]) => {
           setOptions(fetchedTags);
+          setIsLoading(false);
         });
       } else {
-        const options = await DEFAULT_TAGS;
-        setOptions(options);
+        setOptions([]);
       }
     };
     loadOptions();
   }, [inputValue, setOptions, fetchSearchString]);
+
+  let noOptionsText;
+  if (!inputValue) {
+    noOptionsText = "Start typing to find tags";
+  } else {
+    noOptionsText = isLoading ? "Fetching tags" : "No options";
+  }
 
   return (
     <Autocomplete
       options={options}
       style={{ width }}
       autoComplete
-      value={selectedTag}
+      value={selectedTag ?? null}
+      inputValue={inputValue ?? ""}
+      noOptionsText={noOptionsText}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -64,7 +76,7 @@ const TagSearch = ({
       )}
       onChange={handleTagFilterChange}
       onInputChange={(event, newInputValue) => {
-        setInputValue(newInputValue);
+        onInputChange(newInputValue);
       }}
       {...otherProps}
     />

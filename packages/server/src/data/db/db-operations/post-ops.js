@@ -1,93 +1,64 @@
-require("dotenv").config();
 const Post = require("../../models/post-model");
-const axios = require("axios");
-
-const callAzureApi = async (post) => {
-  const headers = {
-    "Content-Type": "text/plain",
-    "Ocp-Apim-Subscription-Key": `${process.env.AZURE_API_KEY}`,
-  };
-  try {
-    return await axios.post(
-      "https://alpacow.cognitiveservices.azure.com/contentmoderator/moderate/v1.0/ProcessText/Screen?autocorrect=True&PII=True&classify=True&language=eng",
-      `${post}`,
-      { headers: headers },
-    );
-  } catch (err) {
-    console.log(err.message);
-    return {
-      data: {
-        Classification: {
-          ReviewRecommended: true,
-        },
-      },
-    };
-  }
-};
-
-const checkIsMature = async (title, body) => {
-  let isMature = false;
-
-  const titleModResponse = await callAzureApi(title);
-  isMature = isMature || titleModResponse.data.Classification.ReviewRecommended;
-  await setTimeout(() => {}, 2000);
-
-  const bodyModResponse = await callAzureApi(body);
-  isMature = isMature || bodyModResponse.data.Classification.ReviewRecommended;
-  await setTimeout(() => {}, 2000);
-
-  return isMature;
-};
 
 // We don't want to send all 1000 posts to the client while we have no filters,
 // so this will just sample randomly from all posts
-const getPosts = async () => {
-  return await Post.aggregate([{ $sample: { size: 50 } }]);
+const getPosts = () => {
+  return Post.aggregate([{ $sample: { size: 50 } }]);
 };
 
-const getPostsByFilter = async (lon, lat, isMature) => {
-  const matureFilter =
-    isMature === "true"
-      ? { $or: [{ isMature: true }, { isMature: false }] }
-      : { isMature: false };
-  return await Post.find({
-    $and: [
-      {
-        location: {
-          $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [lon, lat],
-            },
-            $minDistance: 0,
-            $maxDistance: 750,
-          },
-        },
-      },
-      matureFilter,
-    ],
-  });
+const createPost = async (post) => {
+  const createdPost = await Post.create(post);
+  return createdPost.toObject();
 };
 
-const createPost = async (title, body, tag, location, userId) => {
-  const isMature = await checkIsMature(title, body);
-  const post = new Post({
-    title: title,
-    body: body,
-    tag: tag,
-    location: {
-      type: "Point",
-      coordinates: [location.lon, location.lat],
+const getPostsByFilter = async ({
+  lon,
+  lat,
+  tagFilter,
+  sortType,
+  showMatureContent,
+}) => {
+  const aggregationPipeline = [];
+  aggregationPipeline.push({
+    $geoNear: {
+      near: { type: "Point", coordinates: [lon, lat] },
+      key: "location",
+      distanceField: "distance",
+      minDistance: 0,
+      maxDistance: 1500,
     },
-    userId: userId,
-    numUpvotes: 0,
-    numDownvotes: 0,
-    date: Date.now(),
-    comments: [],
-    isMature: isMature,
   });
-  post.save();
-  return post;
+  if (tagFilter) {
+    aggregationPipeline.push({
+      $match: {
+        tag: tagFilter,
+      },
+    });
+  }
+  if (!showMatureContent) {
+    aggregationPipeline.push({ $match: { isMature: false } });
+  }
+  aggregationPipeline.push({
+    $project: {
+      title: true,
+      body: true,
+      date: true,
+      numUpvotes: true,
+      numDownvotes: true,
+      username: true,
+      tag: true,
+      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+      isMature: true,
+    },
+  });
+  aggregationPipeline.push({
+    // additional arguments are to break ties
+    $sort:
+      sortType === "popular"
+        ? { score: -1, date: -1, _id: -1 }
+        : { date: -1, _id: -1 },
+  });
+  return Post.aggregate(aggregationPipeline);
 };
 
 const operations = {
