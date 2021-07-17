@@ -6,7 +6,6 @@ const baseUrl = "/api/posts";
 // TODO add return types once backend types are done
 
 const create = async (newPost: NewPost) => {
-  console.log(newPost.userId);
   const response = await axios.post(`${baseUrl}`, {
     params: {
       userId: newPost.userId,
