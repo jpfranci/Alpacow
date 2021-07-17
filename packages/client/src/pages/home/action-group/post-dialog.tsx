@@ -72,11 +72,12 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const handleSave = () => {
     dispatch(
       createPost({
-        title,
+        title: title,
         body: bodyText,
         tag: tag as string,
-        location,
-        userId: userId,
+        location: location,
+        //TODO use real user id once login is set up
+        userId: "60f138a5910aef4526a82182",
       }),
     );
     handleClose();
@@ -105,10 +106,11 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           fullWidth
           value={title}
           onChange={(event) => handleFieldChange("title", event.target.value)}
+          inputProps={{ maxLength: 1024 }}
         />
         <TextField
           id="post-body-text"
-          label="Content"
+          label="Content (max 1,024 chars)"
           variant="outlined"
           margin="dense"
           value={bodyText}
@@ -120,6 +122,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           onChange={(event) =>
             handleFieldChange("bodyText", event.target.value)
           }
+          inputProps={{ maxLength: 1024 }}
         />
         <StyledContainer>
           <TagSearch
