@@ -10,7 +10,7 @@ router.get("/", async function (req, res, next) {
       posts = await operations.getPostsByFilter(
         locationFilter.lon,
         locationFilter.lat,
-        req.query.matureFilter,
+        req.query.showMatureContent,
       );
     } else {
       posts = await operations.getPosts();

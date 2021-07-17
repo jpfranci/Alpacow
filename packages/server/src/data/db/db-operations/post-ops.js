@@ -46,18 +46,26 @@ const getPosts = async () => {
 };
 
 const getPostsByFilter = async (lon, lat, isMature) => {
+  const matureFilter =
+    isMature === "true"
+      ? { $or: [{ isMature: true }, { isMature: false }] }
+      : { isMature: false };
   return await Post.find({
-    location: {
-      $near: {
-        $geometry: {
-          type: "Point",
-          coordinates: [lon, lat],
+    $and: [
+      {
+        location: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [lon, lat],
+            },
+            $minDistance: 0,
+            $maxDistance: 750,
+          },
         },
-        $minDistance: 0,
-        $maxDistance: 750,
       },
-    },
-    isMature: isMature,
+      matureFilter,
+    ],
   });
 };
 
