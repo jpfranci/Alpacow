@@ -13,6 +13,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import ProfileButton from "./profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
+import LoginDialog from "./login-dialog";
 import { setShowMatureContent } from "../../../redux/slices/post-slice";
 
 // Using mui theme for consistent spacing
@@ -28,7 +29,12 @@ const useStyles = makeStyles((theme: any) => ({
   },
 }));
 
-const profileOptions = (user: any, classes: any, setModalOpen: any) => {
+const profileOptions = (
+  user: any,
+  classes: any,
+  setSignUpModalOpen: any,
+  setLoginModalOpen: any,
+) => {
   if (user.id) {
     return <ProfileButton username={"mr_clean_mustache"} />;
   } else {
@@ -38,14 +44,14 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
           variant="outlined"
           color="inherit"
           className={classes.menuButton}
-          onClick={() => setModalOpen(true)}>
+          onClick={() => setLoginModalOpen(true)}>
           Login
         </Button>
         <Button
           variant="outlined"
           color="inherit"
           className={classes.menuButton}
-          onClick={() => setModalOpen(true)}>
+          onClick={() => setSignUpModalOpen(true)}>
           Sign up
         </Button>
       </div>
@@ -54,12 +60,22 @@ const profileOptions = (user: any, classes: any, setModalOpen: any) => {
 };
 
 const NavBar = () => {
-  const [modalOpen, setModalOpen]: [
+  const [signUpModalOpen, setSignUpModalOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>,
   ] = useState<boolean>(false);
-  const handleModalClose = () => {
-    setModalOpen(false);
+
+  const [loginModalOpen, setLoginModalOpen]: [
+    boolean,
+    Dispatch<SetStateAction<boolean>>,
+  ] = useState<boolean>(false);
+
+  const handleSignUpModalClose = () => {
+    setSignUpModalOpen(false);
+  };
+
+  const handleLoginModalClose = () => {
+    setLoginModalOpen(false);
   };
 
   const dispatch = useAppDispatch();
@@ -81,9 +97,8 @@ const NavBar = () => {
         <div className={classes.iconContainer}>
           <ButtonBase className={classes.menuButton}>
             <img
-              src="./logo.png"
+              src="./Alpacow-logo.svg"
               alt="official alpacow logo"
-              width={75}
               height={45}
             />
           </ButtonBase>
@@ -100,8 +115,9 @@ const NavBar = () => {
             label="Show mature content"
           />
         </FormGroup>
-        {profileOptions(user, classes, setModalOpen)}
-        <CreateProfileDialog open={modalOpen} onClose={handleModalClose} />
+        {profileOptions(user, classes, setSignUpModalOpen, setLoginModalOpen)}
+        <LoginDialog open={loginModalOpen} onClose={handleLoginModalClose} />
+        <CreateProfileDialog open={signUpModalOpen} onClose={handleSignUpModalClose} />
       </Toolbar>
     </AppBar>
   );
