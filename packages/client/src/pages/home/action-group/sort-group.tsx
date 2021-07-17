@@ -13,9 +13,11 @@ const SortGroup = () => {
 
   const handleSortTypeChange = (
     event: React.MouseEvent<HTMLElement>,
-    newSortType: PostSortType,
+    newSortType?: PostSortType,
   ) => {
-    dispatch(setSortType(newSortType));
+    if (newSortType) {
+      dispatch(setSortType(newSortType));
+    }
   };
 
   return (

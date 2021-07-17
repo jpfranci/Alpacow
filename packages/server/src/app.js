@@ -6,13 +6,14 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
-const jsonServer = require("json-server");
 const { getDb } = require("./data/db/db-connect");
 const indexRouter = require("./routes");
-const postRouter = require("./routes/api/posts");
+const { errors } = require("celebrate");
+const postRouter = require("./routes/api/posts/posts-router");
+const tagsRouter = require("./routes/api/tags/tags-router");
 
-const db = getDb()
-  .then((resolve) => {
+getDb()
+  .then(() => {
     console.log("db connected successfully");
   })
   .catch((err) => {
@@ -33,7 +34,6 @@ app.on("ready", function () {
   app.listen();
 });
 app.use(connectLiveReload());
-app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -41,16 +41,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
 app.use("/api/posts", postRouter);
-
-// TODO: eventually remove usage of mock-server
-app.use("/api", jsonServer.router("mock-server/db.json"));
+app.use("/api/tags", tagsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
+
+app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {

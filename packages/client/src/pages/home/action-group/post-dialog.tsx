@@ -40,6 +40,7 @@ interface PostDialogFields {
   tag: string | undefined;
   isAnonymous: boolean;
   userId: string;
+  inputValue: string;
 }
 
 const DEFAULT_FIELDS = {
@@ -48,6 +49,7 @@ const DEFAULT_FIELDS = {
   tag: undefined,
   isAnonymous: false,
   userId: "",
+  inputValue: "",
 };
 
 const StyledContainer = styled.div`
@@ -62,7 +64,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous, userId } = fields;
+  const { title, bodyText, tag, isAnonymous, userId, inputValue } = fields;
 
   const handleClose = () => {
     setFields(DEFAULT_FIELDS);
@@ -72,11 +74,12 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const handleSave = () => {
     dispatch(
       createPost({
-        title,
+        title: title,
         body: bodyText,
         tag: tag as string,
-        location,
-        userId: userId,
+        location: location,
+        //TODO use real user id once login is set up
+        userId: "60f138a5910aef4526a82182",
       }),
     );
     handleClose();
@@ -105,10 +108,11 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           fullWidth
           value={title}
           onChange={(event) => handleFieldChange("title", event.target.value)}
+          inputProps={{ maxLength: 1024 }}
         />
         <TextField
           id="post-body-text"
-          label="Content"
+          label="Content (max 1,024 chars)"
           variant="outlined"
           margin="dense"
           value={bodyText}
@@ -120,12 +124,17 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           onChange={(event) =>
             handleFieldChange("bodyText", event.target.value)
           }
+          inputProps={{ maxLength: 1024 }}
         />
         <StyledContainer>
           <TagSearch
             width={200}
             size="small"
             selectedTag={tag}
+            inputValue={inputValue}
+            onInputChange={(newInputValue: any) =>
+              handleFieldChange("inputValue", newInputValue)
+            }
             onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
           />
           <FormControlLabel

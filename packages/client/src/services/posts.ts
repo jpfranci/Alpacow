@@ -7,11 +7,14 @@ const baseUrl = "/api/posts";
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
-    ...newPost,
-    // TODO delete below eventually - these props should be generated on backend
-    upvotes: 0,
-    downvotes: 0,
-    createdAt: Date.now(),
+    params: {
+      userId: newPost.userId,
+      title: newPost.title,
+      body: newPost.body,
+      lon: newPost.location.lon,
+      lat: newPost.location.lat,
+      tag: newPost.tag,
+    },
   });
   return response;
 };
@@ -22,13 +25,21 @@ const getAll = async () => {
 };
 
 const getPostsByFilter = async (postState: PostState) => {
+  const {
+    sortType,
+    locationFilter: { lat, lon },
+    tagFilter,
+    currentPostID,
+    showMatureContent,
+  } = postState;
   const response = await axios.get(`${baseUrl}`, {
     params: {
-      posts: [],
-      sortType: postState.sortType,
-      locationFilter: postState.locationFilter,
-      tagFilter: postState.tagFilter,
-      currentPostID: postState.currentPostID,
+      sortType,
+      lat,
+      lon,
+      tagFilter,
+      currentPostID,
+      showMatureContent,
     },
   });
   return response;

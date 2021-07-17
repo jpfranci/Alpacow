@@ -1,10 +1,16 @@
 import React from "react";
 import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
-import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
+import {
+  downvote,
+  Post,
+  setTagFilter,
+  upvote,
+} from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import moment from "moment";
 
 const PostContainer = styled.div`
   display: flex;
@@ -52,11 +58,15 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
 
-  const voteCount = post.numUpvotes - post.numDownvotes || 0;
+  const voteCount = post.numUpvotes - post.numDownvotes;
   const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
   const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
   const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
-  const date = post.date ? new Date(post.date) : new Date();
+  const date = moment(post.date).format("MM-DD-YYYY HH:mm");
+
+  const handleTagClick = () => {
+    dispatch(setTagFilter(post.tag));
+  };
 
   return (
     <PostContainer>
@@ -64,10 +74,12 @@ const PostListItem: React.FC<PostProps> = ({ post }) => {
       <BodyText>{post.body}</BodyText>
       <PostFooter>
         <PostFooterSection>
-          <DateText>
-            {`${date.toLocaleTimeString()} - ${date.toLocaleDateString()}`}
-          </DateText>
-          <Button variant="contained" color="primary" size="small">
+          <DateText>{date}</DateText>
+          <Button
+            onClick={handleTagClick}
+            variant="contained"
+            color="primary"
+            size="small">
             {post.tag}
           </Button>
         </PostFooterSection>

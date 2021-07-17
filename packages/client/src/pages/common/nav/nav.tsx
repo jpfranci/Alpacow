@@ -5,12 +5,16 @@ import {
   Typography,
   Button,
   ButtonBase,
+  Switch,
 } from "@material-ui/core";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { makeStyles } from "@material-ui/core/styles";
-import { useAppSelector } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import ProfileButton from "./profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
 import LoginDialog from "./login-dialog";
+import { setShowMatureContent } from "../../../redux/slices/post-slice";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
@@ -39,6 +43,7 @@ const profileOptions = (
         <Button
           variant="outlined"
           color="inherit"
+          className={classes.menuButton}
           onClick={() => setLoginModalOpen(true)}>
           Login
         </Button>
@@ -73,8 +78,15 @@ const NavBar = () => {
     setLoginModalOpen(false);
   };
 
+  const dispatch = useAppDispatch();
+
   const user = useAppSelector((state: any) => state.user);
+  const isMature = useAppSelector((state: any) => state.post.showMatureContent);
   const classes = useStyles();
+
+  const handleChange = () => {
+    dispatch(setShowMatureContent(!isMature));
+  };
 
   return (
     <AppBar position="static" color="primary">
@@ -91,12 +103,21 @@ const NavBar = () => {
             />
           </ButtonBase>
         </div>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isMature}
+                onChange={handleChange}
+                name="checkedA"
+              />
+            }
+            label="Show mature content"
+          />
+        </FormGroup>
         {profileOptions(user, classes, setSignUpModalOpen, setLoginModalOpen)}
         <LoginDialog open={loginModalOpen} onClose={handleLoginModalClose} />
-        <CreateProfileDialog
-          open={signUpModalOpen}
-          onClose={handleSignUpModalClose}
-        />
+        <CreateProfileDialog open={signUpModalOpen} onClose={handleSignUpModalClose} />
       </Toolbar>
     </AppBar>
   );
