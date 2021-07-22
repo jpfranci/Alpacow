@@ -24,6 +24,7 @@ const Header = styled.div`
 
 const Body = styled.div`
   margin-bottom: 1em;
+  line-height: 1.6;
 `;
 
 const Footer = styled.div`

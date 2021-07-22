@@ -43,6 +43,9 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
       const netVotes1 = comment1.numUpvotes - comment1.numDownvotes;
       const netVotes2 = comment2.numUpvotes - comment2.numDownvotes;
       if (netVotes1 !== netVotes2) return netVotes1 <= netVotes2 ? 1 : -1;
+
+      // use date for ties
+      return moment(comment1.date).isBefore(comment2.date) ? 1 : -1;
     }
 
     if (commentSortType === CommentSortType.NEW) {

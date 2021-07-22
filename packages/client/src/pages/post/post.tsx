@@ -29,7 +29,8 @@ const PostPage = () => {
     if (match && !storePost && !serverPost) {
       postService
         .getByID(match.params.id)
-        .then((res) => setServerPost(res.data));
+        .then((res) => setServerPost(res.data))
+        .catch((error) => console.error(error));
     }
   }, [match, storePost, serverPost, setServerPost]);
 
