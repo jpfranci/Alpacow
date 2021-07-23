@@ -8,6 +8,7 @@ import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { StyledHR } from "../../common/common";
 import Comments from "./comments";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -46,6 +47,12 @@ const VoteButtonSection = styled.div`
   display: flex;
   align-items: center;
   margin-left: auto;
+`;
+
+const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 3em;
 `;
 
 interface PostViewProps {
@@ -92,7 +99,13 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
           </PostContentFooter>
         </PostContent>
         <StyledHR />
-        <Comments comments={post.comments} />
+        {post.comments ? (
+          <Comments comments={post.comments} />
+        ) : (
+          <LoaderContainer>
+            <CircularProgress />
+          </LoaderContainer>
+        )}
       </PostViewContainer>
     </div>
   );

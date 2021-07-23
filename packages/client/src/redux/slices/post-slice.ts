@@ -32,17 +32,17 @@ export interface Post extends NewPost {
   numUpvotes: number;
   numDownvotes: number;
   date: string;
-  comments: Comment[];
   username: string;
+  comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
 }
 
-export type NewPost = {
+export interface NewPost {
   title: string;
   body: string;
   tag: string;
   location: Location;
   userId: string;
-};
+}
 
 export enum PostSortType {
   POPULAR = "popular",

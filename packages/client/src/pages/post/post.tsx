@@ -7,13 +7,21 @@ import { Post } from "../../redux/slices/post-slice";
 import { useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
 import PostView from "./post-view/post-view";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const StyledContainer = styled.div`
   margin: 7.5vh 10vw;
 `;
 
+const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 3em;
+`;
+
 const PostPage = () => {
   const [serverPost, setServerPost] = useState<Post | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   const storePost = useAppSelector((state) =>
     state.post.currPostIndex === -1
       ? undefined
@@ -22,24 +30,29 @@ const PostPage = () => {
 
   const match = useRouteMatch<{ id: string }>(POST_PAGE);
 
-  // Fetch post data from server if user naved to post page via url (vs client-side nav)
-  // We do this b/c post data is only loaded into store if user opens home page first
-  // TODO kinda jank, can do better with server side rendering ??
+  // Fetch thicc post data from server (contains comments)
+  // We do this b/c posts in redux store don't have comments
   useEffect(() => {
-    if (match && !storePost && !serverPost) {
+    if (match && !serverPost) {
       postService
         .getByID(match.params.id)
         .then((res) => setServerPost(res.data))
-        .catch((error) => console.error(error));
+        .catch((error) => console.error(error))
+        .finally(() => setIsLoading(false));
     }
-  }, [match, storePost, serverPost, setServerPost]);
+  }, [match, serverPost]);
 
-  const post = storePost || serverPost;
+  const post = serverPost || storePost;
 
   return (
     <StyledContainer>
       {post ? (
         <PostView post={post} />
+      ) : isLoading ? (
+        // this branch is only hit if we've naved to page via URL
+        <LoaderContainer>
+          <CircularProgress />
+        </LoaderContainer>
       ) : (
         <div>The post you're looking for doesn't exist...</div>
       )}
