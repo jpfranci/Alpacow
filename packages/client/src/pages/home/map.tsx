@@ -9,9 +9,9 @@ import { CSSProperties } from "@material-ui/styles";
 import { Libraries } from "@react-google-maps/api/dist/utils/make-load-script-url";
 import { Location } from "../../redux/slices/post-slice";
 import { setLocationFilter } from "../../redux/slices/post-slice";
-import REACT_APP_GOOGLE_API_KEY from "../../env";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
+const { REACT_APP_GOOGLE_API_KEY } = process.env;
 
 //TODO: Move out of component because it causes performance issue
 const GOOGLE_LIBRARIES: Libraries = ["places"];
@@ -125,7 +125,7 @@ const Map = () => {
   return (
     <StyledContainer>
       <LoadScript
-        googleMapsApiKey={REACT_APP_GOOGLE_API_KEY}
+        googleMapsApiKey={REACT_APP_GOOGLE_API_KEY as string}
         libraries={GOOGLE_LIBRARIES}>
         <GoogleMap mapContainerStyle={googleMapStyle} center={ctr} zoom={12}>
           <Autocomplete
