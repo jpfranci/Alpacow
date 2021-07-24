@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getPosts, createPost } = require("../../../services/posts-service");
+const {
+  getPosts,
+  createPost,
+  getPostByID,
+} = require("../../../services/posts-service");
 const nocache = require("nocache");
 const {
   createPostValidationFn,
@@ -11,6 +15,15 @@ router.get("/", [getPostValidationFn, nocache()], async (req, res, next) => {
   try {
     const posts = await getPosts(req.query);
     res.json(posts);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:id", [nocache()], async (req, res, next) => {
+  try {
+    const post = await getPostByID(req.params.id);
+    res.json(post);
   } catch (err) {
     next(err);
   }

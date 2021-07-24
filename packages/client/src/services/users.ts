@@ -41,10 +41,10 @@ const update = async (id: string, partialUser: Partial<UserState>) => {
   return response;
 };
 
-const authService = {
+const userService = {
   signup,
   login,
   update,
 };
 
-export default authService;
+export default userService;
