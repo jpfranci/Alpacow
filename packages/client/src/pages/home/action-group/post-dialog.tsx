@@ -79,6 +79,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
         tag: tag as string,
         location: location,
         //TODO use real user id once login is set up
+        // test
         userId: "60f138a5910aef4526a82182",
       }),
     );
