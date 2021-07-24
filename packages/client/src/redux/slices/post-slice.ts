@@ -17,13 +17,14 @@ export const initialLocation: Location = {
   lon: -123.22,
 };
 
-type Comment = {
+export type Comment = {
   _id: string;
   date: string;
-  numUpVotes: number;
+  numUpvotes: number;
   numDownvotes: number;
   userId: string;
   username: string;
+  body: string;
 };
 
 export interface Post extends NewPost {
@@ -31,19 +32,24 @@ export interface Post extends NewPost {
   numUpvotes: number;
   numDownvotes: number;
   date: string;
-  comments: Comment[];
   username: string;
+  comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
 }
 
-export type NewPost = {
+export interface NewPost {
   title: string;
   body: string;
   tag: string;
   location: Location;
   userId: string;
-};
+}
 
 export enum PostSortType {
+  POPULAR = "popular",
+  NEW = "new",
+}
+
+export enum CommentSortType {
   POPULAR = "popular",
   NEW = "new",
 }
@@ -51,11 +57,13 @@ export enum PostSortType {
 export type PostState = {
   posts: Post[];
   sortType: PostSortType;
+  commentSortType: CommentSortType;
   locationFilter: Location;
   tagFilter?: string;
   currentPostID?: string;
   tagInput: string;
   showMatureContent?: boolean;
+  currPostIndex: number;
 };
 
 let locationFilter: Location = initialLocation;
@@ -63,9 +71,11 @@ let locationFilter: Location = initialLocation;
 const initialState: PostState = {
   posts: [],
   sortType: PostSortType.POPULAR,
+  commentSortType: CommentSortType.NEW,
   locationFilter: locationFilter,
   tagInput: "",
   showMatureContent: false,
+  currPostIndex: -1,
 };
 
 export const createPost = createAsyncThunk<Post, NewPost>(
@@ -175,6 +185,12 @@ export const postSlice = createSlice({
     setShowMatureContent: (state, action: PayloadAction<boolean>) => {
       state.showMatureContent = action.payload;
     },
+    setCurrPostIndex: (state, action: PayloadAction<number>) => {
+      state.currPostIndex = action.payload;
+    },
+    setCommentSortType: (state, action: PayloadAction<CommentSortType>) => {
+      state.commentSortType = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
@@ -219,5 +235,7 @@ export const {
   setTagFilter,
   setTagInput,
   setShowMatureContent,
+  setCurrPostIndex,
+  setCommentSortType,
 } = postSlice.actions;
 export default postSlice.reducer;

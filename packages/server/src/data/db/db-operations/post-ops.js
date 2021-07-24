@@ -61,10 +61,26 @@ const getPostsByFilter = async ({
   return Post.aggregate(aggregationPipeline);
 };
 
+const getPostByID = async (id) => {
+  return await Post.findById(id, {
+    title: true,
+    body: true,
+    date: true,
+    numUpvotes: true,
+    numDownvotes: true,
+    username: true,
+    tag: true,
+    score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+    isMature: true,
+    comments: true,
+  });
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
   createPost,
+  getPostByID,
 };
 
 module.exports = operations;
