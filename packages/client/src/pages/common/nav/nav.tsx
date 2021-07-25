@@ -12,7 +12,7 @@ import FormGroup from "@material-ui/core/FormGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { makeStyles } from "@material-ui/core/styles";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import ProfileButton from "./profile-button";
+import ProfileButton from "../profile/profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
 import LoginDialog from "./login-dialog";
 import { setShowMatureContent } from "../../../redux/slices/post-slice";
@@ -39,8 +39,8 @@ const profileOptions = (
   setSignUpModalOpen: any,
   setLoginModalOpen: any,
 ) => {
-  if (user.id) {
-    return <ProfileButton username={"mr_clean_mustache"} />;
+  if (user._id) {
+    return <ProfileButton username={user.username} />;
   } else {
     return (
       <div>
@@ -132,7 +132,10 @@ const NavBar = () => {
         </FormGroup>
         {profileOptions(user, classes, setSignUpModalOpen, setLoginModalOpen)}
         <LoginDialog open={loginModalOpen} onClose={handleLoginModalClose} />
-        <CreateProfileDialog open={signUpModalOpen} onClose={handleSignUpModalClose} />
+        <CreateProfileDialog
+          open={signUpModalOpen}
+          onClose={handleSignUpModalClose}
+        />
       </Toolbar>
     </AppBar>
   );

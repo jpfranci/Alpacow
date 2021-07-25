@@ -35,7 +35,7 @@ const PostList: React.FC = () => {
   return (
     <StyledContainer>
       {posts.map((post, i) => (
-        <PostListItem key={post._id} post={post} index={i} />
+        <PostListItem key={post._id} post={post} index={i} bodyLimit={500} />
       ))}
     </StyledContainer>
   );

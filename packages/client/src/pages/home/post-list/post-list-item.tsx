@@ -61,9 +61,10 @@ const DateText = styled.div`
 interface PostProps {
   post: Post;
   index: number;
+  bodyLimit: number;
 }
 
-const PostListItem: React.FC<PostProps> = ({ post, index }) => {
+const PostListItem: React.FC<PostProps> = ({ post, index, bodyLimit }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const history = useHistory();
@@ -105,7 +106,9 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
     <PostContainer onClick={handlePostClick}>
       <TitleText>{post.title}</TitleText>
       <BodyText>
-        {post.body.length > 1000 ? `${post.body.substr(0, 500)}...` : post.body}
+        {post.body.length > bodyLimit
+          ? `${post.body.substr(0, bodyLimit)}...`
+          : post.body}
       </BodyText>
       <PostFooter>
         <PostFooterSection>
