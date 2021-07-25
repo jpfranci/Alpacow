@@ -1,5 +1,6 @@
 const PostDb = require("../data/db/db-operations/post-ops");
 const TagDb = require("../data/db/db-operations/tag-ops");
+const UserDb = require("../data/db/db-operations/user-ops");
 require("dotenv").config();
 const axios = require("axios");
 
@@ -50,6 +51,11 @@ const createPost = async (post) => {
         // ignore the tag has already been created
       }
     }
+  }
+
+  const doesUserExist = await UserDb.userExists(post.userId);
+  if (!doesUserExist) {
+    throw new Error("User not found");
   }
 
   const isMature = await checkIsMature(post.title, post.body);
