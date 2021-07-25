@@ -1,9 +1,11 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 import SortGroup from "./sort-group";
 import PostDialog from "./post-dialog";
 import styled from "styled-components";
 import TagFilterGroup from "./tag-filter-group";
+import { useAppSelector } from "../../../redux/store";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -18,6 +20,7 @@ const ActionGroup = () => {
     boolean,
     Dispatch<SetStateAction<boolean>>,
   ] = useState<boolean>(false);
+  const userState = useAppSelector((state) => state.user);
 
   const ActionElement = styled.div`
     margin: 1em;
@@ -34,12 +37,19 @@ const ActionGroup = () => {
       </ActionElement>
       <TagFilterGroup />
       <ActionElement>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => setModalOpen(true)}>
-          Create Post
-        </Button>
+        <Tooltip title="Log in to create posts">
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              // Tooltip only shows on enabled buttons
+              if (userState._id) {
+                setModalOpen(true);
+              }
+            }}>
+            Create Post
+          </Button>
+        </Tooltip>
       </ActionElement>
       <PostDialog open={modalOpen} onClose={handleModalClose} />
     </StyledContainer>

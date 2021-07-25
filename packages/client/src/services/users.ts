@@ -47,7 +47,6 @@ const getPostsByUser = async (id: string, sortType: string) => {
       sortType: sortType,
     },
   });
-  console.log(response);
   return response;
 };
 

@@ -31,10 +31,7 @@ const ProfileButton = (props: any) => {
     setOpen(false);
   };
 
-  const [profileModalOpen, setProfileModalOpen]: [
-    boolean,
-    Dispatch<SetStateAction<boolean>>,
-  ] = useState<boolean>(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const handleProfileModalClose = () => {
     setProfileModalOpen(false);

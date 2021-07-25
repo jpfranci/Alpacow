@@ -62,9 +62,15 @@ interface PostProps {
   post: Post;
   index: number;
   showPostBody: boolean;
+  postClickCallback?: () => void;
 }
 
-const PostListItem: React.FC<PostProps> = ({ post, index, showPostBody }) => {
+const PostListItem: React.FC<PostProps> = ({
+  post,
+  index,
+  showPostBody,
+  postClickCallback,
+}) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const history = useHistory();
@@ -83,6 +89,9 @@ const PostListItem: React.FC<PostProps> = ({ post, index, showPostBody }) => {
   };
 
   const handlePostClick = () => {
+    if (postClickCallback) {
+      postClickCallback();
+    }
     dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
     window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes
