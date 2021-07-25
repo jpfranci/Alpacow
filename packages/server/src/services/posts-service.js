@@ -80,8 +80,13 @@ const getPostByID = async (id) => {
   return PostDb.getPostByID(id);
 };
 
+const getPostsByUserID = async (userId, sortType) => {
+  return PostDb.getPostsByUserID(userId, sortType);
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostByID,
+  getPostsByUserID,
 };
