@@ -61,10 +61,10 @@ const DateText = styled.div`
 interface PostProps {
   post: Post;
   index: number;
-  bodyLimit: number;
+  showPostBody: boolean;
 }
 
-const PostListItem: React.FC<PostProps> = ({ post, index, bodyLimit }) => {
+const PostListItem: React.FC<PostProps> = ({ post, index, showPostBody }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const history = useHistory();
@@ -102,14 +102,22 @@ const PostListItem: React.FC<PostProps> = ({ post, index, bodyLimit }) => {
     dispatch(downvote({ post, user }));
   };
 
+  const postBodyText = () => {
+    if (showPostBody) {
+      return (
+        <BodyText>
+          {post.body.length > 1000
+            ? `${post.body.substr(0, 500)}...`
+            : post.body}
+        </BodyText>
+      );
+    }
+  };
+
   return (
     <PostContainer onClick={handlePostClick}>
       <TitleText>{post.title}</TitleText>
-      <BodyText>
-        {post.body.length > bodyLimit
-          ? `${post.body.substr(0, bodyLimit)}...`
-          : post.body}
-      </BodyText>
+      {postBodyText()}
       <PostFooter>
         <PostFooterSection>
           <DateText>{date}</DateText>

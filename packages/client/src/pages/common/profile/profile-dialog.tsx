@@ -125,9 +125,9 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
                 Upvoted
               </ToggleButton>
             </ToggleButtonGroup>
-            <ProfilePostList showCreatedPosts={showCreatedPosts} />
           </StyledColumnContainer>
         </StyledRowContainer>
+        <ProfilePostList showCreatedPosts={showCreatedPosts} />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>
         <Button variant="outlined" color="primary">

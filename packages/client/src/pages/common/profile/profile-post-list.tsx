@@ -30,7 +30,12 @@ const ProfilePostList = ({ showCreatedPosts }: ProfilePostListProps) => {
   return (
     <StyledContainer>
       {posts.slice(0, Math.min(2, posts.length)).map((post, i) => (
-        <PostListItem key={post._id} post={post} index={i} bodyLimit={100} />
+        <PostListItem
+          key={post._id}
+          post={post}
+          index={i}
+          showPostBody={false}
+        />
       ))}
     </StyledContainer>
   );
