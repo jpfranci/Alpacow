@@ -37,7 +37,9 @@ const ActionGroup = () => {
       </ActionElement>
       <TagFilterGroup />
       <ActionElement>
-        <Tooltip title="Log in to create posts">
+        <Tooltip
+          title="Log in to create posts"
+          disableHoverListener={userState._id != undefined}>
           <Button
             variant="outlined"
             color="primary"
