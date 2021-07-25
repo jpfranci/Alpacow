@@ -104,9 +104,9 @@ const UserExample = () => {
       </div>
       <div>
         <h3>Current User in store</h3>
-        {user.id ? (
+        {user._id ? (
           <div>
-            <p>id: {user.id}</p>
+            <p>id: {user._id}</p>
             <p>username: {user.username}</p>
             <p>email: {user.email}</p>
           </div>
@@ -144,14 +144,14 @@ const PostExample = () => {
   const handleCreatePost = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
-    if (user.id) {
+    if (user._id) {
       dispatch(
         createPost({
           title,
           body: bodyText,
           tag,
           location: locationFilter,
-          userId: user.id,
+          userId: user._id,
         }),
       )
         .then(unwrapResult)

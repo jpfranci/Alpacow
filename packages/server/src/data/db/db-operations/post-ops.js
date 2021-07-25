@@ -1,4 +1,6 @@
 const Post = require("../../models/post-model");
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 // We don't want to send all 1000 posts to the client while we have no filters,
 // so this will just sample randomly from all posts
@@ -76,11 +78,41 @@ const getPostByID = async (id) => {
   });
 };
 
+const getPostsByUserID = async (userId, sortType) => {
+  const aggregation = [];
+  aggregation.push({
+    $match: {
+      userId: ObjectId(userId),
+    },
+  });
+  aggregation.push({
+    $project: {
+      title: true,
+      body: true,
+      date: true,
+      numUpvotes: true,
+      numDownvotes: true,
+      username: true,
+      tag: true,
+      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+      isMature: true,
+    },
+  });
+  aggregation.push({
+    $sort:
+      sortType === "popular"
+        ? { score: -1, date: -1, _id: -1 }
+        : { date: -1, _id: -1 },
+  });
+  return Post.aggregate(aggregation);
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
   createPost,
   getPostByID,
+  getPostsByUserID,
 };
 
 module.exports = operations;

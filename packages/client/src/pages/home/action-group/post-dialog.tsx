@@ -15,7 +15,7 @@ import {
 import styled from "styled-components";
 import TagSearch from "./tag-search";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import { createPost } from "../../../redux/slices/post-slice";
+import { createPost, getPostsByFilter } from "../../../redux/slices/post-slice";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -39,7 +39,6 @@ interface PostDialogFields {
   bodyText: string;
   tag: string | undefined;
   isAnonymous: boolean;
-  userId: string;
   inputValue: string;
 }
 
@@ -48,7 +47,6 @@ const DEFAULT_FIELDS = {
   bodyText: "",
   tag: undefined,
   isAnonymous: false,
-  userId: "",
   inputValue: "",
 };
 
@@ -62,9 +60,11 @@ const StyledContainer = styled.div`
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const classes = useStyles();
   const location = useAppSelector((state) => state.post.locationFilter);
+  const postState = useAppSelector((state) => state.post);
+  const userId = useAppSelector((state) => state.user._id);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous, userId, inputValue } = fields;
+  const { title, bodyText, tag, isAnonymous, inputValue } = fields;
 
   const handleClose = () => {
     setFields(DEFAULT_FIELDS);
@@ -78,8 +78,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
         body: bodyText,
         tag: tag as string,
         location: location,
-        //TODO use real user id once login is set up
-        userId: "60f138a5910aef4526a82182",
+        userId: userId as string,
       }),
     );
     handleClose();

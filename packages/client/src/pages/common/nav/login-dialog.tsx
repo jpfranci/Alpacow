@@ -86,7 +86,6 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
       }),
     )
       .then(unwrapResult)
-      .then((data) => alert("Logged in successfully."))
       .catch((error) => alert("Login failed:" + error));
     handleClose();
   };
