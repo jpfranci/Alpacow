@@ -1,5 +1,6 @@
 const PostDb = require("../data/db/db-operations/post-ops");
 const TagDb = require("../data/db/db-operations/tag-ops");
+const UserDb = require("../data/db/db-operations/user-ops");
 require("dotenv").config();
 const axios = require("axios");
 
@@ -52,6 +53,11 @@ const createPost = async (post) => {
     }
   }
 
+  const doesUserExist = await UserDb.userExists(post.userId);
+  if (!doesUserExist) {
+    throw new Error("User not found");
+  }
+
   const isMature = await checkIsMature(post.title, post.body);
 
   const postToInsert = {
@@ -80,8 +86,13 @@ const getPostByID = async (id) => {
   return PostDb.getPostByID(id);
 };
 
+const getPostsByUserID = async (userId, sortType) => {
+  return PostDb.getPostsByUserID(userId, sortType);
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostByID,
+  getPostsByUserID,
 };

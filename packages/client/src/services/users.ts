@@ -41,10 +41,20 @@ const update = async (id: string, partialUser: Partial<UserState>) => {
   return response;
 };
 
+const getPostsByUser = async (id: string, sortType: string) => {
+  const response = await axios.get(`${baseUrl}/${id}/posts`, {
+    params: {
+      sortType: sortType,
+    },
+  });
+  return response;
+};
+
 const userService = {
   signup,
   login,
   update,
+  getPostsByUser,
 };
 
 export default userService;

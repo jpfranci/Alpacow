@@ -206,7 +206,7 @@ export const postSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload);
+      getPostsByFilter(state);
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
