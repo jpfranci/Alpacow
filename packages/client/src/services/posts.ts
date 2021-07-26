@@ -7,14 +7,12 @@ const baseUrl = "/api/posts";
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
-    params: {
-      userId: newPost.userId,
-      title: newPost.title,
-      body: newPost.body,
-      lon: newPost.location.lon,
-      lat: newPost.location.lat,
-      tag: newPost.tag,
-    },
+    userId: newPost.userId,
+    title: newPost.title,
+    body: newPost.body,
+    lon: newPost.location.lon,
+    lat: newPost.location.lat,
+    tag: newPost.tag,
   });
   return response;
 };

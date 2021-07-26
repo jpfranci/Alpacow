@@ -1,17 +1,13 @@
 require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
-const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const { getDb } = require("./data/db/db-connect");
-const indexRouter = require("./routes");
 const { errors } = require("celebrate");
-const postRouter = require("./routes/api/posts/posts-router");
-const tagsRouter = require("./routes/api/tags/tags-router");
-const usersRouter = require("./routes/api/users/users-router");
+const apiRouter = require("./routes/api/api-router");
 
 getDb()
   .then(() => {
@@ -40,11 +36,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use("/api/posts", postRouter);
-app.use("/api/tags", tagsRouter);
-app.use("/api/users", usersRouter);
+app.use("/api", apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
