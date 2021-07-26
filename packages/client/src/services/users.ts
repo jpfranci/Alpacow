@@ -1,10 +1,11 @@
 import axios from "axios";
 import { UserState } from "../redux/slices/user-slice";
+import { Post } from "../redux/slices/post-slice";
 
 const baseUrl = "/api/users";
 
 export type LoginCredentials = {
-  username: string;
+  email: string;
   password: string;
 };
 
@@ -27,13 +28,9 @@ const signup = async (signupInfo: SignupInfo) => {
   return response;
 };
 
-const login = async (credentials: LoginCredentials) => {
-  // TODO this route should be sth like axios.post(`${baseUrl/login}`, credentials)
-  const { username, password } = credentials;
-  const response = await axios.get(
-    `${baseUrl}?username=${username}&password=${password}`,
-  );
-  return response;
+const login = async (idToken: string) => {
+  const response = await axios.post(`${baseUrl}/login`, { idToken });
+  return response.data;
 };
 
 const update = async (id: string, partialUser: Partial<UserState>) => {
@@ -41,13 +38,16 @@ const update = async (id: string, partialUser: Partial<UserState>) => {
   return response;
 };
 
-const getPostsByUser = async (id: string, sortType: string) => {
+const getPostsByUser = async (
+  id: string,
+  sortType: string,
+): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/posts`, {
     params: {
       sortType: sortType,
     },
   });
-  return response;
+  return response.data;
 };
 
 const userService = {

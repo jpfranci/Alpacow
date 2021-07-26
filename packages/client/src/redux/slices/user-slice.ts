@@ -1,9 +1,10 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
 } from "../../services/users";
 import { createPost, downvote, getPosts, Post, upvote } from "./post-slice";
+import firebase from "firebase/app";
 
 const prefix = "user";
 
@@ -40,28 +41,14 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
 
 export const login = createAsyncThunk<UserState, LoginCredentials>(
   `${prefix}/login`,
-  async (credentials: LoginCredentials, { rejectWithValue }) => {
+  async ({ email, password }: LoginCredentials, { rejectWithValue }) => {
     try {
-      const response = await userService.login(credentials);
-      // TODO adjust code after we implement this endpoint
-      return response.data.length <= 0
-        ? rejectWithValue("user doesn't exist")
-        : response.data[0];
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
-
-export const getPostsByUser = createAsyncThunk<Post[], UserState>(
-  `${prefix}/getPostsByUser`,
-  async (userState: UserState, { rejectWithValue }) => {
-    try {
-      // TODO: probably allow view profile to toggle between hot and new in the future
-      const response = await userService.getPostsByUser(
-        String(userState._id),
-        "new",
-      );
+      // TODO handle firebase error codes
+      const loggedInUser = await firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password);
+      const idToken = await loggedInUser.user?.getIdToken();
+      const response = await userService.login(idToken as string);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -80,6 +67,11 @@ export const userSlice = createSlice({
     logout: (state) => {
       return { ...initialState };
     },
+    setUser: (state, action: PayloadAction<UserState>) => {
+      state._id = action.payload._id;
+      state.username = action.payload.username;
+      state.email = action.payload.email;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
@@ -93,12 +85,6 @@ export const userSlice = createSlice({
       return { ...initialState, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
-      return { ...initialState };
-    });
-    builder.addCase(getPostsByUser.fulfilled, (state, action) => {
-      state.posts = action.payload;
-    });
-    builder.addCase(getPostsByUser.rejected, (state, action) => {
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
@@ -117,6 +103,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const { logout } = userSlice.actions;
+export const { logout, setUser } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import NavBar from "./pages/common/nav/nav";
 import { Redirect, Route, Switch } from "react-router";
@@ -9,8 +9,20 @@ import PostPage from "./pages/post/post";
 import darkTheme from "./common/theme";
 import ExamplePage from "./pages/example/example";
 import { ThemeProvider } from "styled-components";
+import { useAppDispatch } from "./redux/store";
+import { getUser } from "./services/cookies";
+import { setUser, UserState } from "./redux/slices/user-slice";
 
 const App = () => {
+  const dispatch = useAppDispatch();
+  // check session
+  useEffect(() => {
+    const userState = getUser();
+    if (userState) {
+      dispatch(setUser(userState as UserState));
+    }
+  }, []);
+
   return (
     <MuiThemeProvider theme={darkTheme}>
       <ThemeProvider theme={darkTheme}>

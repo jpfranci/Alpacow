@@ -8,6 +8,11 @@ const connectLiveReload = require("connect-livereload");
 const { getDb } = require("./data/db/db-connect");
 const { errors } = require("celebrate");
 const apiRouter = require("./routes/api/api-router");
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+});
 
 getDb()
   .then(() => {
