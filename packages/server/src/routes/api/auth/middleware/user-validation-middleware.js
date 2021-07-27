@@ -1,9 +1,9 @@
-import {
+const {
   DEFAULT_SESSION_COOKIE_EXPIRATION,
   FIREBASE_SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
   USERNAME_COOKIE_NAME,
-} from "../auth-constants";
+} = require("../auth-constants");
 
 const admin = require("firebase-admin");
 

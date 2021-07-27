@@ -1,7 +1,8 @@
-import { extractUserFromSessionToken } from "../auth/middleware/user-validation-middleware";
-
 const express = require("express");
 const router = express.Router();
+const {
+  extractUserFromSessionCookie,
+} = require("../auth/middleware/user-validation-middleware");
 const {
   getPosts,
   createPost,
@@ -33,7 +34,7 @@ router.get("/:id", async (req, res, next) => {
 //TODO fix post creation validation after demo
 router.post(
   "/",
-  [createPostValidationFn, extractUserFromSessionToken],
+  [createPostValidationFn, extractUserFromSessionCookie],
   async (req, res, next) => {
     try {
       req.body.userId = req.uid;

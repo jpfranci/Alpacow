@@ -4,7 +4,6 @@ import userService, {
   SignupInfo,
 } from "../../services/users";
 import { createPost, downvote, Post, upvote } from "./post-slice";
-import firebase from "firebase/app";
 
 const prefix = "user";
 
@@ -30,9 +29,7 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
   `${prefix}/signup`,
   async (signupInfo: SignupInfo, { rejectWithValue }) => {
     try {
-      const response = await userService.signup(signupInfo);
-
-      return { ...response.data };
+      return await userService.signup(signupInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -41,15 +38,9 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
 
 export const login = createAsyncThunk<UserState, LoginCredentials>(
   `${prefix}/login`,
-  async ({ email, password }: LoginCredentials, { rejectWithValue }) => {
+  async (loginCredentials, { rejectWithValue }) => {
     try {
-      // TODO handle firebase error codes
-      const loggedInUser = await firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password);
-      const idToken = await loggedInUser.user?.getIdToken();
-      const response = await userService.login(idToken as string);
-      return response.data;
+      return await userService.login(loginCredentials);
     } catch (error) {
       return rejectWithValue(error);
     }

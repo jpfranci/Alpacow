@@ -1,10 +1,10 @@
-import {
+const {
   clearAuthCookies,
   createSessionCookieFromIdToken,
   extractUserFromIdToken,
   extractUserFromSessionCookie,
-} from "../auth/middleware/user-validation-middleware";
-import { createUser, getUser } from "../../../services/users-service";
+} = require("../auth/middleware/user-validation-middleware");
+const { createUser, getUser } = require("../../../services/users-service");
 const express = require("express");
 const router = express.Router();
 const { getPostsByUserID } = require("../../../services/posts-service");

@@ -3,9 +3,8 @@ import { UserState } from "../redux/slices/user-slice";
 import { Post } from "../redux/slices/post-slice";
 import firebase from "firebase";
 import SignupErrorCode from "../errors/signup-errors";
-import LoginErrorCode from "../errors/login-errors";
-import UserCredential = firebase.auth.UserCredential;
 import ActionableError from "../errors/ActionableError";
+import LoginErrorCode from "../errors/login-errors";
 
 const baseUrl = "/api/users";
 
@@ -33,7 +32,7 @@ const DUPLICATE_USERNAME_ERROR = new ActionableError(
 
 const signupWithFirebase = async (
   signupInfo: SignupInfo,
-): Promise<UserCredential> => {
+): Promise<firebase.auth.UserCredential> => {
   try {
     const { email, password } = signupInfo;
     return await firebase
@@ -54,13 +53,33 @@ const signupWithFirebase = async (
   }
 };
 
-const loginWithFirebase = async (credentials: LoginCredentials) => {
+const loginWithFirebase = async (
+  credentials: LoginCredentials,
+): Promise<firebase.auth.UserCredential> => {
   try {
     const { email, password } = credentials;
-  } catch (err) {}
+    return await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (err) {
+    switch (err.code) {
+      case "auth/invalid-email":
+      case "auth/user-not-found":
+      case "auth/user-disabled":
+        throw new ActionableError(
+          LoginErrorCode.USER_NOT_FOUND,
+          "No user was found with that email.",
+        );
+      case "auth/wrong-password":
+        throw new ActionableError(
+          LoginErrorCode.WRONG_PASSWORD,
+          "Password was invalid",
+        );
+      default:
+        throw new Error(err.message);
+    }
+  }
 };
 
-const signup = async (signupInfo: SignupInfo) => {
+const signup = async (signupInfo: SignupInfo): Promise<UserState> => {
   const { email, password } = signupInfo;
   const userCredential = await signupWithFirebase(signupInfo);
   const idToken = await userCredential.user?.getIdToken();
@@ -85,9 +104,18 @@ const signup = async (signupInfo: SignupInfo) => {
   }
 };
 
-const login = async (idToken: string) => {
-  const response = await axios.post(`${baseUrl}/login`, { idToken });
-  return response.data;
+const login = async (
+  loginCredentials: LoginCredentials,
+): Promise<UserState> => {
+  const userCredential = await loginWithFirebase(loginCredentials);
+  const idToken = await userCredential.user?.getIdToken();
+  try {
+    const response = await axios.post(`${baseUrl}/login`, { idToken });
+    return response.data;
+  } catch (err) {
+    const { errorCode } = err.response.data.errorCode;
+    throw err;
+  }
 };
 
 const update = async (id: string, partialUser: Partial<UserState>) => {

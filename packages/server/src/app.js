@@ -9,7 +9,7 @@ const { getDb } = require("./data/db/db-connect");
 const { errors } = require("celebrate");
 const apiRouter = require("./routes/api/api-router");
 const admin = require("firebase-admin");
-const { BadRequestError } = require("errors/bad-request-error");
+const { HttpError } = require("./errors/http-error");
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
@@ -53,9 +53,8 @@ app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {
-  const status = err.status ?? 500;
-  if (err instanceof BadRequestError) {
-    res.send(status).json({
+  if (err instanceof HttpError) {
+    res.send(err.status).json({
       message: err.message,
       errorCode: err.errorCode,
     });

@@ -1,5 +1,5 @@
-import { BadRequestError } from "../errors/bad-request-error";
-import { AuthErrorCodes } from "../errors/auth/auth-error-codes";
+const { BadRequestError } = require("../errors/bad-request-error");
+const { AuthErrorCodes } = require("../errors/auth/auth-error-codes");
 
 const UserDb = require("../data/db/db-operations/user-ops");
 
