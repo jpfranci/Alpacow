@@ -1,0 +1,7 @@
+enum SignupErrorCode {
+  DUPLICATE_EMAIL = "DUPLICATE_EMAIL",
+  DUPLICATE_USERNAME = "DUPLICATE_USERNAME",
+  WEAK_PASSWORD = "WEAK_PASSWORD",
+}
+
+export default SignupErrorCode;

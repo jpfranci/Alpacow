@@ -1,20 +1,38 @@
 const User = require("../../models/user-model");
-const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
 
-const login = async (username, password) => {
-  // TODO add real authentication
-  return await User.find({ username: username });
+const getUser = (userId) => {
+  return User.find({ _id: userId }).limit(1);
+};
+
+const createUser = (payload) => {
+  return User.create(payload);
+};
+
+const doesUsernameExist = async (username) => {
+  const userOpt = await User.find({
+    username: username,
+  }).limit(1);
+  return userOpt.length > 0;
+};
+
+const doesEmailExist = async (username) => {
+  const userOpt = await User.find({
+    username: username,
+  }).limit(1);
+  return userOpt.length > 0;
 };
 
 const userExists = async (userId) => {
-  const userOpt = await User.find({ _id: ObjectId(userId) }).limit(1);
+  const userOpt = await getUser(userId);
   return userOpt.length > 0;
 };
 
 const operations = {
-  login,
   userExists,
+  getUser,
+  createUser,
+  doesUsernameExist,
+  doesEmailExist,
 };
 
 module.exports = operations;

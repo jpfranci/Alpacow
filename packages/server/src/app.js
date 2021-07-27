@@ -9,6 +9,7 @@ const { getDb } = require("./data/db/db-connect");
 const { errors } = require("celebrate");
 const apiRouter = require("./routes/api/api-router");
 const admin = require("firebase-admin");
+const { BadRequestError } = require("errors/bad-request-error");
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
@@ -52,13 +53,20 @@ app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.send(err.message);
+  const status = err.status ?? 500;
+  if (err instanceof BadRequestError) {
+    res.send(status).json({
+      message: err.message,
+      errorCode: err.errorCode,
+    });
+  } else {
+    // mask any internal errors
+    const messageToUse =
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "An internal server error occurred";
+    res.status(500).send(messageToUse);
+  }
 });
 
 module.exports = app;

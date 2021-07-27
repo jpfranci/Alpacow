@@ -3,7 +3,7 @@ import userService, {
   LoginCredentials,
   SignupInfo,
 } from "../../services/users";
-import { createPost, downvote, getPosts, Post, upvote } from "./post-slice";
+import { createPost, downvote, Post, upvote } from "./post-slice";
 import firebase from "firebase/app";
 
 const prefix = "user";

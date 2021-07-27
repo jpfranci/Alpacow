@@ -1,3 +1,5 @@
+import { extractUserFromSessionToken } from "../auth/middleware/user-validation-middleware";
+
 const express = require("express");
 const router = express.Router();
 const {
@@ -29,14 +31,18 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //TODO fix post creation validation after demo
-router.post("/", async (req, res, next) => {
-  try {
-    console.log(req.body);
-    const createdPost = await createPost(req.body);
-    res.json(createdPost);
-  } catch (err) {
-    next(err);
-  }
-});
+router.post(
+  "/",
+  [createPostValidationFn, extractUserFromSessionToken],
+  async (req, res, next) => {
+    try {
+      req.body.userId = req.uid;
+      const createdPost = await createPost(req.body);
+      res.json(createdPost);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 module.exports = router;
