@@ -2,25 +2,34 @@ const {
   DEFAULT_SESSION_COOKIE_EXPIRATION,
   FIREBASE_SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
-  USERNAME_COOKIE_NAME,
 } = require("../auth-constants");
 
 const admin = require("firebase-admin");
+const { AuthErrorCodes } = require("../../../../errors/auth/auth-error-codes");
 
-const handleBadIdToken = (err, res) => {
+const handleBadIdToken = (err, res, next) => {
   switch (err.code) {
     // TODO wrap server codes in error messages, so client can handle
     case "auth/id-token-expired":
     case "auth/session-cookie-revoked":
-      return res.status(400).send("Token expired, please try again.");
+      return next(
+        new UnauthorizedError(
+          AuthErrorCodes.TOKEN_EXPIRED,
+          "Token expired, please try again.",
+        ),
+      );
     default:
-      return res.status(401).send("Unauthorized request");
+      return next(
+        new UnauthorizedError(
+          AuthErrorCodes.UNAUTHORIZED_REQUEST,
+          "Unauthorized request",
+        ),
+      );
   }
 };
 
 const clearAuthCookies = (res) => {
   res.clearCookie(FIREBASE_SESSION_COOKIE_NAME);
-  res.clearCookie(USERNAME_COOKIE_NAME);
 };
 
 const extractUserFromIdToken = async (req, res, next) => {
@@ -31,7 +40,7 @@ const extractUserFromIdToken = async (req, res, next) => {
     next();
   } catch (err) {
     clearAuthCookies(res);
-    handleBadIdToken(err, res);
+    handleBadIdToken(err, res, next);
   }
 };
 
@@ -50,9 +59,19 @@ const extractUserFromSessionCookie = async (req, res, next) => {
     switch (err.code) {
       case "auth/session-cookie-expired":
       case "auth/session-cookie-revoked":
-        return res.status(400).send("Session expired, please login again.");
+        return next(
+          new UnauthorizedError(
+            AuthErrorCodes.SESSION_EXPIRED,
+            "Session expired, please log in again.",
+          ),
+        );
       default:
-        return res.status(401).send("Unauthorized request");
+        return next(
+          new UnauthorizedError(
+            AuthErrorCodes.UNAUTHORIZED_REQUEST,
+            "Unauthorized request",
+          ),
+        );
     }
   }
 };

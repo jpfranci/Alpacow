@@ -53,8 +53,9 @@ app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {
+  console.error(err);
   if (err instanceof HttpError) {
-    res.send(err.status).json({
+    res.status(err.status).json({
       message: err.message,
       errorCode: err.errorCode,
     });

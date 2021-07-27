@@ -15,9 +15,9 @@ const doesUsernameExist = async (username) => {
   return userOpt.length > 0;
 };
 
-const doesEmailExist = async (username) => {
+const doesEmailExist = async (email) => {
   const userOpt = await User.find({
-    username: username,
+    email: email,
   }).limit(1);
   return userOpt.length > 0;
 };

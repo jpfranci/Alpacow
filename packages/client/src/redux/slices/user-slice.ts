@@ -66,17 +66,16 @@ export const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(signup.rejected, (state, action) => {
-      return { ...initialState };
+      return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      state = action.payload;
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
-      return { ...initialState };
+      return { ...state };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.posts.push(action.payload);
