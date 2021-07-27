@@ -12,6 +12,7 @@ const create = async (newPost: NewPost) => {
     lon: newPost.location.lon,
     lat: newPost.location.lat,
     tag: newPost.tag,
+    isAnonymous: newPost.isAnonymous,
   });
   return response.data;
 };

@@ -1,7 +1,6 @@
 const PostDb = require("../data/db/db-operations/post-ops");
 const TagDb = require("../data/db/db-operations/tag-ops");
 const UserDb = require("../data/db/db-operations/user-ops");
-require("dotenv").config();
 const axios = require("axios");
 
 const callAzureApi = async (post) => {
@@ -41,7 +40,7 @@ const checkIsMature = async (title, body) => {
 };
 
 const createPost = async (post) => {
-  const { tag, lat, lon } = post;
+  const { tag, lat, lon, isAnonymous } = post;
   const doesTagExist = await TagDb.tagExists(tag);
   if (!doesTagExist) {
     try {
@@ -53,15 +52,20 @@ const createPost = async (post) => {
     }
   }
 
-  const doesUserExist = await UserDb.userExists(post.userId);
-  if (!doesUserExist) {
-    throw new Error("User not found");
+  let username = null;
+  let userId = null;
+
+  if (!isAnonymous) {
+    const user = await UserDb.getUser(userId);
+    username = user.username;
+    userId = post.userId;
   }
 
   const isMature = await checkIsMature(post.title, post.body);
 
   const postToInsert = {
     ...post,
+    userId: userId,
     date: new Date(),
     numUpvotes: 0,
     numDownvotes: 0,
@@ -73,6 +77,7 @@ const createPost = async (post) => {
       coordinates: [lon, lat],
     },
     isMature: isMature,
+    username,
   };
 
   return PostDb.createPost(postToInsert);

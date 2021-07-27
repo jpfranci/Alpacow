@@ -1,8 +1,5 @@
 const CommentSchema = require("./comment-schema");
 const { Schema } = require("mongoose");
-const {
-  Types: { ObjectId },
-} = Schema;
 
 const LocationSchema = new Schema({
   type: String,
@@ -17,11 +14,11 @@ const PostSchema = new Schema({
   numDownvotes: Number,
   location: LocationSchema,
   comments: [CommentSchema],
-  userId: { type: ObjectId, index: true },
+  userId: { type: String, index: true },
   username: String,
   tag: String,
-  upvoters: { type: [ObjectId], index: true },
-  downvoters: { type: [ObjectId], index: true },
+  upvoters: { type: [String], index: true },
+  downvoters: { type: [String], index: true },
   isMature: Boolean,
 });
 

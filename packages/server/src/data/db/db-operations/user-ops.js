@@ -23,13 +23,7 @@ const doesEmailExist = async (email) => {
   return userOpt.length > 0;
 };
 
-const userExists = async (userId) => {
-  const userOpt = await getUser(userId);
-  return userOpt.length > 0;
-};
-
 const operations = {
-  userExists,
   getUser,
   createUser,
   doesUsernameExist,

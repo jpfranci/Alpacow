@@ -40,7 +40,7 @@ export interface NewPost {
   body: string;
   tag: string;
   location: Location;
-  userId: string;
+  isAnonymous: boolean;
 }
 
 export enum PostSortType {

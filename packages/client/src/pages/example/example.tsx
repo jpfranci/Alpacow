@@ -151,7 +151,7 @@ const PostExample = () => {
           body: bodyText,
           tag,
           location: locationFilter,
-          userId: user._id,
+          isAnonymous: false,
         }),
       )
         .then(unwrapResult)
@@ -213,7 +213,6 @@ const PostExample = () => {
               <p>body: {post.body}</p>
               <p>tag: {post.tag}</p>
               <p>location: {post.location}</p>
-              <p>created by (id): {post.userId}</p>
             </li>
           ))}
         </ul>

@@ -1,17 +1,14 @@
 const { Schema } = require("mongoose");
-const {
-  Types: { ObjectId },
-} = Schema;
 
 const CommentSchema = new Schema({
   body: String,
   date: Date,
   numUpvotes: Number,
   numDownvotes: Number,
-  userId: ObjectId,
+  userId: String,
   username: String,
-  upvoters: { type: [ObjectId], index: true },
-  downvoters: { type: [ObjectId], index: true },
+  upvoters: { type: [String], index: true },
+  downvoters: { type: [String], index: true },
 });
 
 module.exports = CommentSchema;
