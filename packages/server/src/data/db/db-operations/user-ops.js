@@ -1,7 +1,8 @@
 const User = require("../../models/user-model");
 
-const getUser = (userId) => {
-  return User.find({ _id: userId }).limit(1);
+const getUser = async (userId) => {
+  const users = await User.find({ _id: userId }).limit(1);
+  return users[0];
 };
 
 const createUser = (payload) => {

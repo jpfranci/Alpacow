@@ -3,8 +3,8 @@ const {
   FIREBASE_SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
 } = require("../auth-constants");
-
 const admin = require("firebase-admin");
+const { UnauthorizedError } = require("../../../../errors/unauthorized-error");
 const { AuthErrorCodes } = require("../../../../errors/auth/auth-error-codes");
 
 const handleBadIdToken = (err, res, next) => {
@@ -21,7 +21,7 @@ const handleBadIdToken = (err, res, next) => {
     default:
       return next(
         new UnauthorizedError(
-          AuthErrorCodes.UNAUTHORIZED_REQUEST,
+          AuthErrorCodes.INVALID_TOKEN,
           "Unauthorized request",
         ),
       );
@@ -51,7 +51,7 @@ const extractUserFromSessionCookie = async (req, res, next) => {
       req.cookies[FIREBASE_SESSION_COOKIE_NAME] ?? "";
     const decodedToken = await admin
       .auth()
-      .verifySessionCookie(firebaseSessionCookie);
+      .verifySessionCookie(firebaseSessionCookie, true);
     req.uid = decodedToken.uid;
     next();
   } catch (err) {
@@ -68,7 +68,7 @@ const extractUserFromSessionCookie = async (req, res, next) => {
       default:
         return next(
           new UnauthorizedError(
-            AuthErrorCodes.UNAUTHORIZED_REQUEST,
+            AuthErrorCodes.INVALID_SESSION,
             "Unauthorized request",
           ),
         );

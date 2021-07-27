@@ -111,17 +111,20 @@ const login = async (
 ): Promise<UserState> => {
   const userCredential = await loginWithFirebase(loginCredentials);
   const idToken = await userCredential.user?.getIdToken();
-  try {
-    const response = await axios.post(`${baseUrl}/login`, { idToken });
-    return response.data;
-  } catch (err) {
-    const { errorCode } = err.response.data;
-    if (errorCode) {
-      switch (errorCode) {
-      }
-    }
-    throw err;
-  }
+  const response = await axios.post(`${baseUrl}/login`, { idToken });
+  return response.data;
+};
+
+const loginFromCookie = async (): Promise<UserState> => {
+  const response = await axios.post(`${baseUrl}/loginFromCookie`);
+  return response.data;
+};
+
+const logout = async () => {
+  await Promise.all([
+    firebase.auth().signOut(),
+    axios.post(`${baseUrl}/logout`),
+  ]);
 };
 
 const validate = async (
@@ -154,6 +157,8 @@ const userService = {
   update,
   getPostsByUser,
   validate,
+  loginFromCookie,
+  logout,
 };
 
 export default userService;

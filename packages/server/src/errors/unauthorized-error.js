@@ -5,3 +5,5 @@ class UnauthorizedError extends HttpError {
     super(errorCode, message, 401);
   }
 }
+
+module.exports = { UnauthorizedError };

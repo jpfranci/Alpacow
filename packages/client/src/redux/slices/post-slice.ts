@@ -81,8 +81,7 @@ export const createPost = createAsyncThunk<Post, NewPost>(
   `${prefix}/createPost`,
   async (newPost, { rejectWithValue }) => {
     try {
-      const response = await postService.create(newPost);
-      return response.data;
+      return await postService.create(newPost);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -94,8 +93,7 @@ export const getPosts = createAsyncThunk<Post[]>(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
     try {
-      const response = await postService.getAll();
-      return response.data;
+      return await postService.getAll();
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -106,8 +104,7 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
   `${prefix}/getPostsByFilter`,
   async (postState: PostState, { rejectWithValue }) => {
     try {
-      const response = await postService.getPostsByFilter(postState);
-      return response.data;
+      return await postService.getPostsByFilter(postState);
     } catch (error) {
       return rejectWithValue(error);
     }

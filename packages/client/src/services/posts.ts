@@ -7,19 +7,18 @@ const baseUrl = "/api/posts";
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
-    userId: newPost.userId,
     title: newPost.title,
     body: newPost.body,
     lon: newPost.location.lon,
     lat: newPost.location.lat,
     tag: newPost.tag,
   });
-  return response;
+  return response.data;
 };
 
 const getAll = async () => {
   const response = await axios.get(`${baseUrl}`);
-  return response;
+  return response.data;
 };
 
 const getPostsByFilter = async (postState: PostState) => {
@@ -40,7 +39,7 @@ const getPostsByFilter = async (postState: PostState) => {
       showMatureContent,
     },
   });
-  return response;
+  return response.data;
 };
 
 const getByID = async (id: string) => {

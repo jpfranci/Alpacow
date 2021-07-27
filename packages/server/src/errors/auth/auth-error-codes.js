@@ -4,7 +4,7 @@ class AuthErrorCodes {
   static SESSION_EXPIRED = "SESSION_EXPIRED";
   static TOKEN_EXPIRED = "TOKEN_EXPIRED";
   static INVALID_SESSION = "INVALID_SESSION";
-  static UNAUTHORIZED_REQUEST = "UNAUTHORIZED_REQUEST";
+  static INVALID_TOKEN = "INVALID_TOKEN";
 }
 
 module.exports = { AuthErrorCodes };

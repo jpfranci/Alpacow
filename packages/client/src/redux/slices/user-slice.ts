@@ -47,6 +47,28 @@ export const login = createAsyncThunk<UserState, LoginCredentials>(
   },
 );
 
+export const loginFromCookie = createAsyncThunk<UserState, void>(
+  `${prefix}/loginFromCookie`,
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.loginFromCookie();
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const logout = createAsyncThunk<void, void>(
+  `${prefix}/logout`,
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.logout();
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // TODO implement getPosts action
 // TODO implement update action
 // TODO implement logout action
@@ -54,16 +76,7 @@ export const login = createAsyncThunk<UserState, LoginCredentials>(
 export const userSlice = createSlice({
   name: prefix,
   initialState,
-  reducers: {
-    logout: (state) => {
-      return { ...initialState };
-    },
-    setUser: (state, action: PayloadAction<UserState>) => {
-      state._id = action.payload._id;
-      state.username = action.payload.username;
-      state.email = action.payload.email;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
       return { ...state, ...action.payload };
@@ -75,6 +88,18 @@ export const userSlice = createSlice({
       return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
+      return { ...state };
+    });
+    builder.addCase(logout.fulfilled, (state, action) => {
+      return { ...initialState };
+    });
+    builder.addCase(logout.rejected, (state, action) => {
+      return { ...initialState };
+    });
+    builder.addCase(loginFromCookie.fulfilled, (state, action) => {
+      return { ...state, ...action.payload };
+    });
+    builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
@@ -92,7 +117,5 @@ export const userSlice = createSlice({
     });
   },
 });
-
-export const { logout, setUser } = userSlice.actions;
 
 export default userSlice.reducer;

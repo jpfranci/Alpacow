@@ -8,6 +8,7 @@ const {
   createUser,
   getUser,
   validateEmailAndUsername,
+  logout,
 } = require("../../../services/users-service");
 const express = require("express");
 const router = express.Router();
@@ -72,6 +73,17 @@ router.post(
 );
 
 router.post("/loginFromCookie", extractUserFromSessionCookie, login);
+router.post("/logout", extractUserFromSessionCookie, async (req, res, next) => {
+  try {
+    const { uid } = req;
+    await logout(uid);
+    res.status(200).send();
+  } catch (err) {
+    next(err);
+  } finally {
+    clearAuthCookies(res);
+  }
+});
 
 router.get("/:id/posts", async (req, res, next) => {
   try {

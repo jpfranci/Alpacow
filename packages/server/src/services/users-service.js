@@ -2,12 +2,30 @@ const { BadRequestError } = require("../errors/bad-request-error");
 const { AuthErrorCodes } = require("../errors/auth/auth-error-codes");
 
 const UserDb = require("../data/db/db-operations/user-ops");
+const admin = require("firebase-admin");
+
+const tryToDeleteUser = async ({ _id }) => {
+  try {
+    await admin.auth().deleteUser(_id);
+  } catch (err) {
+    console.error("Error deleting user from firebase");
+    console.error(err);
+  }
+};
+
+const logout = (uid) => {
+  return admin.auth().revokeRefreshTokens(uid);
+};
 
 const createUser = async (payload) => {
   try {
     return await UserDb.createUser({ ...payload, reputation: 0 });
   } catch (err) {
     if (err.code === 11000) {
+      // try to delete the newly created user. this is since we would need to delete when:
+      // a user is successfully created in firebase (email doesnt exist) but the username is already in our db
+      // since firebase creation happens in the frontend, we can't do anything to guarantee atomicity
+      await tryToDeleteUser(payload);
       const { usernameExists, emailExists } = await validateEmailAndUsername(
         payload,
       );
@@ -49,4 +67,5 @@ module.exports = {
   createUser,
   getUser,
   validateEmailAndUsername,
+  logout,
 };
