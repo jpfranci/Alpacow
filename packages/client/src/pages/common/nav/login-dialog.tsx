@@ -126,7 +126,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
           <StyledColumnContainer>
             <TextField
               id="new-user-email"
-              label="email"
+              label="Email"
               value={values.email}
               onChange={handleChange("email")}
               fullWidth
