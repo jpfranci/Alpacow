@@ -23,7 +23,7 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import CloseIcon from "@material-ui/icons/Close";
 
 const DEFAULT_FIELDS = {
-  username: "",
+  email: "",
   password: "",
   showPassword: false,
 };
@@ -34,7 +34,7 @@ interface LoginDialogProps {
 }
 
 interface LoginState {
-  username: string;
+  email: string;
   password: string;
   showPassword: boolean;
 }
@@ -81,7 +81,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
   const handleLogin = () => {
     dispatch(
       login({
-        username: values.username,
+        email: values.email,
         password: values.password,
       }),
     )
@@ -125,10 +125,10 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
         <StyledRowContainer>
           <StyledColumnContainer>
             <TextField
-              id="new-user-username"
-              label="Username"
-              value={values.username}
-              onChange={handleChange("username")}
+              id="new-user-email"
+              label="Email"
+              value={values.email}
+              onChange={handleChange("email")}
               fullWidth
               margin="normal"
               size="small"

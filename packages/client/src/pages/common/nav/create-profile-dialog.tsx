@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   createStyles,
@@ -22,6 +22,9 @@ import { Visibility, VisibilityOff } from "@material-ui/icons";
 import { signup } from "../../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { Variant } from "@material-ui/core/styles/createTypography";
+import ActionableError from "../../../errors/actionable-error";
+import SignupErrorCode from "../../../errors/signup-errors";
+import userService from "../../../services/users";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -50,6 +53,20 @@ interface ProfileState {
   showPassword: boolean;
 }
 
+interface ProfileErrors {
+  username: string;
+  password: string;
+  email: string;
+  showPassword: string;
+}
+
+const DEFAULT_ERRORS: ProfileErrors = {
+  username: "",
+  password: "",
+  email: "",
+  showPassword: "",
+};
+
 const InputFieldProps = {
   fullWidth: true,
   margin: "normal" as PropTypes.Margin,
@@ -62,7 +79,8 @@ const StyledContainer = styled.div`
 // TODO: form validation, Firebase hookup
 const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   const classes = useStyles();
-  const [values, setValues] = React.useState<ProfileState>(DEFAULT_FIELDS);
+  const [values, setValues] = useState<ProfileState>(DEFAULT_FIELDS);
+  const [errors, setErrors] = useState<ProfileErrors>(DEFAULT_ERRORS);
   const dispatch = useAppDispatch();
 
   const handleClose = () => {
@@ -70,23 +88,61 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
     onClose();
   };
 
-  const handleSignUp = () => {
-    dispatch(
-      signup({
-        username: values.username,
-        password: values.password,
-        email: values.email,
-      }),
-    )
-      .then(unwrapResult)
-      .then((data) => alert("Signup succeeded!"))
-      .catch((error) => alert("Signup failed.:" + error));
-    handleClose();
+  const handleSignUp = async () => {
+    try {
+      const { username, email } = values;
+      const validationResult = await userService.validate({
+        username,
+        email,
+      });
+      let isValid = true;
+      if (validationResult.emailExists) {
+        setErrors({ ...errors, email: "The email already exists" });
+        isValid = false;
+      }
+
+      if (validationResult.usernameExists) {
+        setErrors({ ...errors, username: "The username already exists" });
+        isValid = false;
+      }
+
+      if (isValid) {
+        const dispatchedAction = await dispatch(
+          signup({
+            username: values.username,
+            password: values.password,
+            email: values.email,
+          }),
+        );
+        unwrapResult(dispatchedAction);
+        handleClose();
+      }
+    } catch (err) {
+      if (err instanceof ActionableError) {
+        switch (err.errorCode) {
+          case SignupErrorCode.DUPLICATE_EMAIL:
+          case SignupErrorCode.INVALID_EMAIL:
+            setErrors({ ...errors, email: err.message });
+            break;
+          case SignupErrorCode.DUPLICATE_USERNAME:
+            setErrors({ ...errors, username: err.message });
+            break;
+          case SignupErrorCode.WEAK_PASSWORD:
+            setErrors({ ...errors, password: err.message });
+        }
+      } else {
+        alert(
+          "There was an unexpected error while signing up, please try again",
+        );
+      }
+    }
   };
 
   const handleChange =
     (prop: keyof ProfileState) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      // TODO: Do validation on field
+      setErrors({ ...errors, [prop]: "" });
       setValues({ ...values, [prop]: event.target.value });
     };
 
@@ -111,27 +167,32 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
         <StyledContainer>
           <TextField
             id="new-user-email"
-            label="Email"
+            label={errors.email ? errors.email : "Email"}
             value={values.email}
             onChange={handleChange("email")}
             required
+            error={!!errors.email}
             autoFocus
             variant="standard"
             {...InputFieldProps}
           />
           <TextField
             id="new-user-username"
-            label="Username"
+            label={errors.username ? errors.username : "Username"}
             value={values.username}
             onChange={handleChange("username")}
             required
+            error={!!errors.username}
             variant="standard"
             {...InputFieldProps}
           />
           <FormControl {...InputFieldProps}>
-            <InputLabel htmlFor="adornment-password">Password</InputLabel>
+            <InputLabel htmlFor="adornment-password" error={!!errors.password}>
+              {errors.password ? errors.password : "Password"}
+            </InputLabel>
             <Input
               id="new-user-password"
+              error={!!errors.password}
               type={values.showPassword ? "text" : "password"}
               onChange={handleChange("password")}
               endAdornment={

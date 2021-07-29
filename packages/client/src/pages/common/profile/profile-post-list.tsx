@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import PostListItem from "../../home/post-list/post-list-item";
-import { getPostsByUser } from "../../../redux/slices/user-slice";
+import { UserState } from "../../../redux/slices/user-slice";
+import userService from "../../../services/users";
+import { Post } from "../../../redux/slices/post-slice";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -13,22 +14,25 @@ const StyledContainer = styled.div`
 interface ProfilePostListProps {
   showCreatedPosts: boolean;
   handleClose: any;
+  user: UserState;
 }
 
 const ProfilePostList = ({
   showCreatedPosts,
   handleClose,
+  user,
 }: ProfilePostListProps) => {
-  const dispatch = useAppDispatch();
-
-  const userState = useAppSelector((state) => state.user);
-  const posts = useAppSelector((state) => {
-    return state.user.posts;
-  });
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    //TODO get upvoted posts if !showCreatedPosts
-    dispatch(getPostsByUser(userState));
+    const fetchPostsForUser = async () => {
+      const fetchedPosts = await userService.getPostsByUser(
+        String(user._id),
+        "new",
+      );
+      setPosts(fetchedPosts);
+    };
+    fetchPostsForUser();
   }, [showCreatedPosts]);
 
   return (

@@ -1,6 +1,4 @@
 const Post = require("../../models/post-model");
-const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
 
 // We don't want to send all 1000 posts to the client while we have no filters,
 // so this will just sample randomly from all posts
@@ -82,7 +80,7 @@ const getPostsByUserID = async (userId, sortType) => {
   const aggregation = [];
   aggregation.push({
     $match: {
-      userId: ObjectId(userId),
+      userId: userId,
     },
   });
   aggregation.push({

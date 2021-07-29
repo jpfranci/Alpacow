@@ -1,9 +1,9 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
 } from "../../services/users";
-import { createPost, downvote, getPosts, Post, upvote } from "./post-slice";
+import { createPost, downvote, Post, upvote } from "./post-slice";
 
 const prefix = "user";
 
@@ -29,9 +29,7 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
   `${prefix}/signup`,
   async (signupInfo: SignupInfo, { rejectWithValue }) => {
     try {
-      const response = await userService.signup(signupInfo);
-
-      return { ...response.data };
+      return await userService.signup(signupInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -40,29 +38,31 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
 
 export const login = createAsyncThunk<UserState, LoginCredentials>(
   `${prefix}/login`,
-  async (credentials: LoginCredentials, { rejectWithValue }) => {
+  async (loginCredentials, { rejectWithValue }) => {
     try {
-      const response = await userService.login(credentials);
-      // TODO adjust code after we implement this endpoint
-      return response.data.length <= 0
-        ? rejectWithValue("user doesn't exist")
-        : response.data[0];
+      return await userService.login(loginCredentials);
     } catch (error) {
       return rejectWithValue(error);
     }
   },
 );
 
-export const getPostsByUser = createAsyncThunk<Post[], UserState>(
-  `${prefix}/getPostsByUser`,
-  async (userState: UserState, { rejectWithValue }) => {
+export const loginFromCookie = createAsyncThunk<UserState, void>(
+  `${prefix}/loginFromCookie`,
+  async (_, { rejectWithValue }) => {
     try {
-      // TODO: probably allow view profile to toggle between hot and new in the future
-      const response = await userService.getPostsByUser(
-        String(userState._id),
-        "new",
-      );
-      return response.data;
+      return await userService.loginFromCookie();
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const logout = createAsyncThunk<void, void>(
+  `${prefix}/logout`,
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.logout();
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -76,30 +76,31 @@ export const getPostsByUser = createAsyncThunk<Post[], UserState>(
 export const userSlice = createSlice({
   name: prefix,
   initialState,
-  reducers: {
-    logout: (state) => {
-      return { ...initialState };
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(signup.rejected, (state, action) => {
-      return { ...initialState };
+      return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      state = action.payload;
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
+      return { ...state };
+    });
+    builder.addCase(logout.fulfilled, (state, action) => {
       return { ...initialState };
     });
-    builder.addCase(getPostsByUser.fulfilled, (state, action) => {
-      state.posts = action.payload;
-    });
-    builder.addCase(getPostsByUser.rejected, (state, action) => {
+    builder.addCase(logout.rejected, (state, action) => {
       return { ...initialState };
+    });
+    builder.addCase(loginFromCookie.fulfilled, (state, action) => {
+      return { ...state, ...action.payload };
+    });
+    builder.addCase(loginFromCookie.rejected, (state, action) => {
+      return { ...state };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.posts.push(action.payload);
@@ -116,7 +117,5 @@ export const userSlice = createSlice({
     });
   },
 });
-
-export const { logout } = userSlice.actions;
 
 export default userSlice.reducer;

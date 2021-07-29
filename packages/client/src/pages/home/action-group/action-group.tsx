@@ -15,16 +15,16 @@ const StyledContainer = styled.div`
   flex-wrap: wrap;
 `;
 
+const ActionElement = styled.div`
+  margin: 1em;
+`;
+
 const ActionGroup = () => {
   const [modalOpen, setModalOpen]: [
     boolean,
     Dispatch<SetStateAction<boolean>>,
   ] = useState<boolean>(false);
   const userState = useAppSelector((state) => state.user);
-
-  const ActionElement = styled.div`
-    margin: 1em;
-  `;
 
   const handleModalClose = () => {
     setModalOpen(false);

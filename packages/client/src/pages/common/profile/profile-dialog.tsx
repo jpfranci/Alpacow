@@ -130,6 +130,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         <ProfilePostList
           showCreatedPosts={showCreatedPosts}
           handleClose={handleClose}
+          user={userState}
         />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>

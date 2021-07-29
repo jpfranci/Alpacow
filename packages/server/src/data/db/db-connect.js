@@ -6,6 +6,7 @@ const {
   MONGO_DB_HOST,
   MONGO_DB_USER,
   MONGO_DB_PASSWORD,
+  MONGO_DB_PREFIX,
   USE_AUTHENTICATION,
   AUTH_SOURCE,
 } = process.env;
@@ -14,7 +15,7 @@ const connectToDb = async () => {
   let authString = "";
   let queryParams = "";
   const encodedHost = encodeURIComponent(MONGO_DB_HOST);
-  const encodedPort = encodeURIComponent(MONGO_DB_PORT);
+  const encodedPort = encodeURIComponent(MONGO_DB_PORT ?? "");
   const encodedName = encodeURIComponent(DB_NAME);
   if (USE_AUTHENTICATION === "true") {
     const encodedUser = encodeURIComponent(MONGO_DB_USER);
@@ -24,7 +25,7 @@ const connectToDb = async () => {
     queryParams = `?${queryString}`;
   }
   return mongoose.connect(
-    `mongodb://${authString}${encodedHost}:${encodedPort}/${encodedName}${queryParams}`,
+    `${MONGO_DB_PREFIX}://${authString}${encodedHost}:${encodedPort}/${encodedName}${queryParams}`,
     { useNewUrlParser: true },
   );
 };

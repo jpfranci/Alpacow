@@ -34,7 +34,7 @@ const UserExample = () => {
   const user = useAppSelector((state) => state.user);
 
   const handleLogin = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    dispatch(login({ username: loginUsername, password: loginPassword }))
+    dispatch(login({ email: loginUsername, password: loginPassword }))
       .then(unwrapResult) // this is how you can access thunk return values in a nice format
       // (store has already been updated from action dispatch as this point, but you might want action result to do some component logic)
       .then((data) => alert("login succeeded"))
@@ -151,7 +151,7 @@ const PostExample = () => {
           body: bodyText,
           tag,
           location: locationFilter,
-          userId: user._id,
+          isAnonymous: false,
         }),
       )
         .then(unwrapResult)
@@ -213,7 +213,6 @@ const PostExample = () => {
               <p>body: {post.body}</p>
               <p>tag: {post.tag}</p>
               <p>location: {post.location}</p>
-              <p>created by (id): {post.userId}</p>
             </li>
           ))}
         </ul>

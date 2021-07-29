@@ -1,0 +1,14 @@
+const FIREBASE_SESSION_COOKIE_NAME = "firebase-session";
+// 5 days
+const DEFAULT_SESSION_COOKIE_EXPIRATION = 60 * 60 * 24 * 5 * 1000;
+const SESSION_COOKIE_OPTIONS = {
+  maxAge: DEFAULT_SESSION_COOKIE_EXPIRATION,
+  httpOnly: true,
+  secure: true,
+};
+
+module.exports = {
+  FIREBASE_SESSION_COOKIE_NAME,
+  DEFAULT_SESSION_COOKIE_EXPIRATION,
+  SESSION_COOKIE_OPTIONS,
+};
