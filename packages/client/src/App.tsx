@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import NavBar from "./pages/common/nav/nav";
 import { Redirect, Route, Switch } from "react-router";
@@ -9,8 +9,29 @@ import PostPage from "./pages/post/post";
 import darkTheme from "./common/theme";
 import ExamplePage from "./pages/example/example";
 import { ThemeProvider } from "styled-components";
+import { useAppDispatch } from "./redux/store";
+import { loginFromCookie } from "./redux/slices/user-slice";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const App = () => {
+  const [appLoaded, setAppLoaded] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    const tryToLoginFromCookie = async () => {
+      try {
+        const dispatchResult = await dispatch(loginFromCookie());
+        unwrapResult(dispatchResult);
+      } finally {
+        setAppLoaded(true);
+      }
+    };
+    tryToLoginFromCookie();
+  }, []);
+
+  if (!appLoaded) {
+    return null;
+  }
+
   return (
     <MuiThemeProvider theme={darkTheme}>
       <ThemeProvider theme={darkTheme}>

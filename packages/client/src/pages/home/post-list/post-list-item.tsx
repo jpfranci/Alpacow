@@ -61,9 +61,16 @@ const DateText = styled.div`
 interface PostProps {
   post: Post;
   index: number;
+  showPostBody: boolean;
+  postClickCallback?: () => void;
 }
 
-const PostListItem: React.FC<PostProps> = ({ post, index }) => {
+const PostListItem: React.FC<PostProps> = ({
+  post,
+  index,
+  showPostBody,
+  postClickCallback,
+}) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const history = useHistory();
@@ -82,6 +89,9 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
   };
 
   const handlePostClick = () => {
+    if (postClickCallback) {
+      postClickCallback();
+    }
     dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
     window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes
@@ -101,12 +111,22 @@ const PostListItem: React.FC<PostProps> = ({ post, index }) => {
     dispatch(downvote({ post, user }));
   };
 
+  const postBodyText = () => {
+    if (showPostBody) {
+      return (
+        <BodyText>
+          {post.body.length > 1000
+            ? `${post.body.substr(0, 500)}...`
+            : post.body}
+        </BodyText>
+      );
+    }
+  };
+
   return (
     <PostContainer onClick={handlePostClick}>
       <TitleText>{post.title}</TitleText>
-      <BodyText>
-        {post.body.length > 1000 ? `${post.body.substr(0, 500)}...` : post.body}
-      </BodyText>
+      {postBodyText()}
       <PostFooter>
         <PostFooterSection>
           <DateText>{date}</DateText>

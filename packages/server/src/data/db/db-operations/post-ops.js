@@ -76,11 +76,41 @@ const getPostByID = async (id) => {
   });
 };
 
+const getPostsByUserID = async (userId, sortType) => {
+  const aggregation = [];
+  aggregation.push({
+    $match: {
+      userId: userId,
+    },
+  });
+  aggregation.push({
+    $project: {
+      title: true,
+      body: true,
+      date: true,
+      numUpvotes: true,
+      numDownvotes: true,
+      username: true,
+      tag: true,
+      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+      isMature: true,
+    },
+  });
+  aggregation.push({
+    $sort:
+      sortType === "popular"
+        ? { score: -1, date: -1, _id: -1 }
+        : { date: -1, _id: -1 },
+  });
+  return Post.aggregate(aggregation);
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
   createPost,
   getPostByID,
+  getPostsByUserID,
 };
 
 module.exports = operations;

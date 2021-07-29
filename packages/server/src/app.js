@@ -1,16 +1,19 @@
 require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
-const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 const { getDb } = require("./data/db/db-connect");
-const indexRouter = require("./routes");
 const { errors } = require("celebrate");
-const postRouter = require("./routes/api/posts/posts-router");
-const tagsRouter = require("./routes/api/tags/tags-router");
+const apiRouter = require("./routes/api/api-router");
+const admin = require("firebase-admin");
+const { HttpError } = require("./errors/http-error");
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+});
 
 getDb()
   .then(() => {
@@ -39,10 +42,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.use("/api/posts", postRouter);
-app.use("/api/tags", tagsRouter);
+app.use("/api", apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -53,13 +53,20 @@ app.use(errors());
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.send(err.message);
+  console.error(err);
+  if (err instanceof HttpError) {
+    res.status(err.status).json({
+      message: err.message,
+      errorCode: err.errorCode,
+    });
+  } else {
+    // mask any internal errors
+    const messageToUse =
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "An internal server error occurred";
+    res.status(500).send(messageToUse);
+  }
 });
 
 module.exports = app;

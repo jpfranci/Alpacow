@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
@@ -8,16 +8,17 @@ import { createPost, downvote, Post, upvote } from "./post-slice";
 const prefix = "user";
 
 export type UserState = {
-  id?: string; // if id doesn't exist, user is not logged in
+  _id?: string; // if id doesn't exist, user is not logged in
   username?: string;
   email?: string;
+  reputation?: number;
   // password?: string (shouldn't be stored on client)
   posts: Post[];
   votedPosts: { [id: string]: { upvoted: boolean } }; // TODO idk if this is best way to do it
 };
 
 const initialState: UserState = {
-  id: undefined,
+  _id: undefined,
   username: undefined,
   email: undefined,
   posts: [],
@@ -28,9 +29,7 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
   `${prefix}/signup`,
   async (signupInfo: SignupInfo, { rejectWithValue }) => {
     try {
-      const response = await userService.signup(signupInfo);
-
-      return { ...response.data };
+      return await userService.signup(signupInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -39,14 +38,31 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
 
 export const login = createAsyncThunk<UserState, LoginCredentials>(
   `${prefix}/login`,
-  async (credentials: LoginCredentials, { rejectWithValue }) => {
+  async (loginCredentials, { rejectWithValue }) => {
     try {
-      const response = await userService.login(credentials);
+      return await userService.login(loginCredentials);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
 
-      // TODO adjust code after we implement this endpoint
-      return response.data.length <= 0
-        ? rejectWithValue("user doesn't exist")
-        : response.data[0];
+export const loginFromCookie = createAsyncThunk<UserState, void>(
+  `${prefix}/loginFromCookie`,
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.loginFromCookie();
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const logout = createAsyncThunk<void, void>(
+  `${prefix}/logout`,
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.logout();
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -63,16 +79,28 @@ export const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(signup.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(signup.rejected, (state, action) => {
-      return { ...initialState };
+      return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      return { ...initialState, ...action.payload };
+      return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
+      return { ...state };
+    });
+    builder.addCase(logout.fulfilled, (state, action) => {
       return { ...initialState };
+    });
+    builder.addCase(logout.rejected, (state, action) => {
+      return { ...initialState };
+    });
+    builder.addCase(loginFromCookie.fulfilled, (state, action) => {
+      return { ...state, ...action.payload };
+    });
+    builder.addCase(loginFromCookie.rejected, (state, action) => {
+      return { ...state };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.posts.push(action.payload);

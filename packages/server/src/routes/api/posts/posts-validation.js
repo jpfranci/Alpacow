@@ -1,10 +1,8 @@
 const { celebrate, Joi, Segments } = require("celebrate");
 
 const createPostSchema = Joi.object().keys({
-  username: Joi.string().min(1).required(),
-  email: Joi.string().email().required(),
   title: Joi.string().min(1).required(),
-  body: Joi.string().min(1).required(),
+  body: Joi.string().min(1).max(1024).required(),
   lat: Joi.number().required(),
   lon: Joi.number().required(),
   isAnonymous: Joi.boolean().required(),

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import {
   Button,
   ClickAwayListener,
@@ -10,6 +10,9 @@ import {
 } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import styled from "styled-components";
+import ProfileDialog from "./profile-dialog";
+import { useAppDispatch } from "../../../redux/store";
+import { logout } from "../../../redux/slices/user-slice";
 
 const ButtonContainer = styled(Button)`
   text-transform: none;
@@ -18,6 +21,7 @@ const ButtonContainer = styled(Button)`
 const ProfileButton = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
+  const dispatch = useAppDispatch();
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -27,10 +31,19 @@ const ProfileButton = (props: any) => {
     setOpen(false);
   };
 
-  // const dispatch = useAppDispatch();
-  // const user = useAppSelector((state) => state.user);
-  // TODO: replace with log out action
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  const handleProfileModalClose = () => {
+    setProfileModalOpen(false);
+  };
+
+  const handleViewAccount = () => {
+    setProfileModalOpen(true);
+    handleClose();
+  };
+
   const handleLogOut = () => {
+    dispatch(logout());
     setOpen(false);
   };
 
@@ -70,8 +83,7 @@ const ProfileButton = (props: any) => {
                   autoFocusItem={open}
                   id="menu-list-grow"
                   onKeyDown={handleListKeyDown}>
-                  {/* TODO: replace with real functionality */}
-                  <MenuItem onClick={handleClose}>My account</MenuItem>
+                  <MenuItem onClick={handleViewAccount}>My account</MenuItem>
                   <MenuItem onClick={handleLogOut}>Logout</MenuItem>
                 </MenuList>
               </ClickAwayListener>
@@ -79,6 +91,10 @@ const ProfileButton = (props: any) => {
           </Grow>
         )}
       </Popper>
+      <ProfileDialog
+        open={profileModalOpen}
+        onClose={handleProfileModalClose}
+      />
     </div>
   );
 };

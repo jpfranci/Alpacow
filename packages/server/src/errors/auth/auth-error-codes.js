@@ -1,0 +1,10 @@
+class AuthErrorCodes {
+  static DUPLICATE_EMAIL = "DUPLICATE_EMAIL";
+  static DUPLICATE_USERNAME = "DUPLICATE_USERNAME";
+  static SESSION_EXPIRED = "SESSION_EXPIRED";
+  static TOKEN_EXPIRED = "TOKEN_EXPIRED";
+  static INVALID_SESSION = "INVALID_SESSION";
+  static INVALID_TOKEN = "INVALID_TOKEN";
+}
+
+module.exports = { AuthErrorCodes };
