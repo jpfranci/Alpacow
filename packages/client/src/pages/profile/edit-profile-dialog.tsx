@@ -78,7 +78,6 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
   };
 
   const handleUpdateUser = async () => {
-    // TODO: extract method that returns errors + T/F for validation
     try {
       const { username, email } = values;
       const validationResult = await userService.validate({
@@ -87,10 +86,8 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
       });
       let isValid = true;
       let formErrors = errors;
-      if (validationResult.emailExists) {
-        formErrors = { ...formErrors, email: "The email already exists" };
-        isValid = false;
-      }
+
+      // TODO: check if existing email belongs to this user, if not ensure updated email isn't being used
 
       if (validationResult.usernameExists) {
         formErrors = { ...formErrors, username: "The username already exists" };
