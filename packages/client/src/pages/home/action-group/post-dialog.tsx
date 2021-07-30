@@ -15,7 +15,7 @@ import {
 import styled from "styled-components";
 import TagSearch from "./tag-search";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import { createPost, getPostsByFilter } from "../../../redux/slices/post-slice";
+import { createPost } from "../../../redux/slices/post-slice";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -60,7 +60,6 @@ const StyledContainer = styled.div`
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const classes = useStyles();
   const location = useAppSelector((state) => state.post.locationFilter);
-  const postState = useAppSelector((state) => state.post);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
   const { title, bodyText, tag, isAnonymous, inputValue } = fields;
@@ -79,7 +78,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
         location: location,
         isAnonymous: isAnonymous,
       }),
-    ).then(() => dispatch(getPostsByFilter(postState)));
+    );
     handleClose();
   };
 
