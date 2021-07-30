@@ -16,6 +16,8 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import userService from "../../services/users";
 import { updateUser } from "../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { useHistory } from "react-router-dom";
+import { PROFILE_PAGE } from "../../common/links";
 
 const StyledPaper = styled(Paper)`
   border-radius: 1rem;
@@ -59,17 +61,19 @@ interface EditProfileDialogProps {
 
 const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
   const userState = useAppSelector((state) => state.user);
-  let username = userState.username;
-  let email = userState.email;
+  let curUsername = userState.username;
+  let curEmail = userState.email;
 
   const DEFAULT_FIELDS = {
-    username: username ? username : "",
-    email: email ? email : "",
+    username: curUsername ? curUsername : "",
+    email: curEmail ? curEmail : "",
   };
 
   const [values, setValues] = useState<EditProfileState>(DEFAULT_FIELDS);
   const [errors, setErrors] = useState<EditProfileErrors>(DEFAULT_ERRORS);
   const dispatch = useAppDispatch();
+
+  let history = useHistory();
 
   const handleClose = () => {
     setValues(DEFAULT_FIELDS);
@@ -81,13 +85,17 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
     try {
       const { username, email } = values;
       const validationResult = await userService.validate({
-        username,
-        email,
+        username: username,
+        email: email,
       });
       let isValid = true;
       let formErrors = errors;
 
       // TODO: check if existing email belongs to this user, if not ensure updated email isn't being used
+      if (email !== curEmail && validationResult.emailExists) {
+        formErrors = { ...formErrors, email: "The new email already exists" };
+        isValid = false;
+      }
 
       if (validationResult.usernameExists) {
         formErrors = { ...formErrors, username: "The username already exists" };
@@ -101,12 +109,13 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
           const dispatchedAction = await dispatch(
             updateUser({
               _id: userState._id,
-              username: values.username,
-              email: values.email,
+              username: username,
+              email: email,
             }),
           );
           unwrapResult(dispatchedAction);
           handleClose();
+          history.push(PROFILE_PAGE);
         }
       }
     } catch (err) {
@@ -158,7 +167,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
           id="new-user-username"
           label={errors.username ? errors.username : "Username"}
           value={values.username}
-          error={!!errors.email}
+          error={!!errors.username}
           onChange={handleChange("username")}
           variant="standard"
           {...InputFieldProps}
