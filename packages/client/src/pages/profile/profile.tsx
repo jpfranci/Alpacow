@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { HOME_PAGE } from "../../common/links";
 import { Post } from "../../redux/slices/post-slice";
-import { useAppSelector } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Link } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import ProfilePostList from "../common/profile/profile-post-list";
+import ProfileDialog from "../common/profile/profile-dialog";
+import EditProfileDialog from "./edit-profile-dialog";
 
 const StyledTopContainer = styled.div`
   margin: 7.5vh 14vw;
 `;
 
 const StyledProfileContainer = styled.div`
-  margin: 2vh 0vw;
+  margin: 2vh 0;
   padding: 3vh;
   border: 2px solid #000;
   border-radius: 2rem;
@@ -50,13 +52,21 @@ const StyledPostContainer = styled.div`
 `;
 
 const ProfilePage = () => {
+  const [editProfileModalOpen, setEditProfileModalOpen] = React.useState(false);
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
-  const [serverPost, setServerPost] = useState<Post | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
   const userState = useAppSelector((state) => state.user);
 
-  const handleClose = () => {};
+  const handleEditProfileModalOpen = () => {
+    setEditProfileModalOpen((prevOpen) => !prevOpen);
+  };
 
+  const handleEditProfileModalClose = () => {
+    setEditProfileModalOpen(false);
+  };
+
+  const handleClose = () => {
+    setEditProfileModalOpen(false);
+  };
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
     showRecent: boolean,
@@ -73,9 +83,18 @@ const ProfilePage = () => {
           <StyledRowContainer>
             <h1 style={fieldColor}>{userState.username}'s profile</h1>
 
-            <StyledButton variant="outlined" color="primary">
+            <StyledButton
+              variant="outlined"
+              color="primary"
+              onClick={handleEditProfileModalOpen}>
               Edit
             </StyledButton>
+            <EditProfileDialog
+              open={editProfileModalOpen}
+              onClose={handleEditProfileModalClose}
+              username={userState.username}
+              email={userState.email}
+            />
           </StyledRowContainer>
 
           <StyledColumnContainer>
@@ -93,8 +112,7 @@ const ProfilePage = () => {
       </StyledProfileContainer>
 
       <StyledColumnContainer>
-        <text
-          style={{ fontSize: "1.5rem", margin: "1.2rem 0px", ...fieldColor }}>
+        <text style={{ fontSize: "1.5rem", margin: "1.2rem 0", ...fieldColor }}>
           Posts
         </text>
         <ToggleButtonGroup
