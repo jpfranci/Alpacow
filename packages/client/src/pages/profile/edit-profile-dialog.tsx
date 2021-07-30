@@ -12,7 +12,10 @@ import {
 } from "@material-ui/core";
 import styled from "styled-components";
 import CloseIcon from "@material-ui/icons/Close";
-import { useAppSelector } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import userService from "../../services/users";
+import { updateUser } from "../../redux/slices/user-slice";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const StyledPaper = styled(Paper)`
   border-radius: 1rem;
@@ -32,6 +35,16 @@ const StyledTitle = styled.span`
   margin: 0.5em 0;
 `;
 
+interface EditProfileErrors {
+  username: string;
+  email: string;
+}
+
+const DEFAULT_ERRORS: EditProfileErrors = {
+  username: "",
+  email: "",
+};
+
 interface EditProfileState {
   username: string;
   email: string;
@@ -44,22 +57,64 @@ interface EditProfileDialogProps {
   email: string | undefined;
 }
 
-const EditProfileDialog = ({
-  open,
-  onClose,
-  username,
-  email,
-}: EditProfileDialogProps) => {
+const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
   const userState = useAppSelector((state) => state.user);
+  let username = userState.username;
+  let email = userState.email;
+
   const DEFAULT_FIELDS = {
     username: username ? username : "",
     email: email ? email : "",
   };
 
   const [values, setValues] = useState<EditProfileState>(DEFAULT_FIELDS);
+  const [errors, setErrors] = useState<EditProfileErrors>(DEFAULT_ERRORS);
+  const dispatch = useAppDispatch();
 
   const handleClose = () => {
+    setValues(DEFAULT_FIELDS);
+    setErrors(DEFAULT_ERRORS);
     onClose();
+  };
+
+  const handleUpdateUser = async () => {
+    // TODO: extract method that returns errors + T/F for validation
+    try {
+      const { username, email } = values;
+      const validationResult = await userService.validate({
+        username,
+        email,
+      });
+      let isValid = true;
+      let formErrors = errors;
+      if (validationResult.emailExists) {
+        formErrors = { ...formErrors, email: "The email already exists" };
+        isValid = false;
+      }
+
+      if (validationResult.usernameExists) {
+        formErrors = { ...formErrors, username: "The username already exists" };
+        isValid = false;
+      }
+
+      if (!isValid) {
+        setErrors(formErrors);
+      } else {
+        if (userState._id) {
+          const dispatchedAction = await dispatch(
+            updateUser({
+              _id: userState._id,
+              username: values.username,
+              email: values.email,
+            }),
+          );
+          unwrapResult(dispatchedAction);
+          handleClose();
+        }
+      }
+    } catch (err) {
+      alert("There was an unexpected error while signing up, please try again");
+    }
   };
 
   const handleChange =
@@ -94,17 +149,19 @@ const EditProfileDialog = ({
       <DialogContent>
         <TextField
           id="new-user-email"
-          label="Email"
+          label={errors.email ? errors.email : "Email"}
           value={values.email}
           onChange={handleChange("email")}
           autoFocus
+          error={!!errors.email}
           variant="standard"
           {...InputFieldProps}
         />
         <TextField
           id="new-user-username"
-          label="Username"
+          label={errors.username ? errors.username : "Username"}
           value={values.username}
+          error={!!errors.email}
           onChange={handleChange("username")}
           variant="standard"
           {...InputFieldProps}
@@ -115,7 +172,7 @@ const EditProfileDialog = ({
         <Button variant="outlined" color="primary" onClick={handleClose}>
           Back to profile
         </Button>
-        <Button variant="contained" color="primary" onClick={handleClose}>
+        <Button variant="contained" color="primary" onClick={handleUpdateUser}>
           Submit
         </Button>
       </DialogActions>
