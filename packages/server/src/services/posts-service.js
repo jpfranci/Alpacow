@@ -56,7 +56,7 @@ const createPost = async (post) => {
   let userId = null;
 
   if (!isAnonymous) {
-    const user = await UserDb.getUser(userId);
+    const user = await UserDb.getUser(post.userId);
     username = user.username;
     userId = post.userId;
   }
