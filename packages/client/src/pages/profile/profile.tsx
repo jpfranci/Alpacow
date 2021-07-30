@@ -64,14 +64,14 @@ const ProfilePage = () => {
     setShowCreatedPosts(showRecent);
   };
 
-  const fieldStyle = { margin: "0.5rem 0rem", color: "#595959" };
+  const fieldColor = { color: "#595959" };
 
   return (
     <StyledTopContainer>
       <StyledProfileContainer>
         <StyledColumnContainer>
           <StyledRowContainer>
-            <h1 style={fieldStyle}>{userState.username}'s profile</h1>
+            <h1 style={fieldColor}>{userState.username}'s profile</h1>
 
             <StyledButton variant="outlined" color="primary">
               Edit
@@ -80,12 +80,12 @@ const ProfilePage = () => {
 
           <StyledColumnContainer>
             <StyledText>Email Address</StyledText>
-            <text style={fieldStyle}>{userState.email}</text>
+            <text style={fieldColor}>{userState.email}</text>
           </StyledColumnContainer>
 
           <StyledColumnContainer>
             <StyledText>Username </StyledText>
-            <text style={fieldStyle}>{userState.username}</text>
+            <text style={fieldColor}>{userState.username}</text>
           </StyledColumnContainer>
 
           <StyledText>Reputation: 🔥 {userState.reputation}</StyledText>
@@ -93,7 +93,10 @@ const ProfilePage = () => {
       </StyledProfileContainer>
 
       <StyledColumnContainer>
-        <text style={{ fontSize: "1.5rem", ...fieldStyle }}>Posts</text>
+        <text
+          style={{ fontSize: "1.5rem", margin: "1.2rem 0px", ...fieldColor }}>
+          Posts
+        </text>
         <ToggleButtonGroup
           size="large"
           aria-label="outlined primary button group"
