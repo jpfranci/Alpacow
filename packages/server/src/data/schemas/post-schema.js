@@ -19,7 +19,7 @@ const PostSchema = new Schema({
   tag: String,
   upvoters: { type: [String], index: true },
   downvoters: { type: [String], index: true },
-  isMature: Boolean,
+  isMature: { type: Boolean, index: true },
 });
 
 PostSchema.index({ location: "2dsphere" });
