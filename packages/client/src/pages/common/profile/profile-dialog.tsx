@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Link,
   Paper,
 } from "@material-ui/core";
 import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
@@ -14,6 +15,8 @@ import styled from "styled-components";
 import { useAppSelector } from "../../../redux/store";
 import CloseIcon from "@material-ui/icons/Close";
 import ProfilePostList from "./profile-post-list";
+import { Link as RouterLink } from "react-router-dom";
+import { PROFILE_PAGE } from "../../../common/links";
 
 interface ProfileDialogProps {
   open: boolean;
@@ -130,13 +133,16 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         <ProfilePostList
           showCreatedPosts={showCreatedPosts}
           handleClose={handleClose}
+          maxSize={2}
           user={userState}
         />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>
-        <Button variant="outlined" color="primary">
-          See all
-        </Button>
+        <Link component={RouterLink} to={PROFILE_PAGE}>
+          <Button variant="outlined" color="primary" onClick={handleClose}>
+            See full profile
+          </Button>
+        </Link>
       </DialogActions>
     </Dialog>
   );
