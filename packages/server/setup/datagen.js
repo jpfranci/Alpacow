@@ -3,6 +3,7 @@ const csvParser = require("csv-parser");
 const Post = require("../src/data/models/post-model");
 const User = require("../src/data/models/user-model");
 const Tag = require("../src/data/models/tag-model");
+const { callAzureApi } = require("../src/services/posts-service");
 const { ArgumentParser } = require("argparse");
 const { connectToDb } = require("../src/data/db/db-connect");
 const fs = require("fs");
@@ -29,6 +30,7 @@ class DataGenerator {
     maxPosts,
     reset,
     maxScore,
+    callAzure,
   }) {
     if (numUsers < 3) {
       throw Error("Number of users to generate must at least be 3");
@@ -45,6 +47,7 @@ class DataGenerator {
     this.users = [];
     this.posts = [];
     this.setDayRange(daysAgo);
+    this.callAzure = callAzure;
   }
 
   setDayRange(daysAgo) {
@@ -150,7 +153,24 @@ class DataGenerator {
     }
   }
 
-  generateDataForPost(post) {
+  async checkIsMature(text) {
+    let isMature = false;
+    const textLengthLimit = 1024;
+    const timeout = 10000;
+
+    for (let i = 0; i < text.length; i += textLengthLimit) {
+      const textModResponse = await callAzureApi(
+        text.substring(i, Math.min(i + textLengthLimit, text.length)),
+      );
+      isMature =
+        isMature || textModResponse.data.Classification.ReviewRecommended;
+      if (isMature) break;
+      await setTimeout(() => {}, timeout);
+    }
+    return isMature;
+  }
+
+  async generateDataForPost(post) {
     const { title, score, body } = post;
     const date = this.generateRandomDate(this.startTime);
     const location = this.generateRandomLocation();
@@ -160,6 +180,10 @@ class DataGenerator {
     const poster = this.getRandomElementFromArray(this.users).element;
     poster.reputation += Math.floor(Number(score));
     const votes = this.generateVotes(score);
+
+    const isMature = this.callAzure
+      ? (await this.checkIsMature(title)) || (await this.checkIsMature(body))
+      : false;
 
     const postObject = {
       title,
@@ -172,6 +196,7 @@ class DataGenerator {
       tag,
       userId: poster._id,
       username: poster.username,
+      isMature: isMature,
     };
     this.generateCommentsForPost(postObject);
     return postObject;
@@ -185,11 +210,12 @@ class DataGenerator {
         .on("data", (post) => {
           results.push(post);
         })
-        .on("end", () => {
+        .on("end", async () => {
           const postsToGenerate = Math.min(this.maxPosts, results.length);
           for (let i = 0; i < postsToGenerate; i++) {
             const { index } = this.getRandomElementFromArray(results);
-            this.posts.push(this.generateDataForPost(results[index]));
+            const post = await this.generateDataForPost(results[index]);
+            this.posts.push(post);
             results.splice(index, 1);
           }
           resolve();
@@ -301,6 +327,11 @@ parser.add_argument("--max_score", {
   dest: "maxScore",
   type: "int",
 });
+parser.add_argument("--call-azure", {
+  default: "false",
+  help: "Whether to call Azure text moderation api to set isMature on posts and comments",
+  dest: "callAzure",
+});
 
 const args = parser.parse_args();
 
@@ -315,6 +346,7 @@ const dataGenerator = new DataGenerator({
   maxPosts: args.maxPosts,
   reset: args.reset === "true",
   maxScore: args.maxScore,
+  callAzure: args.callAzure,
 });
 dataGenerator
   .generate()
