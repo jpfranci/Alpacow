@@ -97,7 +97,6 @@ const EditProfileDialog = ({
           label="Email"
           value={values.email}
           onChange={handleChange("email")}
-          required
           autoFocus
           variant="standard"
           {...InputFieldProps}
@@ -107,7 +106,6 @@ const EditProfileDialog = ({
           label="Username"
           value={values.username}
           onChange={handleChange("username")}
-          required
           variant="standard"
           {...InputFieldProps}
         />

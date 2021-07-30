@@ -108,6 +108,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
 
   return (
     <Dialog
+      onBackdropClick={handleClose}
       PaperComponent={StyledPaper}
       open={open}
       scroll="body"
