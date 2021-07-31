@@ -4,8 +4,6 @@ const path = require("path");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const livereload = require("livereload");
-const connectLiveReload = require("connect-livereload");
 const { getDb } = require("./data/db/db-connect");
 const { errors } = require("celebrate");
 const apiRouter = require("./routes/api/api-router");
@@ -24,20 +22,26 @@ getDb()
     console.log("uh oh bad db", err);
   });
 
-const liveReloadServer = livereload.createServer({
-  port: 35730,
-});
-liveReloadServer.server.once("connection", () => {
-  setTimeout(() => {
-    liveReloadServer.refresh("/");
-  }, 100);
-});
-
 const app = express();
 app.on("ready", function () {
   app.listen();
 });
-app.use(connectLiveReload());
+
+if (process.env.NODE_ENV === "development") {
+  const livereload = require("livereload");
+  const connectLiveReload = require("connect-livereload");
+
+  const liveReloadServer = livereload.createServer({
+    port: 35730,
+  });
+  liveReloadServer.server.once("connection", () => {
+    setTimeout(() => {
+      liveReloadServer.refresh("/");
+    }, 100);
+  });
+
+  app.use(connectLiveReload());
+}
 
 app.use(express.static(path.join(__dirname, "..", "build")));
 app.use(logger("dev"));
