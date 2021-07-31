@@ -8,6 +8,7 @@
     "@material-ui/lab": "^4.0.0-alpha.58",
     "@react-google-maps/api": "^2.2.0",
     "@reduxjs/toolkit": "^1.5.1",
+    "@storybook/react": "^6.3.6",
     "axios": "^0.21.1",
     "firebase": "^8.8.0",
     "lodash": "^4.17.21",
@@ -29,7 +30,6 @@
     "@storybook/addon-links": "^6.2.9",
     "@storybook/node-logger": "^6.2.9",
     "@storybook/preset-create-react-app": "^3.1.7",
-    "@storybook/react": "^6.2.9",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -59,7 +59,8 @@
     "prettier": "lint-staged",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "heroku-postbuild": "yarn build && rm -rf ../server/build && mv build ../server"
   },
   "eslintConfig": {
     "extends": [

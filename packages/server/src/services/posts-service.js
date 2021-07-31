@@ -100,4 +100,5 @@ module.exports = {
   getPosts,
   getPostByID,
   getPostsByUserID,
+  callAzureApi,
 };

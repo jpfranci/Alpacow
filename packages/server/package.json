@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "node setup/start-mongo.js & nodemon src/bin/www",
+    "start": "NODE_ENV=production node src/bin/www",
+    "dev": "NODE_ENV=development node setup/start-mongo.js & nodemon src/bin/www",
     "prettier": "lint-staged",
     "setup": "node setup/datagen.js",
     "datagen": "node setup/datagen.js"
@@ -12,6 +13,7 @@
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "celebrate": "^15.0.0",
+    "connect-livereload": "^0.6.1",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^10.0.0",
@@ -20,6 +22,7 @@
     "firebase-admin": "^9.11.0",
     "http-errors": "~1.6.3",
     "joi": "^17.4.1",
+    "livereload": "^0.9.3",
     "mongodb": "^3.6.10",
     "mongoose": "^5.13.2",
     "morgan": "~1.9.1",
@@ -29,11 +32,9 @@
   "devDependencies": {
     "argparse": "^2.0.1",
     "chance": "^1.1.7",
-    "connect-livereload": "^0.6.1",
     "csv-parser": "^3.0.0",
     "json-server": "^0.16.3",
     "lint-staged": "^11.0.0",
-    "livereload": "^0.9.3",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.2"
   },

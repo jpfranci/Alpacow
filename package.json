@@ -5,11 +5,17 @@
     "bootstrap": "lerna bootstrap",
     "setup": "yarn install && yarn bootstrap && lerna run --parallel setup",
     "dev": "lerna run --parallel dev",
-    "storybook": "lerna exec yarn storybook"
+    "storybook": "lerna exec yarn storybook",
+    "heroku-postbuild": "lerna bootstrap && lerna run --parallel heroku-postbuild",
+    "start-prod": "cd packages/server && yarn start",
+    "deploy": "git push heroku main"
   },
   "devDependencies": {
     "husky": "^6.0.0",
     "lerna": "^4.0.0"
   },
-  "name": "bumble-for-cats"
+  "name": "bumble-for-cats",
+  "engines": {
+    "node": "16.x"
+  }
 }
