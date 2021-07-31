@@ -7,7 +7,8 @@
     "dev": "lerna run --parallel dev",
     "storybook": "lerna exec yarn storybook",
     "heroku-postbuild": "lerna bootstrap && lerna run --parallel heroku-postbuild",
-    "start-prod": "cd packages/server && yarn start"
+    "start-prod": "cd packages/server && yarn start",
+    "deploy": "git push heroku main"
   },
   "devDependencies": {
     "husky": "^6.0.0",
