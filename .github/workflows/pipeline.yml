@@ -9,6 +9,8 @@ jobs:
   build_deploy:
     runs-on: ubuntu-18.04
     steps:
+      - name: checkout repo into env
+        uses: actions/checkout@v2
       - name: deploy to heroku
         if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message), '#skip') }}
         uses: akhileshns/heroku-deploy@v3.12.12
