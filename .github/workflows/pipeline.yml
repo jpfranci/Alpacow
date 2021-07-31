@@ -1,0 +1,18 @@
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: deploy to heroku
+        if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message), '#skip') }}
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "alpacowabunga"
+          heroku_email: "rujjiryu99@gmail.com"
