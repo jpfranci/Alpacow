@@ -2,3 +2,4 @@ node_modules
 db.json
 .env
 firebase_secret.json
+build/

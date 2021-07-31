@@ -59,7 +59,8 @@
     "prettier": "lint-staged",
     "eject": "react-scripts eject",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "heroku-postbuild": "yarn build && rm -rf ../server/build && mv build ../server"
   },
   "eslintConfig": {
     "extends": [
