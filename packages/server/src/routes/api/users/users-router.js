@@ -77,11 +77,11 @@ router.post("/logout", extractUserFromSessionCookie, async (req, res, next) => {
   try {
     const { uid } = req;
     await logout(uid);
+    clearAuthCookies(res); // have to clear cookies before sending res
     res.status(200).send();
   } catch (err) {
-    next(err);
-  } finally {
     clearAuthCookies(res);
+    next(err);
   }
 });
 
