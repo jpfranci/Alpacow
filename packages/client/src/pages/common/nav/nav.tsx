@@ -19,6 +19,7 @@ import { setShowMatureContent } from "../../../redux/slices/post-slice";
 import { Link as RouterLink } from "react-router-dom";
 import { HOME_PAGE } from "../../../common/links";
 import styled from "styled-components";
+import LogoSVG from "../../../assets/Alpacow-logo.svg";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
@@ -111,11 +112,7 @@ const NavBar = () => {
         </ButtonBase>
         <div className={classes.iconContainer}>
           <ButtonBase className={classes.menuButton}>
-            <img
-              src="./Alpacow-logo.svg"
-              alt="official alpacow logo"
-              height={45}
-            />
+            <img src={LogoSVG} alt="official alpacow logo" height={45} />
           </ButtonBase>
         </div>
         <FormGroup>
