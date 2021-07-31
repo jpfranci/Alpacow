@@ -21,7 +21,7 @@ import { Visibility, VisibilityOff } from "@material-ui/icons";
 import { login } from "../../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import CloseIcon from "@material-ui/icons/Close";
-import LogoSVG from "../../../assets/Alpacow-logo.svg";
+import LogoSVG from "../../../static/Alpacow-logo.svg";
 
 const DEFAULT_FIELDS = {
   email: "",

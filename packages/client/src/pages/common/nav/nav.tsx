@@ -19,7 +19,7 @@ import { setShowMatureContent } from "../../../redux/slices/post-slice";
 import { Link as RouterLink } from "react-router-dom";
 import { HOME_PAGE } from "../../../common/links";
 import styled from "styled-components";
-import LogoSVG from "../../../assets/Alpacow-logo.svg";
+import LogoSVG from "../../../static/Alpacow-logo.svg";
 
 // Using mui theme for consistent spacing
 const useStyles = makeStyles((theme: any) => ({
