@@ -19,7 +19,7 @@ jobs:
           heroku_app_name: "alpacowabunga"
           heroku_email: "rujjiryu99@gmail.com"
           branch: "main"
-          healthcheck: "https://https://alpacowabunga.herokuapp.com/health"
+          healthcheck: "https://alpacowabunga.herokuapp.com/health"
           checkstring: "ok"
           delay: 5
           rollbackonhealthcheckfailed: true
