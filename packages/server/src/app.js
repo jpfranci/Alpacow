@@ -63,6 +63,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use("/api", apiRouter);
 
+// for heroku github action health checks
+app.get("/health", (req, res) => {
+  res.send("ok");
+});
+
 // Catch all routes for serving index.html. Ensures client side routing works.
 app.get("*", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "build", "index.html"));
