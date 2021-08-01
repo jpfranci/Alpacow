@@ -1,4 +1,4 @@
-# Alpacow
+# Alpacow 🐮
 
 Alpacow is a location-based social news web app that allows users to view, create, and interact with posts. The app aims to provide a communal online forum experience with up-to-date content relevant to our users' current location.
 
