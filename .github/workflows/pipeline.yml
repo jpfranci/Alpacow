@@ -18,3 +18,4 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "alpacowabunga"
           heroku_email: "rujjiryu99@gmail.com"
+          branch: "main"
