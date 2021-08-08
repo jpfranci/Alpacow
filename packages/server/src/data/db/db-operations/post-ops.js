@@ -2,8 +2,9 @@ const Post = require("../../models/post-model");
 
 // We don't want to send all 1000 posts to the client while we have no filters,
 // so this will just sample randomly from all posts
-const getPosts = () => {
-  return Post.aggregate([{ $sample: { size: 50 } }]);
+const getPosts = async () => {
+  const posts = await Post.aggregate([{ $sample: { size: 50 } }]);
+  return posts;
 };
 
 const createPost = async (post) => {
@@ -58,7 +59,8 @@ const getPostsByFilter = async ({
         ? { score: -1, date: -1, _id: -1 }
         : { date: -1, _id: -1 },
   });
-  return Post.aggregate(aggregationPipeline);
+  const posts = await Post.aggregate(aggregationPipeline);
+  return posts;
 };
 
 const getPostByID = async (id) => {
@@ -102,7 +104,8 @@ const getPostsByUserID = async (userId, sortType) => {
         ? { score: -1, date: -1, _id: -1 }
         : { date: -1, _id: -1 },
   });
-  return Post.aggregate(aggregation);
+  const posts = await Post.aggregate(aggregation);
+  return posts;
 };
 
 const getVotedPostsByUserID = async (userId, upvote) => {
@@ -127,31 +130,51 @@ const getVotedPostsByUserID = async (userId, upvote) => {
       isMature: true,
     },
   });
-  return await Post.aggregate(aggregation);
+  const posts = await Post.aggregate(aggregation);
+  return posts;
 };
 
 const upvotePost = async (postId, userId) => {
-  const updatedPost = await Post.findByIdAndUpdate(
-    postId,
-    {
-      $push: { upvoters: userId },
-      $inc: { numUpvotes: 1 },
-    },
-    { new: true },
-  );
-  return updatedPost ? updatedPost.toJSON() : undefined;
+  const updateSpec = {
+    $push: { upvoters: userId },
+    $pull: { downvoters: userId },
+    $inc: { numUpvotes: 1 },
+  };
+
+  // TODO can avoid making mult async requests if we inferred vote counts from voter array length
+  const post = await Post.findById(postId);
+  if (post.downvoters.includes(userId)) {
+    updateSpec.$inc.numDownvotes = -1;
+  }
+
+  const updatedPost = await Post.findByIdAndUpdate(postId, updateSpec, {
+    new: true,
+  });
+
+  return updatedPost
+    ? { ...updatedPost.toJSON(), comments: undefined } // TODO use $project instead
+    : undefined;
 };
 
 const downvotePost = async (postId, userId) => {
-  const updatedPost = await Post.findByIdAndUpdate(
-    postId,
-    {
-      $push: { downvoters: userId },
-      $inc: { numDownvotes: 1 },
-    },
-    { new: true },
-  );
-  return updatedPost ? updatedPost.toJSON() : undefined;
+  const updateSpec = {
+    $push: { downvoters: userId },
+    $pull: { upvoters: userId },
+    $inc: { numDownvotes: 1 },
+  };
+
+  const post = await Post.findById(postId);
+  if (post.upvoters.includes(userId)) {
+    updateSpec.$inc.numUpvotes = -1;
+  }
+
+  const updatedPost = await Post.findByIdAndUpdate(postId, updateSpec, {
+    new: true,
+  });
+
+  return updatedPost
+    ? { ...updatedPost.toJSON(), comments: undefined } // TODO use $project instead
+    : undefined;
 };
 
 const operations = {

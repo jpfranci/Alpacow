@@ -112,13 +112,14 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
 
 // TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
-  { numUpvotes: number; postId: string },
+  { numUpvotes: number; numDownvotes: number; postId: string },
   { post: Post }
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
     return {
       numUpvotes: response.data.numUpvotes,
+      numDownvotes: response.data.numDownvotes,
       postId: post._id,
     };
   } catch (error) {
@@ -127,12 +128,13 @@ export const upvote = createAsyncThunk<
 });
 
 export const downvote = createAsyncThunk<
-  { numDownvotes: number; postId: string },
+  { numUpvotes: number; numDownvotes: number; postId: string },
   { post: Post }
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
     return {
+      numUpvotes: response.data.numUpvotes,
       numDownvotes: response.data.numDownvotes,
       postId: post._id,
     };
@@ -192,8 +194,10 @@ export const postSlice = createSlice({
         (post) => post._id === action.payload.postId,
       );
 
-      if (postToUpdate && action.payload.numUpvotes) {
+      if (postToUpdate) {
+        // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
+        postToUpdate.numDownvotes = action.payload.numDownvotes;
       }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
@@ -201,7 +205,8 @@ export const postSlice = createSlice({
         (post) => post._id === action.payload.postId,
       );
 
-      if (postToUpdate && action.payload.numDownvotes) {
+      if (postToUpdate) {
+        postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
       }
     });

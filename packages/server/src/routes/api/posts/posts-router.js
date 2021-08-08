@@ -12,10 +12,7 @@ const {
   createPostValidationFn,
   getPostValidationFn,
 } = require("./posts-validation");
-const {
-  upvotePost,
-  downvotePost,
-} = require("../../../data/db/db-operations/post-ops");
+const { upvotePost, downvotePost } = require("../../../services/posts-service");
 
 router.get("/", getPostValidationFn, async (req, res, next) => {
   try {
