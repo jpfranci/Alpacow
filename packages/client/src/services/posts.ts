@@ -58,6 +58,16 @@ const deleteByID = async (id: string) => {
   return response;
 };
 
+const upvote = async (id: string) => {
+  const response = await axios.post(`${baseUrl}/${id}/upvote`);
+  return response;
+};
+
+const downvote = async (id: string) => {
+  const response = await axios.post(`${baseUrl}/${id}/downvote`);
+  return response;
+};
+
 const postService = {
   create,
   getAll,
@@ -65,6 +75,8 @@ const postService = {
   getByID,
   update,
   deleteByID,
+  upvote,
+  downvote,
 };
 
 export default postService;

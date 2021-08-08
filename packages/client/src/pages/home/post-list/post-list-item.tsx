@@ -101,14 +101,14 @@ const PostListItem: React.FC<PostProps> = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
-    dispatch(upvote({ post, user }));
+    dispatch(upvote({ post }));
   };
 
   const handleDownvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation();
-    dispatch(downvote({ post, user }));
+    dispatch(downvote({ post }));
   };
 
   const postBodyText = () => {

@@ -95,10 +95,20 @@ const getPostsByUserID = async (userId, sortType) => {
   return PostDb.getPostsByUserID(userId, sortType);
 };
 
+const upvote = async (postId, userId) => {
+  return await PostDb.upvotePost(postId, userId);
+};
+
+const downvote = async (postId, userId) => {
+  return await PostDb.downvotePost(postId, userId);
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostByID,
   getPostsByUserID,
   callAzureApi,
+  upvote,
+  downvote,
 };

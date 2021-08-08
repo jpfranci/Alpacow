@@ -122,6 +122,30 @@ const getVotedPostIdsByUserID = async (userId, upvote) => {
   return await Post.aggregate(aggregation);
 };
 
+const upvotePost = async (postId, userId) => {
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    {
+      $push: { upvoters: userId },
+      $inc: { numUpvotes: 1 },
+    },
+    { new: true },
+  );
+  return updatedPost ? updatedPost.toJSON() : undefined;
+};
+
+const downvotePost = async (postId, userId) => {
+  const updatedPost = await Post.findByIdAndUpdate(
+    postId,
+    {
+      $push: { downvoters: userId },
+      $inc: { numDownvotes: 1 },
+    },
+    { new: true },
+  );
+  return updatedPost ? updatedPost.toJSON() : undefined;
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
@@ -129,6 +153,8 @@ const operations = {
   getPostByID,
   getPostsByUserID,
   getVotedPostIdsByUserID,
+  upvotePost,
+  downvotePost,
 };
 
 module.exports = operations;

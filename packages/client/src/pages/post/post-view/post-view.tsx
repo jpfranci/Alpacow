@@ -85,13 +85,13 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
             </Button>
             <VoteButtonSection>
               <IconButton
-                onClick={() => dispatch(upvote({ post, user }))}
+                onClick={() => dispatch(upvote({ post }))}
                 disabled={shouldDisableUpvote}>
                 <UpvoteIcon />
               </IconButton>
               {`${voteCount > 0 ? "+" : ""}${voteCount}`}
               <IconButton
-                onClick={() => dispatch(downvote({ post, user }))}
+                onClick={() => dispatch(downvote({ post }))}
                 disabled={shouldDisableDownvote}>
                 <DownvoteIcon />
               </IconButton>

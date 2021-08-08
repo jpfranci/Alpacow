@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { UserState } from "./user-slice";
 
 const prefix = "post";
 
@@ -113,46 +112,30 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
 
 // TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
-  Partial<Post> & { id: string },
-  { post: Post; user: UserState }
->(`${prefix}/upvote`, async ({ post, user }, { rejectWithValue }) => {
+  { numUpvotes: number; postId: string },
+  { post: Post }
+>(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post._id, {
-      ...post,
-      numUpvotes: post.numUpvotes + 1,
-    });
-
-    // TODO we should make one route each for upvoting/downvoting so we don't have to make redundant server calls
-    // TODO do this logic when we implement auth
-    // // update user
-    // user.votedPosts[post.id] = { upvoted: true };
-    // await userService.update(user.id as string, {
-    //   ...user,
-    // });
-
-    return response.data;
+    const response = await postService.upvote(post._id);
+    return {
+      numUpvotes: response.data.numUpvotes,
+      postId: post._id,
+    };
   } catch (error) {
     return rejectWithValue(error);
   }
 });
 
 export const downvote = createAsyncThunk<
-  Partial<Post> & { id: string },
-  { post: Post; user: UserState }
->(`${prefix}/downvote`, async ({ post, user }, { rejectWithValue }) => {
+  { numDownvotes: number; postId: string },
+  { post: Post }
+>(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post._id, {
-      ...post,
-      numDownvotes: post.numDownvotes + 1,
-    });
-
-    // // update user
-    // user.votedPosts[post.id] = { upvoted: true };
-    // await userService.update(user.id as string, {
-    //   ...user,
-    // });
-
-    return response.data;
+    const response = await postService.downvote(post._id);
+    return {
+      numDownvotes: response.data.numDownvotes,
+      postId: post._id,
+    };
   } catch (error) {
     return rejectWithValue(error);
   }
@@ -206,7 +189,7 @@ export const postSlice = createSlice({
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.id,
+        (post) => post._id === action.payload.postId,
       );
 
       if (postToUpdate && action.payload.numUpvotes) {
@@ -215,7 +198,7 @@ export const postSlice = createSlice({
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.id,
+        (post) => post._id === action.payload.postId,
       );
 
       if (postToUpdate && action.payload.numDownvotes) {
