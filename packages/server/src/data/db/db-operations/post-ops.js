@@ -105,18 +105,26 @@ const getPostsByUserID = async (userId, sortType) => {
   return Post.aggregate(aggregation);
 };
 
-const getVotedPostIdsByUserID = async (userId, upvote) => {
+const getVotedPostsByUserID = async (userId, upvote) => {
   const voteField = upvote ? "upvoters" : "downvoters";
 
   const aggregation = [];
   aggregation.push({
     $match: {
-      voteField: { $in: [userId] },
+      [voteField]: { $in: [userId] },
     },
   });
   aggregation.push({
     $project: {
-      _id: true,
+      title: true,
+      body: true,
+      date: true,
+      numUpvotes: true,
+      numDownvotes: true,
+      username: true,
+      tag: true,
+      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
+      isMature: true,
     },
   });
   return await Post.aggregate(aggregation);
@@ -152,7 +160,7 @@ const operations = {
   createPost,
   getPostByID,
   getPostsByUserID,
-  getVotedPostIdsByUserID,
+  getVotedPostsByUserID,
   upvotePost,
   downvotePost,
 };
