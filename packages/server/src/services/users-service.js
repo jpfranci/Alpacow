@@ -2,6 +2,7 @@ const { BadRequestError } = require("../errors/bad-request-error");
 const { AuthErrorCodes } = require("../errors/auth/auth-error-codes");
 
 const UserDb = require("../data/db/db-operations/user-ops");
+const PostDb = require("../data/db/db-operations/post-ops");
 const admin = require("firebase-admin");
 
 const tryToDeleteUser = async ({ _id }) => {
@@ -48,8 +49,11 @@ const createUser = async (payload) => {
   }
 };
 
-const getUser = (uid) => {
-  return UserDb.getUser(uid);
+const getUser = async (uid) => {
+  const user = await UserDb.getUser(uid);
+  user.upvotedPostIds = await PostDb.getVotedPostIdsByUserID(uid, true);
+  user.downvotedPostIds = await PostDb.getVotedPostIdsByUserID(uid, false);
+  return user;
 };
 
 const validateEmailAndUsername = async ({ username, email }) => {

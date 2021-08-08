@@ -105,12 +105,30 @@ const getPostsByUserID = async (userId, sortType) => {
   return Post.aggregate(aggregation);
 };
 
+const getVotedPostIdsByUserID = async (userId, upvote) => {
+  const voteField = upvote ? "upvoters" : "downvoters";
+
+  const aggregation = [];
+  aggregation.push({
+    $match: {
+      voteField: { $in: [userId] },
+    },
+  });
+  aggregation.push({
+    $project: {
+      _id: true,
+    },
+  });
+  return await Post.aggregate(aggregation);
+};
+
 const operations = {
   getPosts,
   getPostsByFilter,
   createPost,
   getPostByID,
   getPostsByUserID,
+  getVotedPostIdsByUserID,
 };
 
 module.exports = operations;
