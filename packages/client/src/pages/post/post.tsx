@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useRouteMatch } from "react-router";
 import styled from "styled-components";
 import { POST_PAGE } from "../../common/links";
-import { Post } from "../../redux/slices/post-slice";
-import { useAppSelector } from "../../redux/store";
+import { updatePost } from "../../redux/slices/post-slice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
 import PostView from "./post-view/post-view";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -20,9 +20,9 @@ const LoaderContainer = styled.div`
 `;
 
 const PostPage = () => {
-  const [serverPost, setServerPost] = useState<Post | undefined>(undefined);
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const storePost = useAppSelector((state) =>
+  const post = useAppSelector((state) =>
     state.post.currPostIndex === -1
       ? undefined
       : state.post.posts[state.post.currPostIndex],
@@ -30,19 +30,17 @@ const PostPage = () => {
 
   const match = useRouteMatch<{ id: string }>(POST_PAGE);
 
-  // Fetch thicc post data from server (contains comments)
+  // Fetch thicc post data from server
   // We do this b/c posts in redux store don't have comments
+  // This also handles workflow where user naved here via url and store is empty
   useEffect(() => {
-    if (match && !serverPost) {
-      postService
-        .getByID(match.params.id)
-        .then((res) => setServerPost(res.data))
-        .catch((error) => console.error(error))
-        .finally(() => setIsLoading(false));
-    }
-  }, [match, serverPost]);
-
-  const post = serverPost || storePost;
+    if (!match) return;
+    postService
+      .getByID(match.params.id)
+      .then((res) => dispatch(updatePost(res.data)))
+      .catch((error) => console.error(error))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <StyledContainer>

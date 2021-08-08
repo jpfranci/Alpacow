@@ -172,6 +172,21 @@ export const postSlice = createSlice({
     setCommentSortType: (state, action: PayloadAction<CommentSortType>) => {
       state.commentSortType = action.payload;
     },
+    updatePost: (state, action: PayloadAction<Post>) => {
+      const postToUpdate = state.posts.find(
+        (post) => post._id === action.payload._id,
+      );
+
+      if (postToUpdate) {
+        state.posts = state.posts.map((post) =>
+          post._id === action.payload._id ? action.payload : post,
+        );
+      } else {
+        // this case solely exists to handle workflow where user navs to single post view via url
+        state.posts = [action.payload];
+        state.currPostIndex = 0;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
@@ -221,5 +236,6 @@ export const {
   setShowMatureContent,
   setCurrPostIndex,
   setCommentSortType,
+  updatePost,
 } = postSlice.actions;
 export default postSlice.reducer;
