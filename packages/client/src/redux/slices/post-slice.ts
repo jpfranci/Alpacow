@@ -117,7 +117,6 @@ export const upvote = createAsyncThunk<
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
-    console.log(response.data);
     return {
       numUpvotes: response.data.numUpvotes,
       numDownvotes: response.data.numDownvotes,
@@ -134,7 +133,6 @@ export const downvote = createAsyncThunk<
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
-    console.log(response.data);
     return {
       numUpvotes: response.data.numUpvotes,
       numDownvotes: response.data.numDownvotes,
