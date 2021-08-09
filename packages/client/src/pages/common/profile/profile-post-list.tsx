@@ -4,6 +4,7 @@ import PostListItem from "../../home/post-list/post-list-item";
 import { UserState } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
 import { Post } from "../../../redux/slices/post-slice";
+import { useAppSelector } from "../../../redux/store";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -25,6 +26,9 @@ const ProfilePostList = ({
   user,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const postsState = useAppSelector((state) => {
+    return state.post.posts;
+  });
 
   useEffect(() => {
     const fetchPostsForUser = async () => {
@@ -34,8 +38,16 @@ const ProfilePostList = ({
       );
       setPosts(fetchedPosts);
     };
-    fetchPostsForUser();
-  }, [showCreatedPosts]);
+
+    const fetchPostsVotedByUser = async () => {
+      const fetchedPosts = await userService.getPostsByUserVote(
+        String(user._id),
+        true,
+      );
+      setPosts(fetchedPosts);
+    };
+    showCreatedPosts ? fetchPostsForUser() : fetchPostsVotedByUser();
+  }, [showCreatedPosts, postsState]);
 
   return (
     <StyledContainer>

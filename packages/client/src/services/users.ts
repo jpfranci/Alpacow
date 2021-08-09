@@ -158,11 +158,24 @@ const getPostsByUser = async (
   return response.data;
 };
 
+const getPostsByUserVote = async (
+  id: string,
+  isUpvoted: boolean,
+): Promise<Post[]> => {
+  const response = await axios.get(`${baseUrl}/${id}/voted`, {
+    params: {
+      isUpvoted: isUpvoted,
+    },
+  });
+  return response.data;
+};
+
 const userService = {
   signup,
   login,
   update,
   getPostsByUser,
+  getPostsByUserVote,
   validate,
   loginFromCookie,
   logout,

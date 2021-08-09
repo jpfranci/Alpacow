@@ -117,6 +117,7 @@ export const upvote = createAsyncThunk<
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
+    console.log(response.data);
     return {
       numUpvotes: response.data.numUpvotes,
       numDownvotes: response.data.numDownvotes,
@@ -133,6 +134,7 @@ export const downvote = createAsyncThunk<
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
+    console.log(response.data);
     return {
       numUpvotes: response.data.numUpvotes,
       numDownvotes: response.data.numDownvotes,
@@ -208,7 +210,7 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-
+      console.log(postToUpdate?.title);
       if (postToUpdate) {
         // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
@@ -219,7 +221,7 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-
+      console.log(postToUpdate?.title);
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
