@@ -63,7 +63,7 @@ const TagSearch = ({
       options={options}
       style={{ width }}
       autoComplete
-      value={selectedTag ?? null}
+      value={selectedTag ?? inputValue ?? null}
       inputValue={inputValue ?? ""}
       noOptionsText={noOptionsText}
       renderInput={(params) => (
