@@ -13,7 +13,7 @@ const StyledContainer = styled.div`
   margin: 7.5vh 10vw;
 `;
 
-const LoaderContainer = styled.div`
+export const LoaderContainer = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 3em;

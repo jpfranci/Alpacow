@@ -12,13 +12,15 @@ import {
 } from "@material-ui/core";
 import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
 import styled from "styled-components";
-import { useAppSelector } from "../../../redux/store";
 import CloseIcon from "@material-ui/icons/Close";
 import ProfilePostList from "./profile-post-list";
+import { LoaderContainer } from "../../post/post";
 import { Link as RouterLink } from "react-router-dom";
 import { PROFILE_PAGE } from "../../../common/links";
 import { initialState } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import { useAppSelector } from "../../../redux/store";
 
 interface ProfileDialogProps {
   open: boolean;
@@ -63,9 +65,17 @@ const StyledTitle = styled.span`
   font-size: 1.5em;
 `;
 
+const StyledSpinner = styled(LoaderContainer)`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+`;
+
 const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
   const [user, setUser] = useState(initialState);
+  const userState = useAppSelector((state) => state.user);
 
   const handleClose = () => {
     onClose();
@@ -89,7 +99,22 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   }, []);
 
   if (!user.username) {
-    return <span></span>;
+    return (
+      <Dialog
+        open={open}
+        fullScreen={true}
+        onBackdropClick={handleClose}
+        PaperProps={{
+          style: {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          },
+        }}>
+        <StyledSpinner>
+          <CircularProgress />
+        </StyledSpinner>
+      </Dialog>
+    );
   }
 
   return (
@@ -152,13 +177,18 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
           user={user}
         />
       </DialogContent>
-      <DialogActions style={{ margin: "0.5rem" }}>
-        <Link component={RouterLink} to={PROFILE_PAGE}>
-          <Button variant="outlined" color="primary" onClick={handleClose}>
-            See full profile
-          </Button>
-        </Link>
-      </DialogActions>
+      {/* TODO: "see full profile" is only enabled for the current user for now */}
+      {userState._id == user._id ? (
+        <DialogActions style={{ margin: "0.5rem" }}>
+          <Link component={RouterLink} to={PROFILE_PAGE}>
+            <Button variant="outlined" color="primary" onClick={handleClose}>
+              See full profile
+            </Button>
+          </Link>
+        </DialogActions>
+      ) : (
+        <span></span>
+      )}
     </Dialog>
   );
 };
