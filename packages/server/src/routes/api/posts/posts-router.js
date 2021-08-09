@@ -12,6 +12,7 @@ const {
   createPostValidationFn,
   getPostValidationFn,
 } = require("./posts-validation");
+const { upvotePost, downvotePost } = require("../../../services/posts-service");
 
 router.get("/", getPostValidationFn, async (req, res, next) => {
   try {
@@ -40,6 +41,32 @@ router.post(
       req.body.userId = req.uid;
       const createdPost = await createPost(req.body);
       res.json(createdPost);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/:id/upvote",
+  [extractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const updatedPost = await upvotePost(req.params.id, req.uid);
+      res.json(updatedPost);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/:id/downvote",
+  [extractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const updatedPost = await downvotePost(req.params.id, req.uid);
+      res.json(updatedPost);
     } catch (err) {
       next(err);
     }

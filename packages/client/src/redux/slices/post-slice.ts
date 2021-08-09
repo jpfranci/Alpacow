@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
-import { UserState } from "./user-slice";
 
 const prefix = "post";
 
@@ -113,46 +112,32 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
 
 // TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
-  Partial<Post> & { id: string },
-  { post: Post; user: UserState }
->(`${prefix}/upvote`, async ({ post, user }, { rejectWithValue }) => {
+  { numUpvotes: number; numDownvotes: number; postId: string },
+  { post: Post }
+>(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post._id, {
-      ...post,
-      numUpvotes: post.numUpvotes + 1,
-    });
-
-    // TODO we should make one route each for upvoting/downvoting so we don't have to make redundant server calls
-    // TODO do this logic when we implement auth
-    // // update user
-    // user.votedPosts[post.id] = { upvoted: true };
-    // await userService.update(user.id as string, {
-    //   ...user,
-    // });
-
-    return response.data;
+    const response = await postService.upvote(post._id);
+    return {
+      numUpvotes: response.data.numUpvotes,
+      numDownvotes: response.data.numDownvotes,
+      postId: post._id,
+    };
   } catch (error) {
     return rejectWithValue(error);
   }
 });
 
 export const downvote = createAsyncThunk<
-  Partial<Post> & { id: string },
-  { post: Post; user: UserState }
->(`${prefix}/downvote`, async ({ post, user }, { rejectWithValue }) => {
+  { numUpvotes: number; numDownvotes: number; postId: string },
+  { post: Post }
+>(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
-    const response = await postService.update(post._id, {
-      ...post,
-      numDownvotes: post.numDownvotes + 1,
-    });
-
-    // // update user
-    // user.votedPosts[post.id] = { upvoted: true };
-    // await userService.update(user.id as string, {
-    //   ...user,
-    // });
-
-    return response.data;
+    const response = await postService.downvote(post._id);
+    return {
+      numUpvotes: response.data.numUpvotes,
+      numDownvotes: response.data.numDownvotes,
+      postId: post._id,
+    };
   } catch (error) {
     return rejectWithValue(error);
   }
@@ -187,6 +172,21 @@ export const postSlice = createSlice({
     setCommentSortType: (state, action: PayloadAction<CommentSortType>) => {
       state.commentSortType = action.payload;
     },
+    updatePost: (state, action: PayloadAction<Post>) => {
+      const postToUpdate = state.posts.find(
+        (post) => post._id === action.payload._id,
+      );
+
+      if (postToUpdate) {
+        state.posts = state.posts.map((post) =>
+          post._id === action.payload._id ? action.payload : post,
+        );
+      } else {
+        // this case solely exists to handle workflow where user navs to single post view via url
+        state.posts = [action.payload];
+        state.currPostIndex = 0;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getPosts.fulfilled, (state, action) => {
@@ -206,19 +206,22 @@ export const postSlice = createSlice({
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.id,
+        (post) => post._id === action.payload.postId,
       );
 
-      if (postToUpdate && action.payload.numUpvotes) {
+      if (postToUpdate) {
+        // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
+        postToUpdate.numDownvotes = action.payload.numDownvotes;
       }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.id,
+        (post) => post._id === action.payload.postId,
       );
 
-      if (postToUpdate && action.payload.numDownvotes) {
+      if (postToUpdate) {
+        postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
       }
     });
@@ -233,5 +236,6 @@ export const {
   setShowMatureContent,
   setCurrPostIndex,
   setCommentSortType,
+  updatePost,
 } = postSlice.actions;
 export default postSlice.reducer;

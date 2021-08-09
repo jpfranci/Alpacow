@@ -13,9 +13,18 @@ export type UserState = {
   username?: string;
   email?: string;
   reputation?: number;
-  // password?: string (shouldn't be stored on client)
   posts: Post[];
-  votedPosts: { [id: string]: { upvoted: boolean } }; // TODO idk if this is best way to do it
+  votedPosts: { [id: string]: { upvoted: boolean } };
+};
+
+// response body for login requests
+export type LoginState = {
+  _id: string;
+  username: string;
+  email: string;
+  reputation: number;
+  upvotedPostIds: string[];
+  downvotedPostIds: string[];
 };
 
 const initialState: UserState = {
@@ -48,7 +57,7 @@ export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
   },
 );
 
-export const login = createAsyncThunk<UserState, LoginCredentials>(
+export const login = createAsyncThunk<LoginState, LoginCredentials>(
   `${prefix}/login`,
   async (loginCredentials, { rejectWithValue }) => {
     try {
@@ -59,7 +68,7 @@ export const login = createAsyncThunk<UserState, LoginCredentials>(
   },
 );
 
-export const loginFromCookie = createAsyncThunk<UserState, void>(
+export const loginFromCookie = createAsyncThunk<LoginState, void>(
   `${prefix}/loginFromCookie`,
   async (_, { rejectWithValue }) => {
     try {
@@ -102,7 +111,16 @@ export const userSlice = createSlice({
       return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      return { ...state, ...action.payload };
+      const votedPosts = {};
+      for (const upvotedPostId of action.payload.upvotedPostIds) {
+        votedPosts[upvotedPostId] = { upvoted: true };
+      }
+
+      for (const downvotedPostId of action.payload.downvotedPostIds) {
+        votedPosts[downvotedPostId] = { upvoted: false };
+      }
+
+      return { ...state, ...action.payload, votedPosts };
     });
     builder.addCase(login.rejected, (state, action) => {
       return { ...state };
@@ -114,7 +132,17 @@ export const userSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(loginFromCookie.fulfilled, (state, action) => {
-      return { ...state, ...action.payload };
+      console.log("ooo", action.payload);
+      const votedPosts = {};
+      for (const upvotedPostId of action.payload.upvotedPostIds) {
+        votedPosts[upvotedPostId] = { upvoted: true };
+      }
+
+      for (const downvotedPostId of action.payload.downvotedPostIds) {
+        votedPosts[downvotedPostId] = { upvoted: false };
+      }
+
+      return { ...state, ...action.payload, votedPosts };
     });
     builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
@@ -123,12 +151,12 @@ export const userSlice = createSlice({
       state.posts.push(action.payload);
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.id] = {
+      state.votedPosts[action.payload.postId] = {
         upvoted: true,
       };
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.id] = {
+      state.votedPosts[action.payload.postId] = {
         upvoted: false,
       };
     });

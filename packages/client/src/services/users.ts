@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserState } from "../redux/slices/user-slice";
+import { LoginState, UserState } from "../redux/slices/user-slice";
 import { Post } from "../redux/slices/post-slice";
 import firebase from "firebase";
 import SignupErrorCode from "../errors/signup-errors";
@@ -114,14 +114,14 @@ const signup = async (signupInfo: SignupInfo): Promise<UserState> => {
 
 const login = async (
   loginCredentials: LoginCredentials,
-): Promise<UserState> => {
+): Promise<LoginState> => {
   const userCredential = await loginWithFirebase(loginCredentials);
   const idToken = await userCredential.user?.getIdToken();
   const response = await axios.post(`${baseUrl}/login`, { idToken });
   return response.data;
 };
 
-const loginFromCookie = async (): Promise<UserState> => {
+const loginFromCookie = async (): Promise<LoginState> => {
   const response = await axios.post(`${baseUrl}/loginFromCookie`);
   return response.data;
 };

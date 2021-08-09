@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { StyledHR } from "../../common/common";
 import Comments from "./comments";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -85,13 +86,21 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
             </Button>
             <VoteButtonSection>
               <IconButton
-                onClick={() => dispatch(upvote({ post, user }))}
+                onClick={() =>
+                  dispatch(upvote({ post }))
+                    .then(unwrapResult)
+                    .catch((error) => alert("You must be logged in to vote!"))
+                }
                 disabled={shouldDisableUpvote}>
                 <UpvoteIcon />
               </IconButton>
               {`${voteCount > 0 ? "+" : ""}${voteCount}`}
               <IconButton
-                onClick={() => dispatch(downvote({ post, user }))}
+                onClick={() =>
+                  dispatch(downvote({ post }))
+                    .then(unwrapResult)
+                    .catch((error) => alert("You must be logged in to vote!"))
+                }
                 disabled={shouldDisableDownvote}>
                 <DownvoteIcon />
               </IconButton>
