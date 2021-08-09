@@ -11,7 +11,7 @@ import {
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import styled from "styled-components";
 import ProfileDialog from "./profile-dialog";
-import { useAppDispatch } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { logout } from "../../../redux/slices/user-slice";
 import { useHistory } from "react-router-dom";
 import { HOME_PAGE } from "../../../common/links";
@@ -24,6 +24,8 @@ const ProfileButton = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
   const dispatch = useAppDispatch();
+  const userState = useAppSelector((state) => state.user);
+
   let history = useHistory();
 
   const handleToggle = () => {
@@ -49,6 +51,20 @@ const ProfileButton = (props: any) => {
     dispatch(logout());
     setOpen(false);
     history.push(HOME_PAGE);
+  };
+
+  const showProfileDialog = () => {
+    if (profileModalOpen) {
+      return (
+        <ProfileDialog
+          open={profileModalOpen}
+          onClose={handleProfileModalClose}
+          userId={userState._id as string}
+        />
+      );
+    } else {
+      return <span></span>;
+    }
   };
 
   function handleListKeyDown(event: any) {
@@ -95,10 +111,7 @@ const ProfileButton = (props: any) => {
           </Grow>
         )}
       </Popper>
-      <ProfileDialog
-        open={profileModalOpen}
-        onClose={handleProfileModalClose}
-      />
+      {showProfileDialog()}
     </div>
   );
 };

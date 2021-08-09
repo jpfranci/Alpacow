@@ -1,15 +1,12 @@
-import { IconButton } from "@material-ui/core";
+import { Button, IconButton, Typography } from "@material-ui/core";
 import moment from "moment";
 import React from "react";
 import styled from "styled-components";
-import {
-  Comment as CommentType,
-  downvote,
-  upvote,
-} from "../../../redux/slices/post-slice";
+import { Comment as CommentType } from "../../../redux/slices/post-slice";
 import { StyledHR } from "../../common/common";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
+import UsernameButton from "./username-button";
 
 const CommentContainer = styled.div`
   display: flex;
@@ -52,7 +49,8 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
   return (
     <CommentContainer>
       <Header>
-        <b>{comment.username}</b> - {date}
+        <UsernameButton username={comment.username} userId={comment.userId} />
+        {} - {date}
       </Header>
       <Body>{comment.body}</Body>
       <Footer>

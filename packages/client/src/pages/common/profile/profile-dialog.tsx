@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -17,10 +17,13 @@ import CloseIcon from "@material-ui/icons/Close";
 import ProfilePostList from "./profile-post-list";
 import { Link as RouterLink } from "react-router-dom";
 import { PROFILE_PAGE } from "../../../common/links";
+import { initialState } from "../../../redux/slices/user-slice";
+import userService from "../../../services/users";
 
 interface ProfileDialogProps {
   open: boolean;
   onClose: () => any;
+  userId: string;
 }
 
 const StyledPaper = styled(Paper)`
@@ -60,9 +63,9 @@ const StyledTitle = styled.span`
   font-size: 1.5em;
 `;
 
-const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
+const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
-  const userState = useAppSelector((state) => state.user);
+  const [user, setUser] = useState(initialState);
 
   const handleClose = () => {
     onClose();
@@ -77,6 +80,18 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
 
   const fieldStyle = { margin: "0.5rem 0rem", color: "#595959" };
 
+  useEffect(() => {
+    const getUserProfile = async () => {
+      const userProfile = await userService.getUserProfile(userId);
+      setUser(userProfile);
+    };
+    getUserProfile();
+  }, []);
+
+  if (!user.username) {
+    return <span></span>;
+  }
+
   return (
     <Dialog
       onBackdropClick={handleClose}
@@ -89,7 +104,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         <StyledRowContainer>
           <StyledInnerRowContainer>
             <StyledTitle>
-              <StyledUsername>{userState.username}'s </StyledUsername> profile
+              <StyledUsername>{user.username}'s </StyledUsername> profile
             </StyledTitle>
           </StyledInnerRowContainer>
           <IconButton aria-label="close" onClick={onClose}>
@@ -98,12 +113,12 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         </StyledRowContainer>
         <DialogContentText style={fieldStyle}>
           <StyledUsername>Email: </StyledUsername>
-          {userState.email}
+          {user.email}
         </DialogContentText>
         <StyledRowContainerNoSpace>
           <DialogContentText style={fieldStyle}>
             <StyledUsername>Reputation: 🔥</StyledUsername>
-            {userState.reputation}
+            {user.reputation}
           </DialogContentText>
         </StyledRowContainerNoSpace>
       </DialogTitle>
@@ -134,7 +149,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
           showCreatedPosts={showCreatedPosts}
           handleClose={handleClose}
           maxSize={2}
-          user={userState}
+          user={user}
         />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>

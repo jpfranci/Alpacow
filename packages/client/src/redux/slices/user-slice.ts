@@ -27,7 +27,7 @@ export type LoginState = {
   downvotedPostIds: string[];
 };
 
-const initialState: UserState = {
+export const initialState: UserState = {
   _id: undefined,
   username: undefined,
   email: undefined,
@@ -132,7 +132,6 @@ export const userSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(loginFromCookie.fulfilled, (state, action) => {
-      console.log("ooo", action.payload);
       const votedPosts = {};
       for (const upvotedPostId of action.payload.upvotedPostIds) {
         votedPosts[upvotedPostId] = { upvoted: true };

@@ -121,6 +121,11 @@ const login = async (
   return response.data;
 };
 
+const getUserProfile = async (userId: string): Promise<UserState> => {
+  const response = await axios.get(`${baseUrl}/${userId}/profile`);
+  return response.data;
+};
+
 const loginFromCookie = async (): Promise<LoginState> => {
   const response = await axios.post(`${baseUrl}/loginFromCookie`);
   return response.data;
@@ -174,6 +179,7 @@ const userService = {
   signup,
   login,
   update,
+  getUserProfile,
   getPostsByUser,
   getPostsByUserVote,
   validate,

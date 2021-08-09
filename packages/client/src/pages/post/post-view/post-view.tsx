@@ -10,6 +10,7 @@ import { StyledHR } from "../../common/common";
 import Comments from "./comments";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { unwrapResult } from "@reduxjs/toolkit";
+import UsernameButton from "./username-button";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -77,7 +78,8 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
         <PostContent>
           <TitleText>{post.title}</TitleText>
           <SubTitleText>
-            Posted on {date} by <b>{post.username ?? "anonymous"}</b>
+            Posted on {date} by {}{" "}
+            <UsernameButton username={post.username} userId={post.userId} />
           </SubTitleText>
           <BodyText>{post.body}</BodyText>
           <PostContentFooter>

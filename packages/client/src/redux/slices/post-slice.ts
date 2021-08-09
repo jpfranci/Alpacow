@@ -30,6 +30,7 @@ export interface Post extends NewPost {
   numUpvotes: number;
   numDownvotes: number;
   date: string;
+  userId: string;
   username: string;
   comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
 }
