@@ -70,6 +70,7 @@ const getPostByID = async (id) => {
     date: true,
     numUpvotes: true,
     numDownvotes: true,
+    userId: true,
     username: true,
     tag: true,
     score: { $subtract: ["$numUpvotes", "$numDownvotes"] },

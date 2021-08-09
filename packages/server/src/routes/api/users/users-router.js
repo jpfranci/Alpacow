@@ -123,4 +123,13 @@ router.get("/:id/voted", async (req, res, next) => {
   }
 });
 
+router.get("/:id/profile", async (req, res, next) => {
+  try {
+    const user = await getUser(req.params.id);
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
