@@ -1,14 +1,30 @@
 const Post = require("../../models/post-model");
 
-// We don't want to send all 1000 posts to the client while we have no filters,
-// so this will just sample randomly from all posts
-const getPosts = () => {
-  return Post.aggregate([{ $sample: { size: 50 } }]);
+const createProjectionObject = (userId, showComments = false) => {
+  const projection = {
+    $project: {
+      title: true,
+      body: true,
+      date: true,
+      score: { $subtract: [{ $size: "$upvoters" }, { $size: "$downvoters" }] },
+      numUpvotes: { $size: "$upvoters" },
+      numDownvotes: { $size: "$downvoters" },
+      username: true,
+      tag: true,
+      isMature: true,
+      isUpvoted: { $in: [userId, "$upvoters"] },
+      isDownvoted: { $in: [userId, "$downvoters"] },
+    },
+  };
+  if (showComments) {
+    projection.$project.comments = true;
+  }
+  return projection;
 };
 
 const createPost = async (post) => {
   const createdPost = await Post.create(post);
-  return createdPost.toObject();
+  return getPostByID(createdPost._id, post.userId);
 };
 
 const getPostsByFilter = async ({
@@ -17,6 +33,7 @@ const getPostsByFilter = async ({
   tagFilter,
   sortType,
   showMatureContent,
+  userId,
 }) => {
   const aggregationPipeline = [];
   aggregationPipeline.push({
@@ -38,19 +55,7 @@ const getPostsByFilter = async ({
   if (!showMatureContent) {
     aggregationPipeline.push({ $match: { isMature: false } });
   }
-  aggregationPipeline.push({
-    $project: {
-      title: true,
-      body: true,
-      date: true,
-      numUpvotes: true,
-      numDownvotes: true,
-      username: true,
-      tag: true,
-      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-      isMature: true,
-    },
-  });
+  aggregationPipeline.push(createProjectionObject(userId));
   aggregationPipeline.push({
     // additional arguments are to break ties
     $sort:
@@ -61,19 +66,8 @@ const getPostsByFilter = async ({
   return Post.aggregate(aggregationPipeline);
 };
 
-const getPostByID = async (id) => {
-  return await Post.findById(id, {
-    title: true,
-    body: true,
-    date: true,
-    numUpvotes: true,
-    numDownvotes: true,
-    username: true,
-    tag: true,
-    score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-    isMature: true,
-    comments: true,
-  });
+const getPostByID = (id, userId) => {
+  return Post.findById(id, createProjectionObject(userId, true).$project);
 };
 
 const getPostsByUserID = async (userId, sortType) => {
@@ -83,19 +77,7 @@ const getPostsByUserID = async (userId, sortType) => {
       userId: userId,
     },
   });
-  aggregation.push({
-    $project: {
-      title: true,
-      body: true,
-      date: true,
-      numUpvotes: true,
-      numDownvotes: true,
-      username: true,
-      tag: true,
-      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-      isMature: true,
-    },
-  });
+  aggregation.push(createProjectionObject(userId));
   aggregation.push({
     $sort:
       sortType === "popular"
@@ -105,12 +87,72 @@ const getPostsByUserID = async (userId, sortType) => {
   return Post.aggregate(aggregation);
 };
 
+const getVotedPostsByUserID = async (userId, upvote) => {
+  const voteField = upvote ? "upvoters" : "downvoters";
+
+  const aggregation = [];
+  aggregation.push({
+    $match: {
+      [voteField]: { $in: [userId] },
+    },
+  });
+  aggregation.push(createProjectionObject(userId));
+  return Post.aggregate(aggregation);
+};
+
+const upvotePost = async (postId, userId) => {
+  const updateSpec = {
+    $push: { upvoters: userId },
+    $pull: { downvoters: userId },
+  };
+
+  const filter = {
+    _id: postId,
+    upvoters: { $nin: [userId] },
+  };
+
+  return Post.findOneAndUpdate(filter, updateSpec, {
+    new: true,
+    projection: createProjectionObject(userId).$project,
+  });
+};
+
+const downvotePost = async (postId, userId) => {
+  const updateSpec = {
+    $push: { downvoters: userId },
+    $pull: { upvoters: userId },
+  };
+
+  const filter = {
+    _id: postId,
+    downvoters: { $nin: [userId] },
+  };
+
+  return Post.findOneAndUpdate(filter, updateSpec, {
+    new: true,
+    projection: createProjectionObject(userId).$project,
+  });
+};
+
+const updateUsername = async (userId, newUsername) => {
+  return Post.updateMany(
+    { userId },
+    {
+      username: newUsername,
+    },
+    { new: true },
+  );
+};
+
 const operations = {
-  getPosts,
   getPostsByFilter,
   createPost,
   getPostByID,
   getPostsByUserID,
+  getVotedPostsByUserID,
+  upvotePost,
+  downvotePost,
+  updateUsername,
 };
 
 module.exports = operations;

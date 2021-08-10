@@ -68,13 +68,16 @@ router.post(
   },
 );
 
-router.patch(
-  "/:id",
-  [emailAndUsernameUpdateValidationFn],
+router.post(
+  "/update",
+  [emailAndUsernameUpdateValidationFn, extractUserFromSessionCookie],
   async (req, res, next) => {
     try {
-      const updateUserResults = await updateEmailAndUsername(req.body);
-      res.status(200).send({ ...updateUserResults });
+      const updateUserResults = await updateEmailAndUsername({
+        _id: req.uid,
+        ...req.body,
+      });
+      res.status(200).send(updateUserResults);
     } catch (err) {
       next(err);
     }

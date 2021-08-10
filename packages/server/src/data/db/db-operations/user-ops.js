@@ -2,7 +2,7 @@ const User = require("../../models/user-model");
 
 const getUser = async (userId) => {
   const users = await User.find({ _id: userId }).limit(1);
-  return users[0];
+  return users[0].toJSON(); // converts mongo model object to stripped down JSON containing only schema fields
 };
 
 const createUser = (payload) => {
@@ -10,24 +10,16 @@ const createUser = (payload) => {
 };
 
 const updateEmailAndUsername = ({ _id, username, email }) => {
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     _id,
     {
-      username: username,
-      email: email,
+      username,
+      email,
     },
-    function (err, docs) {
-      if (err) {
-        return err;
-      } else {
-        return docs;
-      }
+    {
+      new: true,
     },
   );
-  return {
-    username: username,
-    email: email,
-  };
 };
 
 const doesUsernameExist = async (username) => {

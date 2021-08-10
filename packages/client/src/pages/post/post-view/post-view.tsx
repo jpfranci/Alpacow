@@ -9,6 +9,8 @@ import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { StyledHR } from "../../common/common";
 import Comments from "./comments";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -61,15 +63,12 @@ interface PostViewProps {
 
 const PostView: React.FC<PostViewProps> = ({ post }) => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
 
   const voteCount = post.numUpvotes - post.numDownvotes;
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
-  const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
-  const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
-  const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
+  const shouldDisableUpvote = post.isUpvoted;
+  const shouldDisableDownvote = post.isDownvoted;
 
-  // TODO implement upvote/downvote logic
   return (
     <div>
       <PostViewContainer>
@@ -85,13 +84,21 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
             </Button>
             <VoteButtonSection>
               <IconButton
-                onClick={() => dispatch(upvote({ post, user }))}
+                onClick={() =>
+                  dispatch(upvote({ post }))
+                    .then(unwrapResult)
+                    .catch((err) => toast.error(err.message))
+                }
                 disabled={shouldDisableUpvote}>
                 <UpvoteIcon />
               </IconButton>
               {`${voteCount > 0 ? "+" : ""}${voteCount}`}
               <IconButton
-                onClick={() => dispatch(downvote({ post, user }))}
+                onClick={() =>
+                  dispatch(downvote({ post }))
+                    .then(unwrapResult)
+                    .catch((err) => toast.error(err.message))
+                }
                 disabled={shouldDisableDownvote}>
                 <DownvoteIcon />
               </IconButton>

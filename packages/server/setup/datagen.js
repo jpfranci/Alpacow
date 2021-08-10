@@ -123,8 +123,6 @@ class DataGenerator {
     this.generateVoters(voters, numUpvotes, upvoters);
     this.generateVoters(voters, numDownvotes, downvoters);
     return {
-      numUpvotes,
-      numDownvotes,
       upvoters,
       downvoters,
     };
@@ -346,7 +344,7 @@ const dataGenerator = new DataGenerator({
   maxPosts: args.maxPosts,
   reset: args.reset === "true",
   maxScore: args.maxScore,
-  callAzure: args.callAzure,
+  callAzure: args.callAzure === "true",
 });
 dataGenerator
   .generate()

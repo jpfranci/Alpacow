@@ -1,9 +1,9 @@
 import axios from "axios";
 import { NewPost, Post, PostState } from "../redux/slices/post-slice";
+import ActionableError from "../errors/actionable-error";
+import LoginErrorCode from "../errors/login-errors";
 
 const baseUrl = "/api/posts";
-
-// TODO add return types once backend types are done
 
 const create = async (newPost: NewPost) => {
   const response = await axios.post(`${baseUrl}`, {
@@ -58,6 +58,36 @@ const deleteByID = async (id: string) => {
   return response;
 };
 
+const upvote = async (id: string): Promise<Post> => {
+  try {
+    const response = await axios.post(`${baseUrl}/${id}/upvote`);
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to upvote",
+      );
+    }
+    throw err;
+  }
+};
+
+const downvote = async (id: string): Promise<Post> => {
+  try {
+    const response = await axios.post(`${baseUrl}/${id}/downvote`);
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to downvote",
+      );
+    }
+    throw err;
+  }
+};
+
 const postService = {
   create,
   getAll,
@@ -65,6 +95,8 @@ const postService = {
   getByID,
   update,
   deleteByID,
+  upvote,
+  downvote,
 };
 
 export default postService;

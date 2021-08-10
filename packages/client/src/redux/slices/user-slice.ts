@@ -1,10 +1,10 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
   UpdateUserInfo,
 } from "../../services/users";
-import { createPost, downvote, Post, upvote } from "./post-slice";
+import { Post } from "./post-slice";
 
 const prefix = "user";
 
@@ -13,9 +13,15 @@ export type UserState = {
   username?: string;
   email?: string;
   reputation?: number;
-  // password?: string (shouldn't be stored on client)
   posts: Post[];
-  votedPosts: { [id: string]: { upvoted: boolean } }; // TODO idk if this is best way to do it
+};
+
+// response body for login requests
+export type LoginState = {
+  _id: string;
+  username: string;
+  email: string;
+  reputation: number;
 };
 
 const initialState: UserState = {
@@ -23,7 +29,6 @@ const initialState: UserState = {
   username: undefined,
   email: undefined,
   posts: [],
-  votedPosts: {},
 };
 
 export const signup = createAsyncThunk<UserState, SignupInfo>(
@@ -41,14 +46,14 @@ export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
   `${prefix}/update`,
   async (updateUserInfo: UpdateUserInfo, { rejectWithValue }) => {
     try {
-      return await userService.update(updateUserInfo._id, updateUserInfo);
+      return await userService.update(updateUserInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
   },
 );
 
-export const login = createAsyncThunk<UserState, LoginCredentials>(
+export const login = createAsyncThunk<LoginState, LoginCredentials>(
   `${prefix}/login`,
   async (loginCredentials, { rejectWithValue }) => {
     try {
@@ -59,7 +64,7 @@ export const login = createAsyncThunk<UserState, LoginCredentials>(
   },
 );
 
-export const loginFromCookie = createAsyncThunk<UserState, void>(
+export const loginFromCookie = createAsyncThunk<LoginState, void>(
   `${prefix}/loginFromCookie`,
   async (_, { rejectWithValue }) => {
     try {
@@ -80,9 +85,6 @@ export const logout = createAsyncThunk<void, void>(
     }
   },
 );
-
-// TODO implement getPosts action
-// TODO implement logout action
 
 export const userSlice = createSlice({
   name: prefix,
@@ -118,19 +120,6 @@ export const userSlice = createSlice({
     });
     builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
-    });
-    builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload);
-    });
-    builder.addCase(upvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.id] = {
-        upvoted: true,
-      };
-    });
-    builder.addCase(downvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.id] = {
-        upvoted: false,
-      };
     });
   },
 });

@@ -1,10 +1,12 @@
 import axios from "axios";
-import { UserState } from "../redux/slices/user-slice";
+import { LoginState, UserState } from "../redux/slices/user-slice";
 import { Post } from "../redux/slices/post-slice";
 import firebase from "firebase";
 import SignupErrorCode from "../errors/signup-errors";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
+import { current } from "@reduxjs/toolkit";
+import UpdateErrorCode from "../errors/update-errors";
 
 const baseUrl = "/api/users";
 
@@ -25,7 +27,6 @@ export type SignupInfo = {
 };
 
 export type UpdateUserInfo = {
-  _id: string;
   username?: string;
   email?: string;
 };
@@ -114,14 +115,14 @@ const signup = async (signupInfo: SignupInfo): Promise<UserState> => {
 
 const login = async (
   loginCredentials: LoginCredentials,
-): Promise<UserState> => {
+): Promise<LoginState> => {
   const userCredential = await loginWithFirebase(loginCredentials);
   const idToken = await userCredential.user?.getIdToken();
   const response = await axios.post(`${baseUrl}/login`, { idToken });
   return response.data;
 };
 
-const loginFromCookie = async (): Promise<UserState> => {
+const loginFromCookie = async (): Promise<LoginState> => {
   const response = await axios.post(`${baseUrl}/loginFromCookie`);
   return response.data;
 };
@@ -140,12 +141,23 @@ const validate = async (
   return response.data;
 };
 
-const update = async (id: string, updateUserInfo: UpdateUserInfo) => {
+const update = async (updateUserInfo: UpdateUserInfo) => {
   const currentUser = firebase.auth().currentUser;
-  if (currentUser && updateUserInfo.email) {
-    await currentUser.updateEmail(updateUserInfo.email);
+  if (updateUserInfo.email) {
+    try {
+      await currentUser?.updateEmail(updateUserInfo.email);
+    } catch (err) {
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          throw new ActionableError(
+            UpdateErrorCode.EMAIL_IN_USE,
+            "Email already in use",
+          );
+      }
+    }
   }
-  const response = await axios.patch(`${baseUrl}/${id}`, updateUserInfo);
+
+  const response = await axios.post(`${baseUrl}/update`, updateUserInfo);
   return response.data;
 };
 

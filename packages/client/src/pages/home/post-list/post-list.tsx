@@ -11,7 +11,6 @@ const StyledContainer = styled.div`
   margin: 0 10vw;
 `;
 
-// TODO rename file to component name?
 const PostList: React.FC = () => {
   const dispatch = useAppDispatch();
 
