@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Dialog,
@@ -21,22 +21,24 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import CloseIcon from "@material-ui/icons/Close";
 import LogoSVG from "../../../static/Alpacow-logo.svg";
 import { toast } from "react-toastify";
+import Joi from "joi";
+import { Controller, useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import LoginErrorCode from "../../../errors/login-errors";
 
 const DEFAULT_FIELDS = {
   email: "",
   password: "",
-  showPassword: false,
 };
+
+const StyledErrorMessage = styled.span`
+  color: red;
+  margin-bottom: 1em;
+`;
 
 interface LoginDialogProps {
   open: boolean;
   onClose: () => any;
-}
-
-interface LoginState {
-  email: string;
-  password: string;
-  showPassword: boolean;
 }
 
 const StyledPaper = styled(Paper)`
@@ -68,39 +70,70 @@ const StyledImg = styled.img`
   margin: 1vw;
 `;
 
+const validationSchema = Joi.object({
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .required(),
+  password: Joi.string().min(1).required(),
+});
+
 // TODO: form validation
 const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
-  const [values, setValues] = React.useState<LoginState>(DEFAULT_FIELDS);
+  const {
+    setValue,
+    control,
+    formState: { errors },
+    setError,
+    handleSubmit,
+  } = useForm({
+    mode: "onBlur",
+    resolver: joiResolver(validationSchema),
+    defaultValues: DEFAULT_FIELDS,
+  });
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
   const handleClose = () => {
-    setValues(DEFAULT_FIELDS);
+    Object.keys(DEFAULT_FIELDS).forEach((field) => {
+      // @ts-ignore
+      setValue(field, DEFAULT_FIELDS[field], { shouldValidate: false });
+    });
+    setShowPassword(false);
     onClose();
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async ({ email, password }) => {
     try {
       const result = await dispatch(
         login({
-          email: values.email,
-          password: values.password,
+          email: email,
+          password: password,
         }),
       );
       unwrapResult(result);
       handleClose();
     } catch (error) {
-      toast.error(error.message);
+      switch (error.errorCode) {
+        case LoginErrorCode.USER_NOT_FOUND:
+          setError("email", {
+            type: "manual",
+            message: "Email does not exist",
+          });
+          break;
+        case LoginErrorCode.WRONG_PASSWORD:
+          setError("password", {
+            type: "manual",
+            message: "Wrong password",
+          });
+          break;
+        default:
+          toast.error(error.message);
+      }
     }
   };
 
-  const handleChange =
-    (prop: keyof LoginState) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [prop]: event.target.value });
-    };
-
   const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword });
+    setShowPassword(!showPassword);
   };
 
   const handleMouseDownPassword = (
@@ -127,37 +160,62 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
       <DialogContent>
         <StyledRowContainer>
           <StyledColumnContainer>
-            <TextField
-              id="new-user-email"
-              label="Email"
-              value={values.email}
-              onChange={handleChange("email")}
-              fullWidth
-              margin="normal"
-              size="small"
-              variant="outlined"
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <>
+                  <TextField
+                    id="new-user-email"
+                    label="Email"
+                    fullWidth
+                    error={!!errors.email}
+                    margin="normal"
+                    size="small"
+                    variant="outlined"
+                    {...field}
+                  />
+                  {errors.email && (
+                    <StyledErrorMessage>
+                      {errors.email.message}
+                    </StyledErrorMessage>
+                  )}
+                </>
+              )}
             />
-            <FormControl variant="outlined" size="small">
-              <InputLabel htmlFor="adornment-password">Password</InputLabel>
-              <OutlinedInput
-                id="adornment-password"
-                type={values.showPassword ? "text" : "password"}
-                onChange={handleChange("password")}
-                label="Password"
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}>
-                      {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormControl variant="outlined" size="small">
+                  <InputLabel htmlFor="adornment-password">Password</InputLabel>
+                  <OutlinedInput
+                    id="adornment-password"
+                    error={!!errors.password}
+                    type={showPassword ? "text" : "password"}
+                    label="Password"
+                    {...field}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}>
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                  {errors.password && (
+                    <StyledErrorMessage>
+                      {errors.password.message}
+                    </StyledErrorMessage>
+                  )}
+                </FormControl>
+              )}
+            />
             <StyledButton
-              onClick={handleLogin}
+              onClick={handleSubmit(handleLogin)}
               variant="contained"
               color="primary">
               Login

@@ -31,6 +31,10 @@ import { joiResolver } from "@hookform/resolvers/joi";
 import Joi from "joi";
 import { useForm, Controller } from "react-hook-form";
 
+const StyledErrorMessage = styled.span`
+  color: red;
+`;
+
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
@@ -38,10 +42,6 @@ const useStyles = makeStyles(() =>
     },
   }),
 );
-
-const StyledErrorMessage = styled.span`
-  color: red;
-`;
 
 const DEFAULT_FIELDS = {
   username: "",
@@ -55,20 +55,6 @@ interface CreateDialogProps {
   onClose: () => any;
 }
 
-interface ProfileErrors {
-  username: string;
-  password: string;
-  email: string;
-  showPassword: string;
-}
-
-const DEFAULT_ERRORS: ProfileErrors = {
-  username: "",
-  password: "",
-  email: "",
-  showPassword: "",
-};
-
 const InputFieldProps = {
   fullWidth: true,
   margin: "normal" as PropTypes.Margin,
@@ -79,11 +65,11 @@ const StyledContainer = styled.div`
 `;
 
 const validationSchema = Joi.object({
-  password: Joi.string().min(6).required(),
-  confirmPassword: Joi.string().required().valid(Joi.ref("password")),
   email: Joi.string()
     .email({ tlds: { allow: false } })
     .required(),
+  password: Joi.string().min(6).required(),
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")),
   username: Joi.string().required(),
 });
 
