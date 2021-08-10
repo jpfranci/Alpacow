@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
 import { RootState } from "../store";
-import { updateUser } from "./user-slice";
 
 const prefix = "post";
 
@@ -25,6 +24,8 @@ export type Comment = {
   userId: string;
   username: string;
   body: string;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
 };
 
 export interface Post extends NewPost {
@@ -131,7 +132,6 @@ export const upvote = createAsyncThunk<
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
-    console.log(response);
     return {
       numUpvotes: response.numUpvotes,
       numDownvotes: response.numDownvotes,
@@ -156,7 +156,6 @@ export const downvote = createAsyncThunk<
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
-    console.log(response);
     return {
       numUpvotes: response.numUpvotes,
       numDownvotes: response.numDownvotes,
@@ -168,6 +167,60 @@ export const downvote = createAsyncThunk<
     return rejectWithValue(error);
   }
 });
+
+export const upvoteComment = createAsyncThunk<
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+    commentId: string;
+  },
+  { postId: string; commentId: string }
+>(
+  `${prefix}/upvoteComment`,
+  async ({ postId, commentId }, { rejectWithValue }) => {
+    try {
+      const response = await postService.upvoteComment(postId, commentId);
+      return {
+        numUpvotes: response.numUpvotes,
+        numDownvotes: response.numDownvotes,
+        isUpvoted: response.isUpvoted,
+        isDownvoted: response.isDownvoted,
+        commentId: commentId,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const downvoteComment = createAsyncThunk<
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+    commentId: string;
+  },
+  { postId: string; commentId: string }
+>(
+  `${prefix}/downvoteComment`,
+  async ({ postId, commentId }, { rejectWithValue }) => {
+    try {
+      const response = await postService.downvoteComment(postId, commentId);
+      return {
+        numUpvotes: response.numUpvotes,
+        numDownvotes: response.numDownvotes,
+        isUpvoted: response.isUpvoted,
+        isDownvoted: response.isDownvoted,
+        commentId: commentId,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
 
 // TODO implement comment action
 export const postSlice = createSlice({
@@ -252,6 +305,40 @@ export const postSlice = createSlice({
         postToUpdate.numDownvotes = action.payload.numDownvotes;
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
+      }
+    });
+    builder.addCase(upvoteComment.fulfilled, (state, action) => {
+      const postToUpdate =
+        state.currPostIndex === -1
+          ? state.postViewFromProfile
+          : state.posts[state.currPostIndex];
+      if (postToUpdate) {
+        const commentToUpdate = postToUpdate.comments?.find((comment) => {
+          return comment._id === action.payload.commentId;
+        });
+        if (commentToUpdate) {
+          commentToUpdate.numUpvotes = action.payload.numUpvotes;
+          commentToUpdate.numDownvotes = action.payload.numDownvotes;
+          commentToUpdate.isUpvoted = action.payload.isUpvoted;
+          commentToUpdate.isDownvoted = action.payload.isDownvoted;
+        }
+      }
+    });
+    builder.addCase(downvoteComment.fulfilled, (state, action) => {
+      const postToUpdate =
+        state.currPostIndex === -1
+          ? state.postViewFromProfile
+          : state.posts[state.currPostIndex];
+      if (postToUpdate) {
+        const commentToUpdate = postToUpdate.comments?.find((comment) => {
+          return comment._id === action.payload.commentId;
+        });
+        if (commentToUpdate) {
+          commentToUpdate.numUpvotes = action.payload.numUpvotes;
+          commentToUpdate.numDownvotes = action.payload.numDownvotes;
+          commentToUpdate.isUpvoted = action.payload.isUpvoted;
+          commentToUpdate.isDownvoted = action.payload.isDownvoted;
+        }
       }
     });
   },
