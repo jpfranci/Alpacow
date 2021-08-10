@@ -6,6 +6,7 @@ const {
 } = require("../auth/middleware/user-validation-middleware");
 const {
   createUser,
+  updateUser,
   getUser,
   validateEmailAndUsername,
   logout,
@@ -17,6 +18,7 @@ const {
   loginValidationFn,
   createUserValidationFn,
   emailAndUsernameValidationFn,
+  emailAndUsernameUpdateValidationFn,
 } = require("./users-validation");
 
 const login = async (req, res, next) => {
@@ -59,7 +61,22 @@ router.post(
   async (req, res, next) => {
     try {
       const validationResults = await validateEmailAndUsername(req.body);
-      res.status(200).send({ ...validationResults, emailExists: false });
+      res.status(200).send({ ...validationResults });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.patch(
+  "/:id",
+  [emailAndUsernameUpdateValidationFn],
+  async (req, res, next) => {
+    try {
+      // TODO: validate email/user for update (ensure neither have been taken)
+      const updateUserResults = await updateUser(req.body);
+      console.log(updateUserResults);
+      res.status(200).send({ ...updateUserResults });
     } catch (err) {
       next(err);
     }

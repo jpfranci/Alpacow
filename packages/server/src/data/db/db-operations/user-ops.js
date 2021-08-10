@@ -9,6 +9,24 @@ const createUser = (payload) => {
   return User.create(payload);
 };
 
+const updateUser = ({ _id, username, email }) => {
+  const updateResult = User.findByIdAndUpdate(
+    _id,
+    {
+      username: username,
+      email: email,
+    },
+    function (err, docs) {
+      if (err) {
+        return err;
+      } else {
+        return docs;
+      }
+    },
+  );
+  return updateResult;
+};
+
 const doesUsernameExist = async (username) => {
   const userOpt = await User.find({
     username: username,
@@ -26,6 +44,7 @@ const doesEmailExist = async (email) => {
 const operations = {
   getUser,
   createUser,
+  updateUser,
   doesUsernameExist,
   doesEmailExist,
 };

@@ -24,6 +24,12 @@ export type SignupInfo = {
   email: string;
 };
 
+export type UpdateUserInfo = {
+  _id: string;
+  username: string;
+  email: string;
+};
+
 const signupWithFirebase = async (
   signupInfo: SignupInfo,
 ): Promise<firebase.auth.UserCredential> => {
@@ -135,8 +141,9 @@ const validate = async (
 };
 
 const update = async (id: string, partialUser: Partial<UserState>) => {
-  const response = await axios.put(`/users/${id}`, partialUser);
-  return response;
+  // TODO: update firebase credentials somehow
+  const response = await axios.patch(`${baseUrl}/${id}`, partialUser);
+  return response.data;
 };
 
 const getPostsByUser = async (

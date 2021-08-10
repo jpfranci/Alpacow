@@ -14,12 +14,14 @@ const StyledContainer = styled.div`
 interface ProfilePostListProps {
   showCreatedPosts: boolean;
   handleClose: any;
+  maxSize: number;
   user: UserState;
 }
 
 const ProfilePostList = ({
   showCreatedPosts,
   handleClose,
+  maxSize,
   user,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -37,7 +39,7 @@ const ProfilePostList = ({
 
   return (
     <StyledContainer>
-      {posts.slice(0, Math.min(2, posts.length)).map((post, i) => (
+      {posts.slice(0, Math.min(maxSize, posts.length)).map((post, i) => (
         <PostListItem
           postClickCallback={handleClose}
           key={post._id}
