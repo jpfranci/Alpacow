@@ -1,4 +1,11 @@
 const Post = require("../../models/post-model");
+const User = require("../../models/user-model");
+
+const updateUserReputation = async (userId, amount) => {
+  const userUpdateSpec = { $inc: { reputation: amount } };
+  const userFilter = { _id: userId };
+  await User.updateOne(userFilter, userUpdateSpec);
+};
 
 const createProjectionObject = (userId, showComments = false) => {
   const projection = {
@@ -119,6 +126,9 @@ const getVotedPostsByUserID = async (userId, currentUserId, upvote) => {
 };
 
 const upvotePost = async (postId, userId) => {
+  const post = await getPostByID(postId, userId);
+  updateUserReputation(post.userId, 1);
+
   const updateSpec = {
     $push: { upvoters: userId },
     $pull: { downvoters: userId },
@@ -136,6 +146,9 @@ const upvotePost = async (postId, userId) => {
 };
 
 const downvotePost = async (postId, userId) => {
+  const post = await getPostByID(postId, userId);
+  updateUserReputation(post.userId, -1);
+
   const updateSpec = {
     $push: { downvoters: userId },
     $pull: { upvoters: userId },
@@ -177,6 +190,8 @@ const upvoteComment = async (postId, commentId, userId) => {
   const comment = await post.comments.find(
     (comment) => comment._id == commentId,
   );
+  updateUserReputation(comment.userId, 1);
+
   return comment;
 };
 
@@ -205,6 +220,8 @@ const downvoteComment = async (postId, commentId, userId) => {
   const comment = await post.comments.find(
     (comment) => comment._id == commentId,
   );
+  updateUserReputation(comment.userId, -1);
+
   return comment;
 };
 

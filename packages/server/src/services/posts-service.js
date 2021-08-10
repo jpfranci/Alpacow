@@ -111,13 +111,13 @@ const downvotePost = async (postId, userId) => {
 };
 
 const upvoteComment = async (postId, commentId, userId) => {
-  const post = await PostDb.upvoteComment(postId, commentId, userId);
-  return post;
+  const comment = await PostDb.upvoteComment(postId, commentId, userId);
+  return comment;
 };
 
 const downvoteComment = async (postId, commentId, userId) => {
-  const post = await PostDb.downvoteComment(postId, commentId, userId);
-  return post;
+  const comment = await PostDb.downvoteComment(postId, commentId, userId);
+  return comment;
 };
 
 module.exports = {
