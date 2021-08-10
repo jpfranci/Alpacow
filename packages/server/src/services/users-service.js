@@ -51,15 +51,16 @@ const createUser = async (payload) => {
 
 const getUser = async (uid) => {
   const user = await UserDb.getUser(uid);
-  const upvotedPosts = await PostDb.getVotedPostsByUserID(uid, true);
-  const downvotedPosts = await PostDb.getVotedPostsByUserID(uid, false);
-  user.upvotedPostIds = upvotedPosts.map((post) => post._id);
-  user.downvotedPostIds = downvotedPosts.map((post) => post._id);
   return user;
 };
 
-const updateUser = async (payload) => {
-  return UserDb.updateUser(payload);
+const updateEmailAndUsername = async (payload) => {
+  const newUser = UserDb.updateEmailAndUsername(payload);
+  const updatedPosts = await PostDb.updateUsername(
+    payload._id,
+    payload.username,
+  );
+  return newUser;
 };
 
 const validateEmailAndUsername = async ({ username, email }) => {
@@ -76,7 +77,7 @@ const validateEmailAndUsername = async ({ username, email }) => {
 module.exports = {
   createUser,
   getUser,
-  updateUser,
+  updateEmailAndUsername,
   validateEmailAndUsername,
   logout,
 };

@@ -9,22 +9,17 @@ const createUser = (payload) => {
   return User.create(payload);
 };
 
-const updateUser = ({ _id, username, email }) => {
-  const updateResult = User.findByIdAndUpdate(
+const updateEmailAndUsername = ({ _id, username, email }) => {
+  return User.findByIdAndUpdate(
     _id,
     {
-      username: username,
-      email: email,
+      username,
+      email,
     },
-    function (err, docs) {
-      if (err) {
-        return err;
-      } else {
-        return docs;
-      }
+    {
+      new: true,
     },
   );
-  return updateResult;
 };
 
 const doesUsernameExist = async (username) => {
@@ -44,7 +39,7 @@ const doesEmailExist = async (email) => {
 const operations = {
   getUser,
   createUser,
-  updateUser,
+  updateEmailAndUsername,
   doesUsernameExist,
   doesEmailExist,
 };

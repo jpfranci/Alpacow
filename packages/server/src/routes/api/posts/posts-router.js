@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   extractUserFromSessionCookie,
+  tryToExtractUserFromSessionCookie,
 } = require("../auth/middleware/user-validation-middleware");
 const {
   getPosts,
@@ -14,25 +15,32 @@ const {
 } = require("./posts-validation");
 const { upvotePost, downvotePost } = require("../../../services/posts-service");
 
-router.get("/", getPostValidationFn, async (req, res, next) => {
-  try {
-    const posts = await getPosts(req.query);
-    res.json(posts);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get(
+  "/",
+  [getPostValidationFn, tryToExtractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const posts = await getPosts({ ...req.query, userId: req.uid });
+      res.json(posts);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const post = await getPostByID(req.params.id);
-    res.json(post);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get(
+  "/:id",
+  tryToExtractUserFromSessionCookie,
+  async (req, res, next) => {
+    try {
+      const post = await getPostByID(req.params.id, req.uid);
+      res.json(post);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
-//TODO fix post creation validation after demo
 router.post(
   "/",
   [createPostValidationFn, extractUserFromSessionCookie],

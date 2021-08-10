@@ -16,7 +16,6 @@ const emailAndUsernameExistsSchema = Joi.object().keys({
 });
 
 const emailAndUsernameUpdateSchema = Joi.object().keys({
-  _id: Joi.string().required(),
   email: Joi.string().email(),
   username: Joi.string(),
 });

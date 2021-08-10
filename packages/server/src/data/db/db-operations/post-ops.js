@@ -1,15 +1,31 @@
 const Post = require("../../models/post-model");
 
-// We don't want to send all 1000 posts to the client while we have no filters,
-// so this will just sample randomly from all posts
-const getPosts = async () => {
-  const posts = await Post.aggregate([{ $sample: { size: 50 } }]);
-  return posts;
+const createProjectionObject = (userId, showComments = false) => {
+  const projection = {
+    $project: {
+      title: true,
+      body: true,
+      date: true,
+      score: { $subtract: [{ $size: "$upvoters" }, { $size: "$downvoters" }] },
+      numUpvotes: { $size: "$upvoters" },
+      numDownvotes: { $size: "$downvoters" },
+      username: true,
+      tag: true,
+      isMature: true,
+      isUpvoted: { $in: [userId, "$upvoters"] },
+      isDownvoted: { $in: [userId, "$downvoters"] },
+      userId: true,
+    },
+  };
+  if (showComments) {
+    projection.$project.comments = true;
+  }
+  return projection;
 };
 
 const createPost = async (post) => {
   const createdPost = await Post.create(post);
-  return createdPost.toObject();
+  return getPostByID(createdPost._id, post.userId);
 };
 
 const getPostsByFilter = async ({
@@ -18,6 +34,7 @@ const getPostsByFilter = async ({
   tagFilter,
   sortType,
   showMatureContent,
+  userId,
 }) => {
   const aggregationPipeline = [];
   aggregationPipeline.push({
@@ -39,19 +56,7 @@ const getPostsByFilter = async ({
   if (!showMatureContent) {
     aggregationPipeline.push({ $match: { isMature: false } });
   }
-  aggregationPipeline.push({
-    $project: {
-      title: true,
-      body: true,
-      date: true,
-      numUpvotes: true,
-      numDownvotes: true,
-      username: true,
-      tag: true,
-      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-      isMature: true,
-    },
-  });
+  aggregationPipeline.push(createProjectionObject(userId));
   aggregationPipeline.push({
     // additional arguments are to break ties
     $sort:
@@ -59,24 +64,11 @@ const getPostsByFilter = async ({
         ? { score: -1, date: -1, _id: -1 }
         : { date: -1, _id: -1 },
   });
-  const posts = await Post.aggregate(aggregationPipeline);
-  return posts;
+  return Post.aggregate(aggregationPipeline);
 };
 
-const getPostByID = async (id) => {
-  return await Post.findById(id, {
-    title: true,
-    body: true,
-    date: true,
-    numUpvotes: true,
-    numDownvotes: true,
-    userId: true,
-    username: true,
-    tag: true,
-    score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-    isMature: true,
-    comments: true,
-  });
+const getPostByID = (id, userId) => {
+  return Post.findById(id, createProjectionObject(userId, true).$project);
 };
 
 const getPostsByUserID = async (userId, sortType) => {
@@ -86,27 +78,14 @@ const getPostsByUserID = async (userId, sortType) => {
       userId: userId,
     },
   });
-  aggregation.push({
-    $project: {
-      title: true,
-      body: true,
-      date: true,
-      numUpvotes: true,
-      numDownvotes: true,
-      username: true,
-      tag: true,
-      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-      isMature: true,
-    },
-  });
+  aggregation.push(createProjectionObject(userId));
   aggregation.push({
     $sort:
       sortType === "popular"
         ? { score: -1, date: -1, _id: -1 }
         : { date: -1, _id: -1 },
   });
-  const posts = await Post.aggregate(aggregation);
-  return posts;
+  return Post.aggregate(aggregation);
 };
 
 const getVotedPostsByUserID = async (userId, upvote) => {
@@ -118,68 +97,55 @@ const getVotedPostsByUserID = async (userId, upvote) => {
       [voteField]: { $in: [userId] },
     },
   });
-  aggregation.push({
-    $project: {
-      title: true,
-      body: true,
-      date: true,
-      numUpvotes: true,
-      numDownvotes: true,
-      username: true,
-      tag: true,
-      score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
-      isMature: true,
-    },
-  });
-  const posts = await Post.aggregate(aggregation);
-  return posts;
+  aggregation.push(createProjectionObject(userId));
+  return Post.aggregate(aggregation);
 };
 
 const upvotePost = async (postId, userId) => {
   const updateSpec = {
     $push: { upvoters: userId },
     $pull: { downvoters: userId },
-    $inc: { numUpvotes: 1 },
   };
 
-  // TODO can avoid making mult async requests if we inferred vote counts from voter array length
-  const post = await Post.findById(postId);
-  if (post.downvoters.includes(userId)) {
-    updateSpec.$inc.numDownvotes = -1;
-  }
+  const filter = {
+    _id: postId,
+    upvoters: { $nin: [userId] },
+  };
 
-  const updatedPost = await Post.findByIdAndUpdate(postId, updateSpec, {
+  return Post.findOneAndUpdate(filter, updateSpec, {
     new: true,
+    projection: createProjectionObject(userId).$project,
   });
-
-  return updatedPost
-    ? { ...updatedPost.toJSON(), comments: undefined } // TODO use $project instead
-    : undefined;
 };
 
 const downvotePost = async (postId, userId) => {
   const updateSpec = {
     $push: { downvoters: userId },
     $pull: { upvoters: userId },
-    $inc: { numDownvotes: 1 },
   };
 
-  const post = await Post.findById(postId);
-  if (post.upvoters.includes(userId)) {
-    updateSpec.$inc.numUpvotes = -1;
-  }
+  const filter = {
+    _id: postId,
+    downvoters: { $nin: [userId] },
+  };
 
-  const updatedPost = await Post.findByIdAndUpdate(postId, updateSpec, {
+  return Post.findOneAndUpdate(filter, updateSpec, {
     new: true,
+    projection: createProjectionObject(userId).$project,
   });
+};
 
-  return updatedPost
-    ? { ...updatedPost.toJSON(), comments: undefined } // TODO use $project instead
-    : undefined;
+const updateUsername = async (userId, newUsername) => {
+  return Post.updateMany(
+    { userId },
+    {
+      username: newUsername,
+    },
+    { new: true },
+  );
 };
 
 const operations = {
-  getPosts,
   getPostsByFilter,
   createPost,
   getPostByID,
@@ -187,6 +153,7 @@ const operations = {
   getVotedPostsByUserID,
   upvotePost,
   downvotePost,
+  updateUsername,
 };
 
 module.exports = operations;
