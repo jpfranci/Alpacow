@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouteMatch } from "react-router";
 import styled from "styled-components";
 import { POST_PAGE } from "../../common/links";
-import { updatePost } from "../../redux/slices/post-slice";
+import { updatePost, Post } from "../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
 import PostView from "./post-view/post-view";
@@ -24,7 +24,7 @@ const PostPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const post = useAppSelector((state) =>
     state.post.currPostIndex === -1
-      ? undefined
+      ? state.post.postViewFromProfile
       : state.post.posts[state.post.currPostIndex],
   );
 
@@ -40,7 +40,7 @@ const PostPage = () => {
       .then((res) => dispatch(updatePost(res.data)))
       .catch((error) => console.error(error))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [match?.params.id]);
 
   return (
     <StyledContainer>

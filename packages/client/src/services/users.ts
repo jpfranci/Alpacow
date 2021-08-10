@@ -168,11 +168,13 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
 
 const getPostsByUser = async (
   id: string,
+  currentUserId: string,
   sortType: string,
 ): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/posts`, {
     params: {
       sortType: sortType,
+      currentUserId: currentUserId,
     },
   });
   return response.data;
@@ -180,11 +182,13 @@ const getPostsByUser = async (
 
 const getPostsByUserVote = async (
   id: string,
+  currentUserId: string,
   isUpvoted: boolean,
 ): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/voted`, {
     params: {
       isUpvoted: isUpvoted,
+      currentUserId: currentUserId,
     },
   });
   return response.data;

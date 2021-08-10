@@ -37,6 +37,7 @@ export interface Post extends NewPost {
   isDownvoted: boolean;
   username: string;
   comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
+  score: number;
 }
 
 export interface NewPost {
@@ -66,6 +67,7 @@ export type PostState = {
   currentPostID?: string;
   tagInput: string;
   showMatureContent?: boolean;
+  postViewFromProfile?: Post;
   currPostIndex: number;
 };
 
@@ -129,6 +131,7 @@ export const upvote = createAsyncThunk<
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
+    console.log(response);
     return {
       numUpvotes: response.numUpvotes,
       numDownvotes: response.numDownvotes,
@@ -153,6 +156,7 @@ export const downvote = createAsyncThunk<
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
+    console.log(response);
     return {
       numUpvotes: response.numUpvotes,
       numDownvotes: response.numDownvotes,
@@ -185,6 +189,9 @@ export const postSlice = createSlice({
     },
     setShowMatureContent: (state, action: PayloadAction<boolean>) => {
       state.showMatureContent = action.payload;
+    },
+    setPostViewFromProfile: (state, action: PayloadAction<Post>) => {
+      state.postViewFromProfile = action.payload;
     },
     setCurrPostIndex: (state, action: PayloadAction<number>) => {
       state.currPostIndex = action.payload;
@@ -257,6 +264,7 @@ export const {
   setTagInput,
   setShowMatureContent,
   setCurrPostIndex,
+  setPostViewFromProfile,
   setCommentSortType,
   updatePost,
 } = postSlice.actions;

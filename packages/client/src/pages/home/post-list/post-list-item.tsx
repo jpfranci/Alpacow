@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
 import {
   downvote,
   Post,
   setCurrPostIndex,
+  setPostViewFromProfile,
   setTagFilter,
   upvote,
 } from "../../../redux/slices/post-slice";
@@ -85,10 +86,9 @@ const PostListItem: React.FC<PostProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-
-  const voteCount = post.numUpvotes - post.numDownvotes;
-  const shouldDisableUpvote = post.isUpvoted;
-  const shouldDisableDownvote = post.isDownvoted;
+  const voteCount = post.score;
+  const [upvoteDisabled, setUpvoteDisabled] = useState(post.isUpvoted);
+  const [downvoteDisabled, setDownvoteDisabled] = useState(post.isDownvoted);
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (
@@ -101,8 +101,11 @@ const PostListItem: React.FC<PostProps> = ({
   const handlePostClick = () => {
     if (postClickCallback) {
       postClickCallback();
+      dispatch(setCurrPostIndex(-1));
+      dispatch(setPostViewFromProfile(post));
+    } else {
+      dispatch(setCurrPostIndex(index));
     }
-    dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
     window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes
   };
@@ -110,30 +113,40 @@ const PostListItem: React.FC<PostProps> = ({
   const handleUpvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
-    if (voteClickCallback)
-      voteClickCallback({
-        post: post,
-        isUpvote: true,
-        otherVoteDisabled: shouldDisableDownvote,
-      });
     e.stopPropagation();
     dispatch(upvote({ post }))
-      .then(unwrapResult)
+      .then((result) => {
+        unwrapResult(result);
+        if (voteClickCallback) {
+          voteClickCallback({
+            post: post,
+            isUpvote: true,
+            otherVoteDisabled: downvoteDisabled,
+          });
+        }
+        setUpvoteDisabled(true);
+        setDownvoteDisabled(false);
+      })
       .catch((err) => toast.error(err.message));
   };
 
   const handleDownvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
-    if (voteClickCallback)
-      voteClickCallback({
-        post: post,
-        isUpvote: false,
-        otherVoteDisabled: shouldDisableUpvote,
-      });
     e.stopPropagation();
     dispatch(downvote({ post }))
-      .then(unwrapResult)
+      .then((result) => {
+        unwrapResult(result);
+        if (voteClickCallback) {
+          voteClickCallback({
+            post: post,
+            isUpvote: false,
+            otherVoteDisabled: upvoteDisabled,
+          });
+        }
+        setDownvoteDisabled(true);
+        setUpvoteDisabled(false);
+      })
       .catch((err) => toast.error(err.message));
   };
 
@@ -165,17 +178,13 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton
-            onClick={handleUpvoteClick}
-            disabled={shouldDisableUpvote}>
+          <IconButton onClick={handleUpvoteClick} disabled={upvoteDisabled}>
             <UpvoteIcon />
           </IconButton>
 
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
-          <IconButton
-            onClick={handleDownvoteClick}
-            disabled={shouldDisableDownvote}>
+          <IconButton onClick={handleDownvoteClick} disabled={downvoteDisabled}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>

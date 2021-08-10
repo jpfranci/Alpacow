@@ -28,13 +28,16 @@ const ProfilePostList = ({
   user,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const postsState = useAppSelector((state) => {
-    return state.post.posts;
+  const [updateVote, setUpdateVote] = useState(false);
+
+  const currentUserState = useAppSelector((state) => {
+    return state.user;
   });
 
   const fetchPostsForUser = async () => {
     const fetchedPosts = await userService.getPostsByUser(
       String(user._id),
+      currentUserState._id as string,
       "new",
     );
     setPosts(fetchedPosts);
@@ -43,36 +46,25 @@ const ProfilePostList = ({
   const fetchPostsVotedByUser = async () => {
     const fetchedPosts = await userService.getPostsByUserVote(
       String(user._id),
+      currentUserState._id as string,
       true,
     );
     setPosts(fetchedPosts);
   };
 
   const handleVote = (params: VoteUpdateParams) => {
-    const postToUpdate = posts.find(
+    const postToUpdate = posts.findIndex(
       (foundPost) => foundPost._id === params.post._id,
     );
-    if (postToUpdate) {
-      // we update both in case user is upvoting a post that they previously downvoted
-      if (params.isUpvote) {
-        if (params.otherVoteDisabled) {
-          postToUpdate.numUpvotes = params.post.numUpvotes + 2;
-        } else {
-          postToUpdate.numUpvotes = params.post.numUpvotes + 1;
-        }
-      } else {
-        if (params.otherVoteDisabled) {
-          postToUpdate.numDownvotes = params.post.numDownvotes + 2;
-        } else {
-          postToUpdate.numDownvotes = params.post.numDownvotes + 1;
-        }
-      }
+    if (postToUpdate >= 0) {
+      showCreatedPosts ? fetchPostsForUser() : fetchPostsVotedByUser();
+      setUpdateVote(!updateVote);
     }
   };
 
   useEffect(() => {
     showCreatedPosts ? fetchPostsForUser() : fetchPostsVotedByUser();
-  }, [showCreatedPosts, postsState]);
+  }, [showCreatedPosts, updateVote]);
 
   return (
     <StyledContainer>
