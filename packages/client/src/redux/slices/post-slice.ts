@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
 import { RootState } from "../store";
+import { updateUser } from "./user-slice";
 
 const prefix = "post";
 

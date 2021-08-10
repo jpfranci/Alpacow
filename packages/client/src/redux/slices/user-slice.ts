@@ -46,7 +46,7 @@ export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
   `${prefix}/update`,
   async (updateUserInfo: UpdateUserInfo, { rejectWithValue }) => {
     try {
-      return await userService.update(updateUserInfo._id, updateUserInfo);
+      return await userService.update(updateUserInfo);
     } catch (error) {
       return rejectWithValue(error);
     }

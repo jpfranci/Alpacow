@@ -10,24 +10,16 @@ const createUser = (payload) => {
 };
 
 const updateEmailAndUsername = ({ _id, username, email }) => {
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     _id,
     {
-      username: username,
-      email: email,
+      username,
+      email,
     },
-    function (err, docs) {
-      if (err) {
-        return err;
-      } else {
-        return docs;
-      }
+    {
+      new: true,
     },
   );
-  return {
-    username: username,
-    email: email,
-  };
 };
 
 const doesUsernameExist = async (username) => {

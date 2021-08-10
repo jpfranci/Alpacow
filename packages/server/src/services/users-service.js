@@ -55,7 +55,13 @@ const getUser = async (uid) => {
 };
 
 const updateEmailAndUsername = async (payload) => {
-  return UserDb.updateEmailAndUsername(payload);
+  const newUser = UserDb.updateEmailAndUsername(payload);
+  const updatedPosts = await PostDb.updateUsername(
+    payload._id,
+    payload.username,
+  );
+  console.log(updatedPosts);
+  return newUser;
 };
 
 const validateEmailAndUsername = async ({ username, email }) => {

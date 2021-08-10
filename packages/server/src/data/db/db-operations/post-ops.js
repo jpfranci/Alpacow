@@ -134,6 +134,16 @@ const downvotePost = async (postId, userId) => {
   });
 };
 
+const updateUsername = async (userId, newUsername) => {
+  return Post.updateMany(
+    { userId },
+    {
+      username: newUsername,
+    },
+    { new: true },
+  );
+};
+
 const operations = {
   getPostsByFilter,
   createPost,
@@ -142,6 +152,7 @@ const operations = {
   getVotedPostsByUserID,
   upvotePost,
   downvotePost,
+  updateUsername,
 };
 
 module.exports = operations;

@@ -73,7 +73,6 @@ const validationSchema = Joi.object({
   username: Joi.string().required(),
 });
 
-// TODO: Firebase hookup
 const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   const classes = useStyles();
   const {
