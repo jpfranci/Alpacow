@@ -1,9 +1,9 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
 } from "../../services/users";
-import { createPost, downvote, Post, upvote } from "./post-slice";
+import { Post } from "./post-slice";
 
 const prefix = "user";
 
@@ -106,9 +106,6 @@ export const userSlice = createSlice({
     });
     builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
-    });
-    builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload);
     });
   },
 });

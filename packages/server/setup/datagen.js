@@ -123,8 +123,6 @@ class DataGenerator {
     this.generateVoters(voters, numUpvotes, upvoters);
     this.generateVoters(voters, numDownvotes, downvoters);
     return {
-      numUpvotes,
-      numDownvotes,
       upvoters,
       downvoters,
     };

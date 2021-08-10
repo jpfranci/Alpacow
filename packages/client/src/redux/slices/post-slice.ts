@@ -78,11 +78,14 @@ const initialState: PostState = {
   currPostIndex: -1,
 };
 
-export const createPost = createAsyncThunk<Post, NewPost>(
+export const createPost = createAsyncThunk<Post[], NewPost>(
   `${prefix}/createPost`,
-  async (newPost, { rejectWithValue }) => {
+  async (newPost, { rejectWithValue, getState }) => {
     try {
-      return await postService.create(newPost);
+      // @ts-ignore
+      const postState = getState().post;
+      await postService.create(newPost);
+      return await postService.getPostsByFilter(postState);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -220,7 +223,7 @@ export const postSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      getPostsByFilter(state);
+      state.posts = action.payload;
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
