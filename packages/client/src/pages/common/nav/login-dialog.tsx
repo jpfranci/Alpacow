@@ -11,9 +11,7 @@ import {
   InputLabel,
   OutlinedInput,
   Paper,
-  PropTypes,
   TextField,
-  Typography,
 } from "@material-ui/core";
 import styled from "styled-components";
 import { useAppDispatch } from "../../../redux/store";
@@ -22,6 +20,7 @@ import { login } from "../../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import CloseIcon from "@material-ui/icons/Close";
 import LogoSVG from "../../../static/Alpacow-logo.svg";
+import { toast } from "react-toastify";
 
 const DEFAULT_FIELDS = {
   email: "",
@@ -79,16 +78,19 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
     onClose();
   };
 
-  const handleLogin = () => {
-    dispatch(
-      login({
-        email: values.email,
-        password: values.password,
-      }),
-    )
-      .then(unwrapResult)
-      .catch((error) => alert("Login failed:" + error));
-    handleClose();
+  const handleLogin = async () => {
+    try {
+      const result = await dispatch(
+        login({
+          email: values.email,
+          password: values.password,
+        }),
+      );
+      unwrapResult(result);
+      handleClose();
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handleChange =
