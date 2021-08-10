@@ -108,7 +108,11 @@ router.post("/logout", extractUserFromSessionCookie, async (req, res, next) => {
 
 router.get("/:id/posts", async (req, res, next) => {
   try {
-    const post = await getPostsByUserID(req.params.id, req.query.sortType);
+    const post = await getPostsByUserID(
+      req.params.id,
+      req.query.currentUserId,
+      req.query.sortType,
+    );
     res.json(post);
   } catch (err) {
     next(err);
@@ -117,7 +121,11 @@ router.get("/:id/posts", async (req, res, next) => {
 
 router.get("/:id/voted", async (req, res, next) => {
   try {
-    const post = await getPostsByUserVote(req.params.id, req.query.isUpvoted);
+    const post = await getPostsByUserVote(
+      req.params.id,
+      req.query.currentUserId,
+      req.query.isUpvoted,
+    );
     res.json(post);
   } catch (err) {
     next(err);

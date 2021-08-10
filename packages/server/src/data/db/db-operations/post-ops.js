@@ -71,14 +71,14 @@ const getPostByID = (id, userId) => {
   return Post.findById(id, createProjectionObject(userId, true).$project);
 };
 
-const getPostsByUserID = async (userId, sortType) => {
+const getPostsByUserID = async (userId, currentUserId, sortType) => {
   const aggregation = [];
   aggregation.push({
     $match: {
       userId: userId,
     },
   });
-  aggregation.push(createProjectionObject(userId));
+  aggregation.push(createProjectionObject(currentUserId));
   aggregation.push({
     $sort:
       sortType === "popular"
@@ -88,7 +88,7 @@ const getPostsByUserID = async (userId, sortType) => {
   return Post.aggregate(aggregation);
 };
 
-const getVotedPostsByUserID = async (userId, upvote) => {
+const getVotedPostsByUserID = async (userId, currentUserId, upvote) => {
   const voteField = upvote ? "upvoters" : "downvoters";
 
   const aggregation = [];
@@ -97,7 +97,7 @@ const getVotedPostsByUserID = async (userId, upvote) => {
       [voteField]: { $in: [userId] },
     },
   });
-  aggregation.push(createProjectionObject(userId));
+  aggregation.push(createProjectionObject(currentUserId));
   return Post.aggregate(aggregation);
 };
 
