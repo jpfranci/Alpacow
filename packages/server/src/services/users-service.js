@@ -52,8 +52,8 @@ const getUser = (uid) => {
   return UserDb.getUser(uid);
 };
 
-const updateUser = async (payload) => {
-  return UserDb.updateUser(payload);
+const updateEmailAndUsername = async (payload) => {
+  return UserDb.updateEmailAndUsername(payload);
 };
 
 const validateEmailAndUsername = async ({ username, email }) => {
@@ -70,7 +70,7 @@ const validateEmailAndUsername = async ({ username, email }) => {
 module.exports = {
   createUser,
   getUser,
-  updateUser,
+  updateEmailAndUsername,
   validateEmailAndUsername,
   logout,
 };
