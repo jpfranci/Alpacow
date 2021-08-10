@@ -73,7 +73,7 @@ const validationSchema = Joi.object({
   username: Joi.string().required(),
 });
 
-// TODO: form validation, Firebase hookup
+// TODO: Firebase hookup
 const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   const classes = useStyles();
   const {
@@ -269,7 +269,6 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
                   id="new-user-confirm-password"
                   type={showPassword ? "text" : "password"}
                   {...field}
-                  // TODO: confirm password onChange
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton

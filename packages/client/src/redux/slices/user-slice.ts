@@ -86,9 +86,6 @@ export const logout = createAsyncThunk<void, void>(
   },
 );
 
-// TODO implement getPosts action
-// TODO implement logout action
-
 export const userSlice = createSlice({
   name: prefix,
   initialState,

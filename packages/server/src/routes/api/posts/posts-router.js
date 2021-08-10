@@ -41,7 +41,6 @@ router.get(
   },
 );
 
-//TODO fix post creation validation after demo
 router.post(
   "/",
   [createPostValidationFn, extractUserFromSessionCookie],

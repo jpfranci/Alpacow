@@ -143,8 +143,6 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          {/* TODO disable voting for non-logged in users */}
-
           <IconButton
             onClick={handleUpvoteClick}
             disabled={shouldDisableUpvote}>

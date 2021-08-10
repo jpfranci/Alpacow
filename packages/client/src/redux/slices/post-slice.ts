@@ -93,7 +93,6 @@ export const createPost = createAsyncThunk<
   }
 });
 
-// TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk<Post[]>(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
@@ -116,7 +115,6 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
   },
 );
 
-// TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
   {
     numUpvotes: number;
@@ -165,9 +163,7 @@ export const downvote = createAsyncThunk<
   }
 });
 
-// TODO implement getPostByID action
 // TODO implement comment action
-
 export const postSlice = createSlice({
   name: prefix,
   initialState,

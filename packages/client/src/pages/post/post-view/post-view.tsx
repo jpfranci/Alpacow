@@ -69,7 +69,6 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
   const shouldDisableUpvote = post.isUpvoted;
   const shouldDisableDownvote = post.isDownvoted;
 
-  // TODO implement upvote/downvote logic
   return (
     <div>
       <PostViewContainer>

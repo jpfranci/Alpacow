@@ -9,7 +9,6 @@ const { AuthErrorCodes } = require("../../../../errors/auth/auth-error-codes");
 
 const handleBadIdToken = (err, res, next) => {
   switch (err.code) {
-    // TODO wrap server codes in error messages, so client can handle
     case "auth/id-token-expired":
     case "auth/session-cookie-revoked":
       return next(

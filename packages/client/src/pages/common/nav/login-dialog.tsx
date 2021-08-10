@@ -77,7 +77,6 @@ const validationSchema = Joi.object({
   password: Joi.string().min(1).required(),
 });
 
-// TODO: form validation
 const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
   const {
     setValue,
