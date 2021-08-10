@@ -209,7 +209,6 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-      console.log(postToUpdate?.title);
       if (postToUpdate) {
         // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
@@ -220,7 +219,6 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-      console.log(postToUpdate?.title);
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;

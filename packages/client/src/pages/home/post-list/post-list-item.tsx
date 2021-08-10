@@ -59,11 +59,20 @@ const DateText = styled.div`
   margin-right: 2em;
 `;
 
+// upvote updates the posts in the post state, but view profile
+// displays posts which may not be in the post state
+export interface VoteUpdateParams {
+  post: Post;
+  isUpvote: boolean;
+  otherVoteDisabled: boolean;
+}
+
 interface PostProps {
   post: Post;
   index: number;
   showPostBody: boolean;
   postClickCallback?: () => void;
+  voteClickCallback?: (params: VoteUpdateParams) => void;
 }
 
 const PostListItem: React.FC<PostProps> = ({
@@ -71,6 +80,7 @@ const PostListItem: React.FC<PostProps> = ({
   index,
   showPostBody,
   postClickCallback,
+  voteClickCallback,
 }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
@@ -101,6 +111,12 @@ const PostListItem: React.FC<PostProps> = ({
   const handleUpvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
+    if (voteClickCallback)
+      voteClickCallback({
+        post: post,
+        isUpvote: true,
+        otherVoteDisabled: shouldDisableDownvote,
+      });
     e.stopPropagation();
     dispatch(upvote({ post }))
       .then(unwrapResult)
@@ -110,6 +126,12 @@ const PostListItem: React.FC<PostProps> = ({
   const handleDownvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
+    if (voteClickCallback)
+      voteClickCallback({
+        post: post,
+        isUpvote: false,
+        otherVoteDisabled: shouldDisableUpvote,
+      });
     e.stopPropagation();
     dispatch(downvote({ post }))
       .then(unwrapResult)
