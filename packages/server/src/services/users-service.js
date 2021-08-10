@@ -51,10 +51,6 @@ const createUser = async (payload) => {
 
 const getUser = async (uid) => {
   const user = await UserDb.getUser(uid);
-  const upvotedPosts = await PostDb.getVotedPostsByUserID(uid, true);
-  const downvotedPosts = await PostDb.getVotedPostsByUserID(uid, false);
-  user.upvotedPostIds = upvotedPosts.map((post) => post._id);
-  user.downvotedPostIds = downvotedPosts.map((post) => post._id);
   return user;
 };
 

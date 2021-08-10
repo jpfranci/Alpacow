@@ -87,8 +87,8 @@ const getPosts = (query) => {
   return PostDb.getPostsByFilter(query);
 };
 
-const getPostByID = async (id) => {
-  return PostDb.getPostByID(id);
+const getPostByID = async (id, userId) => {
+  return PostDb.getPostByID(id, userId);
 };
 
 const getPostsByUserID = async (userId, sortType) => {

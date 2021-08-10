@@ -76,6 +76,14 @@ const extractUserFromSessionCookie = async (req, res, next) => {
   }
 };
 
+const tryToExtractUserFromSessionCookie = async (req, res, next) => {
+  if (req.cookies[FIREBASE_SESSION_COOKIE_NAME]) {
+    await extractUserFromSessionCookie(req, res, next);
+  } else {
+    next();
+  }
+};
+
 const createSessionCookieFromIdToken = async (req, res, next) => {
   try {
     const { idToken } = req.body;
@@ -99,4 +107,5 @@ module.exports = {
   extractUserFromSessionCookie,
   createSessionCookieFromIdToken,
   clearAuthCookies,
+  tryToExtractUserFromSessionCookie,
 };

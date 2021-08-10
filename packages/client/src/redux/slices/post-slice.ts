@@ -30,6 +30,8 @@ export interface Post extends NewPost {
   numUpvotes: number;
   numDownvotes: number;
   date: string;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
   username: string;
   comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
 }
@@ -112,14 +114,22 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
 
 // TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
-  { numUpvotes: number; numDownvotes: number; postId: string },
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    postId: string;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+  },
   { post: Post }
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
     return {
-      numUpvotes: response.data.numUpvotes,
-      numDownvotes: response.data.numDownvotes,
+      numUpvotes: response.numUpvotes,
+      numDownvotes: response.numDownvotes,
+      isUpvoted: response.isUpvoted,
+      isDownvoted: response.isDownvoted,
       postId: post._id,
     };
   } catch (error) {
@@ -128,14 +138,22 @@ export const upvote = createAsyncThunk<
 });
 
 export const downvote = createAsyncThunk<
-  { numUpvotes: number; numDownvotes: number; postId: string },
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    postId: string;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+  },
   { post: Post }
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
     return {
-      numUpvotes: response.data.numUpvotes,
-      numDownvotes: response.data.numDownvotes,
+      numUpvotes: response.numUpvotes,
+      numDownvotes: response.numDownvotes,
+      isUpvoted: response.isUpvoted,
+      isDownvoted: response.isDownvoted,
       postId: post._id,
     };
   } catch (error) {
@@ -213,6 +231,8 @@ export const postSlice = createSlice({
         // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
+        postToUpdate.isUpvoted = action.payload.isUpvoted;
+        postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
@@ -223,6 +243,8 @@ export const postSlice = createSlice({
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
+        postToUpdate.isUpvoted = action.payload.isUpvoted;
+        postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
     });
   },

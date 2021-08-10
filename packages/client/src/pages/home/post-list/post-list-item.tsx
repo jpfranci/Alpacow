@@ -10,7 +10,7 @@ import {
 } from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { useAppDispatch } from "../../../redux/store";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -73,13 +73,11 @@ const PostListItem: React.FC<PostProps> = ({
   postClickCallback,
 }) => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
   const history = useHistory();
 
   const voteCount = post.numUpvotes - post.numDownvotes;
-  const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
-  const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
-  const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
+  const shouldDisableUpvote = post.isUpvoted;
+  const shouldDisableDownvote = post.isDownvoted;
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (

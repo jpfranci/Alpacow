@@ -346,7 +346,7 @@ const dataGenerator = new DataGenerator({
   maxPosts: args.maxPosts,
   reset: args.reset === "true",
   maxScore: args.maxScore,
-  callAzure: args.callAzure,
+  callAzure: args.callAzure === "true",
 });
 dataGenerator
   .generate()

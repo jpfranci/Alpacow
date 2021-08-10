@@ -62,13 +62,11 @@ interface PostViewProps {
 
 const PostView: React.FC<PostViewProps> = ({ post }) => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
 
   const voteCount = post.numUpvotes - post.numDownvotes;
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
-  const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
-  const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
-  const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
+  const shouldDisableUpvote = post.isUpvoted;
+  const shouldDisableDownvote = post.isDownvoted;
 
   // TODO implement upvote/downvote logic
   return (

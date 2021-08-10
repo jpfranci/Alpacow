@@ -58,14 +58,14 @@ const deleteByID = async (id: string) => {
   return response;
 };
 
-const upvote = async (id: string) => {
+const upvote = async (id: string): Promise<Post> => {
   const response = await axios.post(`${baseUrl}/${id}/upvote`);
-  return response;
+  return response.data;
 };
 
-const downvote = async (id: string) => {
+const downvote = async (id: string): Promise<Post> => {
   const response = await axios.post(`${baseUrl}/${id}/downvote`);
-  return response;
+  return response.data;
 };
 
 const postService = {

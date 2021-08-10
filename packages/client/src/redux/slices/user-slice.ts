@@ -13,7 +13,6 @@ export type UserState = {
   email?: string;
   reputation?: number;
   posts: Post[];
-  votedPosts: { [id: string]: { upvoted: boolean } };
 };
 
 // response body for login requests
@@ -22,8 +21,6 @@ export type LoginState = {
   username: string;
   email: string;
   reputation: number;
-  upvotedPostIds: string[];
-  downvotedPostIds: string[];
 };
 
 const initialState: UserState = {
@@ -31,7 +28,6 @@ const initialState: UserState = {
   username: undefined,
   email: undefined,
   posts: [],
-  votedPosts: {},
 };
 
 export const signup = createAsyncThunk<UserState, SignupInfo>(
@@ -94,16 +90,7 @@ export const userSlice = createSlice({
       return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      const votedPosts = {};
-      for (const upvotedPostId of action.payload.upvotedPostIds) {
-        votedPosts[upvotedPostId] = { upvoted: true };
-      }
-
-      for (const downvotedPostId of action.payload.downvotedPostIds) {
-        votedPosts[downvotedPostId] = { upvoted: false };
-      }
-
-      return { ...state, ...action.payload, votedPosts };
+      return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
       return { ...state };
@@ -115,33 +102,13 @@ export const userSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(loginFromCookie.fulfilled, (state, action) => {
-      console.log("ooo", action.payload);
-      const votedPosts = {};
-      for (const upvotedPostId of action.payload.upvotedPostIds) {
-        votedPosts[upvotedPostId] = { upvoted: true };
-      }
-
-      for (const downvotedPostId of action.payload.downvotedPostIds) {
-        votedPosts[downvotedPostId] = { upvoted: false };
-      }
-
-      return { ...state, ...action.payload, votedPosts };
+      return { ...state, ...action.payload };
     });
     builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
       state.posts.push(action.payload);
-    });
-    builder.addCase(upvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.postId] = {
-        upvoted: true,
-      };
-    });
-    builder.addCase(downvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.postId] = {
-        upvoted: false,
-      };
     });
   },
 });
