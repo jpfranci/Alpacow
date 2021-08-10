@@ -63,7 +63,7 @@ const ProfileButton = (props: any) => {
         />
       );
     } else {
-      return <span></span>;
+      return null;
     }
   };
 
