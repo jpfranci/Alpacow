@@ -110,6 +110,16 @@ const downvotePost = async (postId, userId) => {
   return post;
 };
 
+const upvoteComment = async (postId, commentId, userId) => {
+  const post = await PostDb.upvoteComment(postId, commentId, userId);
+  return post;
+};
+
+const downvoteComment = async (postId, commentId, userId) => {
+  const post = await PostDb.downvoteComment(postId, commentId, userId);
+  return post;
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -119,4 +129,6 @@ module.exports = {
   callAzureApi,
   upvotePost,
   downvotePost,
+  upvoteComment,
+  downvoteComment,
 };

@@ -18,7 +18,24 @@ const createProjectionObject = (userId, showComments = false) => {
     },
   };
   if (showComments) {
-    projection.$project.comments = true;
+    projection.$project.comments = {
+      $map: {
+        input: "$comments",
+        as: "c",
+        in: {
+          _id: "$$c._id",
+          body: "$$c.body",
+          date: "$$c.date",
+          userId: "$$c.userId",
+          username: "$$c.username",
+          isMature: "$$c.isMature",
+          numUpvotes: { $size: "$$c.upvoters" },
+          numDownvotes: { $size: "$$c.downvoters" },
+          isUpvoted: { $in: [userId, "$$c.upvoters"] },
+          isDownvoted: { $in: [userId, "$$c.downvoters"] },
+        },
+      },
+    };
   }
   return projection;
 };
@@ -135,6 +152,62 @@ const downvotePost = async (postId, userId) => {
   });
 };
 
+const upvoteComment = async (postId, commentId, userId) => {
+  const updateSpec = {
+    $push: { "comments.$[comment].upvoters": userId },
+    $pull: { "comments.$[comment].downvoters": userId },
+  };
+
+  const filter = {
+    _id: postId,
+  };
+
+  const options = {
+    new: true,
+    projection: createProjectionObject(userId, true).$project,
+    arrayFilters: [
+      {
+        "comment._id": commentId,
+        "comment.upvoters": { $nin: [userId] },
+      },
+    ],
+  };
+
+  const post = await Post.findOneAndUpdate(filter, updateSpec, options);
+  const comment = await post.comments.find(
+    (comment) => comment._id == commentId,
+  );
+  return comment;
+};
+
+const downvoteComment = async (postId, commentId, userId) => {
+  const updateSpec = {
+    $push: { "comments.$[comment].downvoters": userId },
+    $pull: { "comments.$[comment].upvoters": userId },
+  };
+
+  const filter = {
+    _id: postId,
+  };
+
+  const options = {
+    new: true,
+    projection: createProjectionObject(userId, true).$project,
+    arrayFilters: [
+      {
+        "comment._id": commentId,
+        "comment.downvoters": { $nin: [userId] },
+      },
+    ],
+  };
+
+  const post = await Post.findOneAndUpdate(filter, updateSpec, options);
+  const comment = await post.comments.find(
+    (comment) => comment._id == commentId,
+  );
+  return comment;
+};
+
 const updateUsername = async (userId, newUsername) => {
   return Post.updateMany(
     { userId },
@@ -153,6 +226,8 @@ const operations = {
   getVotedPostsByUserID,
   upvotePost,
   downvotePost,
+  upvoteComment,
+  downvoteComment,
   updateUsername,
 };
 
