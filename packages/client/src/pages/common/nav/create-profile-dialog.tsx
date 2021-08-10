@@ -81,6 +81,7 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
     control,
     formState: { errors },
     setError,
+    clearErrors,
     handleSubmit,
   } = useForm({
     mode: "onBlur",
@@ -95,6 +96,7 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
       // @ts-ignore
       setValue(field, DEFAULT_FIELDS[field], { shouldValidate: false });
     });
+    clearErrors();
     setShowPassword(false);
     onClose();
   };

@@ -84,6 +84,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
     control,
     formState: { errors },
     setError,
+    clearErrors,
     handleSubmit,
   } = useForm({
     mode: "onBlur",
@@ -98,6 +99,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
       // @ts-ignore
       setValue(field, DEFAULT_FIELDS[field], { shouldValidate: false });
     });
+    clearErrors();
     setShowPassword(false);
     onClose();
   };
@@ -148,6 +150,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
       PaperComponent={StyledPaper}
       open={open}
       scroll="body"
+      onClose={handleClose}
       aria-labelledby="form-dialog-title"
       fullWidth>
       <DialogTitle id="form-dialog-title">
