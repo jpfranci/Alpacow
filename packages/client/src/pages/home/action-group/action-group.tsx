@@ -43,6 +43,7 @@ const ActionGroup = () => {
           <Button
             variant="outlined"
             color="primary"
+            disabled={!userState._id}
             onClick={() => {
               // Tooltip only shows on enabled buttons
               if (userState._id) {

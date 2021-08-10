@@ -14,6 +14,7 @@ import { useAppDispatch } from "../../../redux/store";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const PostContainer = styled.div`
   display: flex;
@@ -102,7 +103,7 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(upvote({ post }))
       .then(unwrapResult)
-      .catch((error) => alert("You must be logged in to vote!"));
+      .catch((err) => toast.error(err.message));
   };
 
   const handleDownvoteClick = (
@@ -111,7 +112,7 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(downvote({ post }))
       .then(unwrapResult)
-      .catch((error) => alert("You must be logged in to vote!"));
+      .catch((err) => toast.error(err.message));
   };
 
   const postBodyText = () => {

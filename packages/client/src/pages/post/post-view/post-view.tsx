@@ -10,6 +10,7 @@ import { StyledHR } from "../../common/common";
 import Comments from "./comments";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const PostViewContainer = styled.div`
   display: flex;
@@ -87,7 +88,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                 onClick={() =>
                   dispatch(upvote({ post }))
                     .then(unwrapResult)
-                    .catch((error) => alert("You must be logged in to vote!"))
+                    .catch((err) => toast.error(err.message))
                 }
                 disabled={shouldDisableUpvote}>
                 <UpvoteIcon />
@@ -97,7 +98,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                 onClick={() =>
                   dispatch(downvote({ post }))
                     .then(unwrapResult)
-                    .catch((error) => alert("You must be logged in to vote!"))
+                    .catch((err) => toast.error(err.message))
                 }
                 disabled={shouldDisableDownvote}>
                 <DownvoteIcon />

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
+import { RootState } from "../store";
 
 const prefix = "post";
 
@@ -78,19 +79,19 @@ const initialState: PostState = {
   currPostIndex: -1,
 };
 
-export const createPost = createAsyncThunk<Post[], NewPost>(
-  `${prefix}/createPost`,
-  async (newPost, { rejectWithValue, getState }) => {
-    try {
-      // @ts-ignore
-      const postState = getState().post;
-      await postService.create(newPost);
-      return await postService.getPostsByFilter(postState);
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
+export const createPost = createAsyncThunk<
+  Post[],
+  NewPost,
+  { state: RootState }
+>(`${prefix}/createPost`, async (newPost, { rejectWithValue, getState }) => {
+  try {
+    const postState = getState().post;
+    await postService.create(newPost);
+    return await postService.getPostsByFilter(postState);
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
 // TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk<Post[]>(
