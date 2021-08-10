@@ -10,10 +10,11 @@ import {
 } from "../../../redux/slices/post-slice";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { useAppDispatch } from "../../../redux/store";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const PostContainer = styled.div`
   display: flex;
@@ -83,13 +84,11 @@ const PostListItem: React.FC<PostProps> = ({
   voteClickCallback,
 }) => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
   const history = useHistory();
 
   const voteCount = post.numUpvotes - post.numDownvotes;
-  const didUserUpvote: boolean | undefined = user.votedPosts[post._id]?.upvoted;
-  const shouldDisableUpvote = didUserUpvote !== undefined && didUserUpvote;
-  const shouldDisableDownvote = didUserUpvote !== undefined && !didUserUpvote;
+  const shouldDisableUpvote = post.isUpvoted;
+  const shouldDisableDownvote = post.isDownvoted;
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (
@@ -120,7 +119,7 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(upvote({ post }))
       .then(unwrapResult)
-      .catch((error) => alert("You must be logged in to vote!"));
+      .catch((err) => toast.error(err.message));
   };
 
   const handleDownvoteClick = (
@@ -135,7 +134,7 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(downvote({ post }))
       .then(unwrapResult)
-      .catch((error) => alert("You must be logged in to vote!"));
+      .catch((err) => toast.error(err.message));
   };
 
   const postBodyText = () => {
@@ -166,8 +165,6 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          {/* TODO disable voting for non-logged in users */}
-
           <IconButton
             onClick={handleUpvoteClick}
             disabled={shouldDisableUpvote}>

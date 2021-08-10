@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -18,6 +18,11 @@ import { updateUser } from "../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useHistory } from "react-router-dom";
 import { PROFILE_PAGE } from "../../common/links";
+import { Controller, useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import Joi from "joi";
+import { toast } from "react-toastify";
+import UpdateErrorCode from "../../errors/update-errors";
 
 const StyledPaper = styled(Paper)`
   border-radius: 1rem;
@@ -37,20 +42,9 @@ const StyledTitle = styled.span`
   margin: 0.5em 0;
 `;
 
-interface EditProfileErrors {
-  username: string;
-  email: string;
-}
-
-const DEFAULT_ERRORS: EditProfileErrors = {
-  username: "",
-  email: "",
-};
-
-interface EditProfileState {
-  username: string;
-  email: string;
-}
+const StyledErrorMessage = styled.span`
+  color: red;
+`;
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -59,56 +53,74 @@ interface EditProfileDialogProps {
   email: string | undefined;
 }
 
+const validationSchema = Joi.object({
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .required(),
+  username: Joi.string().required(),
+});
 const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
-  const userState = useAppSelector((state) => state.user);
-  let curUsername = userState.username;
-  let curEmail = userState.email;
+  const { username: currentUsername, email: currentEmail } = useAppSelector(
+    (state) => state.user,
+  );
+  const {
+    setValue,
+    control,
+    formState: { errors },
+    setError,
+    clearErrors,
+    handleSubmit,
+  } = useForm({
+    mode: "onBlur",
+    resolver: joiResolver(validationSchema),
+    defaultValues: {
+      username: currentUsername,
+      email: currentEmail,
+    },
+  });
 
-  const DEFAULT_FIELDS = {
-    username: curUsername ? curUsername : "",
-    email: curEmail ? curEmail : "",
-  };
+  useEffect(() => {
+    setValue("email", currentEmail);
+    setValue("username", currentUsername);
+  }, [currentEmail, currentUsername]);
 
-  const [values, setValues] = useState<EditProfileState>(DEFAULT_FIELDS);
-  const [errors, setErrors] = useState<EditProfileErrors>(DEFAULT_ERRORS);
   const dispatch = useAppDispatch();
 
   let history = useHistory();
 
   const handleClose = () => {
-    setValues(DEFAULT_FIELDS);
-    setErrors(DEFAULT_ERRORS);
+    clearErrors();
     onClose();
   };
 
-  const handleUpdateUser = async () => {
+  const handleUpdateUser = async ({ username, email }) => {
     try {
-      const { username, email } = values;
-      const validationResult = await userService.validate({
-        username: username,
-        email: email,
-      });
-      let isValid = true;
-      let formErrors = errors;
+      if (username !== currentUsername || email !== currentEmail) {
+        const validationResult = await userService.validate({
+          username: username,
+          email: email,
+        });
+        let isValid = true;
 
-      // TODO: check if existing email belongs to this user, if not ensure updated email isn't being used
-      if (email !== curEmail && validationResult.emailExists) {
-        formErrors = { ...formErrors, email: "The new email already exists" };
-        isValid = false;
-      }
+        if (email !== currentEmail && validationResult.emailExists) {
+          setError("email", {
+            type: "manual",
+            message: "The new email already exists",
+          });
+          isValid = false;
+        }
 
-      if (validationResult.usernameExists) {
-        formErrors = { ...formErrors, username: "The username already exists" };
-        isValid = false;
-      }
+        if (username !== currentUsername && validationResult.usernameExists) {
+          setError("username", {
+            type: "manual",
+            message: "The username already exists",
+          });
+          isValid = false;
+        }
 
-      if (!isValid) {
-        setErrors(formErrors);
-      } else {
-        if (userState._id) {
+        if (isValid) {
           const dispatchedAction = await dispatch(
             updateUser({
-              _id: userState._id,
               username: username,
               email: email,
             }),
@@ -117,19 +129,24 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
           handleClose();
           history.push(PROFILE_PAGE);
         }
+      } else {
+        toast.info("No changes were made to current info.");
       }
     } catch (err) {
-      alert("There was an unexpected error while signing up, please try again");
+      switch (err.errorCode) {
+        case UpdateErrorCode.EMAIL_IN_USE:
+          setError("email", {
+            type: "manual",
+            message: "The new email already exists",
+          });
+          break;
+        default:
+          toast.error("There was an unexpected error while updating user");
+          break;
+      }
     }
   };
 
-  const handleChange =
-    (prop: keyof EditProfileState) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [prop]: event.target.value });
-    };
-
-  const fieldStyle = { margin: "0.5rem 0rem", color: "#595959" };
   const InputFieldProps = {
     fullWidth: true,
     margin: "normal" as PropTypes.Margin,
@@ -153,24 +170,47 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
       </DialogTitle>
 
       <DialogContent>
-        <TextField
-          id="new-user-email"
-          label={errors.email ? errors.email : "Email"}
-          value={values.email}
-          onChange={handleChange("email")}
-          autoFocus
-          error={!!errors.email}
-          variant="standard"
-          {...InputFieldProps}
+        <Controller
+          control={control}
+          name="email"
+          render={({ field }) => (
+            <>
+              <TextField
+                id="new-user-email"
+                label={"Email"}
+                autoFocus
+                error={!!errors.email}
+                variant="standard"
+                {...field}
+                {...InputFieldProps}
+              />
+              {errors.email && (
+                <StyledErrorMessage>{errors.email.message}</StyledErrorMessage>
+              )}
+            </>
+          )}
         />
-        <TextField
-          id="new-user-username"
-          label={errors.username ? errors.username : "Username"}
-          value={values.username}
-          error={!!errors.username}
-          onChange={handleChange("username")}
-          variant="standard"
-          {...InputFieldProps}
+
+        <Controller
+          control={control}
+          name="username"
+          render={({ field }) => (
+            <>
+              <TextField
+                id="new-user-username"
+                label={errors.username ? errors.username : "Username"}
+                error={!!errors.username}
+                variant="standard"
+                {...field}
+                {...InputFieldProps}
+              />
+              {errors.username && (
+                <StyledErrorMessage>
+                  {errors.username.message}
+                </StyledErrorMessage>
+              )}
+            </>
+          )}
         />
       </DialogContent>
 
@@ -178,7 +218,10 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         <Button variant="outlined" color="primary" onClick={handleClose}>
           Back to profile
         </Button>
-        <Button variant="contained" color="primary" onClick={handleUpdateUser}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit(handleUpdateUser)}>
           Submit
         </Button>
       </DialogActions>

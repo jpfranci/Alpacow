@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
+import { RootState } from "../store";
+import { updateUser } from "./user-slice";
 
 const prefix = "post";
 
@@ -31,6 +33,8 @@ export interface Post extends NewPost {
   numDownvotes: number;
   date: string;
   userId: string;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
   username: string;
   comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
 }
@@ -77,18 +81,20 @@ const initialState: PostState = {
   currPostIndex: -1,
 };
 
-export const createPost = createAsyncThunk<Post, NewPost>(
-  `${prefix}/createPost`,
-  async (newPost, { rejectWithValue }) => {
-    try {
-      return await postService.create(newPost);
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
+export const createPost = createAsyncThunk<
+  Post[],
+  NewPost,
+  { state: RootState }
+>(`${prefix}/createPost`, async (newPost, { rejectWithValue, getState }) => {
+  try {
+    const postState = getState().post;
+    await postService.create(newPost);
+    return await postService.getPostsByFilter(postState);
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
-// TODO add some filter param after deciding how post fetching will work (getting all posts will suffice for now)
 export const getPosts = createAsyncThunk<Post[]>(
   `${prefix}/getPosts`,
   async (_, { rejectWithValue }) => {
@@ -111,16 +117,23 @@ export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
   },
 );
 
-// TODO vote actions have race condition, should be updating on server
 export const upvote = createAsyncThunk<
-  { numUpvotes: number; numDownvotes: number; postId: string },
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    postId: string;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+  },
   { post: Post }
 >(`${prefix}/upvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.upvote(post._id);
     return {
-      numUpvotes: response.data.numUpvotes,
-      numDownvotes: response.data.numDownvotes,
+      numUpvotes: response.numUpvotes,
+      numDownvotes: response.numDownvotes,
+      isUpvoted: response.isUpvoted,
+      isDownvoted: response.isDownvoted,
       postId: post._id,
     };
   } catch (error) {
@@ -129,14 +142,22 @@ export const upvote = createAsyncThunk<
 });
 
 export const downvote = createAsyncThunk<
-  { numUpvotes: number; numDownvotes: number; postId: string },
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    postId: string;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+  },
   { post: Post }
 >(`${prefix}/downvote`, async ({ post }, { rejectWithValue }) => {
   try {
     const response = await postService.downvote(post._id);
     return {
-      numUpvotes: response.data.numUpvotes,
-      numDownvotes: response.data.numDownvotes,
+      numUpvotes: response.numUpvotes,
+      numDownvotes: response.numDownvotes,
+      isUpvoted: response.isUpvoted,
+      isDownvoted: response.isDownvoted,
       postId: post._id,
     };
   } catch (error) {
@@ -144,9 +165,7 @@ export const downvote = createAsyncThunk<
   }
 });
 
-// TODO implement getPostByID action
 // TODO implement comment action
-
 export const postSlice = createSlice({
   name: prefix,
   initialState,
@@ -203,7 +222,7 @@ export const postSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(createPost.fulfilled, (state, action) => {
-      getPostsByFilter(state);
+      state.posts = action.payload;
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
@@ -213,6 +232,8 @@ export const postSlice = createSlice({
         // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
+        postToUpdate.isUpvoted = action.payload.isUpvoted;
+        postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
@@ -222,6 +243,8 @@ export const postSlice = createSlice({
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
+        postToUpdate.isUpvoted = action.payload.isUpvoted;
+        postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
     });
   },

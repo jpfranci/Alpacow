@@ -5,6 +5,8 @@ import firebase from "firebase";
 import SignupErrorCode from "../errors/signup-errors";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
+import { current } from "@reduxjs/toolkit";
+import UpdateErrorCode from "../errors/update-errors";
 
 const baseUrl = "/api/users";
 
@@ -25,9 +27,8 @@ export type SignupInfo = {
 };
 
 export type UpdateUserInfo = {
-  _id: string;
-  username: string;
-  email: string;
+  username?: string;
+  email?: string;
 };
 
 const signupWithFirebase = async (
@@ -145,9 +146,23 @@ const validate = async (
   return response.data;
 };
 
-const update = async (id: string, partialUser: Partial<UserState>) => {
-  // TODO: update firebase credentials somehow
-  const response = await axios.patch(`${baseUrl}/${id}`, partialUser);
+const update = async (updateUserInfo: UpdateUserInfo) => {
+  const currentUser = firebase.auth().currentUser;
+  if (updateUserInfo.email) {
+    try {
+      await currentUser?.updateEmail(updateUserInfo.email);
+    } catch (err) {
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          throw new ActionableError(
+            UpdateErrorCode.EMAIL_IN_USE,
+            "Email already in use",
+          );
+      }
+    }
+  }
+
+  const response = await axios.post(`${baseUrl}/update`, updateUserInfo);
   return response.data;
 };
 

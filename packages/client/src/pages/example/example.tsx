@@ -8,6 +8,7 @@ import {
 } from "../../redux/slices/post-slice";
 import { login, signup } from "../../redux/slices/user-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { toast } from "react-toastify";
 
 const ExamplePage = () => {
   return (
@@ -155,11 +156,11 @@ const PostExample = () => {
         }),
       )
         .then(unwrapResult)
-        .then((data) => alert("post created oooo"))
         .catch((error) => {
           alert("post creation failed NOOOOO");
         });
     } else {
+      toast.error("You must be logged in to create a post");
       alert("you must be logged in to create a post");
     }
   };

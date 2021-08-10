@@ -17,5 +17,6 @@
   "name": "bumble-for-cats",
   "engines": {
     "node": "16.x"
-  }
+  },
+  "dependencies": {}
 }

@@ -1,10 +1,10 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
   UpdateUserInfo,
 } from "../../services/users";
-import { createPost, downvote, Post, upvote } from "./post-slice";
+import { Post } from "./post-slice";
 
 const prefix = "user";
 
@@ -14,7 +14,6 @@ export type UserState = {
   email?: string;
   reputation?: number;
   posts: Post[];
-  votedPosts: { [id: string]: { upvoted: boolean } };
 };
 
 // response body for login requests
@@ -23,8 +22,6 @@ export type LoginState = {
   username: string;
   email: string;
   reputation: number;
-  upvotedPostIds: string[];
-  downvotedPostIds: string[];
 };
 
 export const initialState: UserState = {
@@ -32,7 +29,6 @@ export const initialState: UserState = {
   username: undefined,
   email: undefined,
   posts: [],
-  votedPosts: {},
 };
 
 export const signup = createAsyncThunk<UserState, SignupInfo>(
@@ -50,7 +46,7 @@ export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
   `${prefix}/update`,
   async (updateUserInfo: UpdateUserInfo, { rejectWithValue }) => {
     try {
-      return await userService.update(updateUserInfo._id, updateUserInfo);
+      return await userService.update(updateUserInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -90,9 +86,6 @@ export const logout = createAsyncThunk<void, void>(
   },
 );
 
-// TODO implement getPosts action
-// TODO implement logout action
-
 export const userSlice = createSlice({
   name: prefix,
   initialState,
@@ -111,16 +104,7 @@ export const userSlice = createSlice({
       return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      const votedPosts = {};
-      for (const upvotedPostId of action.payload.upvotedPostIds) {
-        votedPosts[upvotedPostId] = { upvoted: true };
-      }
-
-      for (const downvotedPostId of action.payload.downvotedPostIds) {
-        votedPosts[downvotedPostId] = { upvoted: false };
-      }
-
-      return { ...state, ...action.payload, votedPosts };
+      return { ...state, ...action.payload };
     });
     builder.addCase(login.rejected, (state, action) => {
       return { ...state };
@@ -132,32 +116,10 @@ export const userSlice = createSlice({
       return { ...initialState };
     });
     builder.addCase(loginFromCookie.fulfilled, (state, action) => {
-      const votedPosts = {};
-      for (const upvotedPostId of action.payload.upvotedPostIds) {
-        votedPosts[upvotedPostId] = { upvoted: true };
-      }
-
-      for (const downvotedPostId of action.payload.downvotedPostIds) {
-        votedPosts[downvotedPostId] = { upvoted: false };
-      }
-
-      return { ...state, ...action.payload, votedPosts };
+      return { ...state, ...action.payload };
     });
     builder.addCase(loginFromCookie.rejected, (state, action) => {
       return { ...state };
-    });
-    builder.addCase(createPost.fulfilled, (state, action) => {
-      state.posts.push(action.payload);
-    });
-    builder.addCase(upvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.postId] = {
-        upvoted: true,
-      };
-    });
-    builder.addCase(downvote.fulfilled, (state, action) => {
-      state.votedPosts[action.payload.postId] = {
-        upvoted: false,
-      };
     });
   },
 });

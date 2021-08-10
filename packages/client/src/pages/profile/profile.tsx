@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { HOME_PAGE } from "../../common/links";
-import { Post } from "../../redux/slices/post-slice";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppSelector } from "../../redux/store";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Link } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import ProfilePostList from "../common/profile/profile-post-list";
-import ProfileDialog from "../common/profile/profile-dialog";
 import EditProfileDialog from "./edit-profile-dialog";
 
 const StyledTopContainer = styled.div`
@@ -20,7 +18,6 @@ const StyledProfileContainer = styled.div`
   border: 2px solid #000;
   border-radius: 2rem;
   min-width: 220px;
-  width: 40%;
 `;
 
 const StyledColumnContainer = styled.div`
@@ -32,12 +29,11 @@ const StyledColumnContainer = styled.div`
 const StyledRowContainer = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
 `;
 
-const StyledButton = styled(Button)`
-  margin-top: 0.5rem;
+const EditButton = styled(Button)`
+  margin-left: 1.5em;
 `;
 
 const StyledText = styled.text`
@@ -47,7 +43,6 @@ const StyledText = styled.text`
 `;
 
 const StyledPostContainer = styled.div`
-  width: 42%;
   min-width: 300;
 `;
 
@@ -83,12 +78,12 @@ const ProfilePage = () => {
           <StyledRowContainer>
             <h1 style={fieldColor}>{userState.username}'s profile</h1>
 
-            <StyledButton
+            <EditButton
               variant="outlined"
               color="primary"
               onClick={handleEditProfileModalOpen}>
               Edit
-            </StyledButton>
+            </EditButton>
             <EditProfileDialog
               open={editProfileModalOpen}
               onClose={handleEditProfileModalClose}
@@ -145,9 +140,9 @@ const ProfilePage = () => {
       </StyledColumnContainer>
 
       <Link component={RouterLink} to={HOME_PAGE}>
-        <StyledButton variant="outlined" color="primary">
+        <Button variant="outlined" color="primary">
           Back to home page
-        </StyledButton>
+        </Button>
       </Link>
     </StyledTopContainer>
   );

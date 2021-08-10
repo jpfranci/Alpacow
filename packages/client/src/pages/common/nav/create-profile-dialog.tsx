@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from "react";
 import {
   Button,
@@ -25,6 +26,14 @@ import { Variant } from "@material-ui/core/styles/createTypography";
 import ActionableError from "../../../errors/actionable-error";
 import SignupErrorCode from "../../../errors/signup-errors";
 import userService from "../../../services/users";
+import { toast } from "react-toastify";
+import { joiResolver } from "@hookform/resolvers/joi";
+import Joi from "joi";
+import { useForm, Controller } from "react-hook-form";
+
+const StyledErrorMessage = styled.span`
+  color: red;
+`;
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -38,34 +47,13 @@ const DEFAULT_FIELDS = {
   username: "",
   password: "",
   email: "",
-  showPassword: false,
+  confirmPassword: "",
 };
 
 interface CreateDialogProps {
   open: boolean;
   onClose: () => any;
 }
-
-interface ProfileState {
-  username: string;
-  password: string;
-  email: string;
-  showPassword: boolean;
-}
-
-interface ProfileErrors {
-  username: string;
-  password: string;
-  email: string;
-  showPassword: string;
-}
-
-const DEFAULT_ERRORS: ProfileErrors = {
-  username: "",
-  password: "",
-  email: "",
-  showPassword: "",
-};
 
 const InputFieldProps = {
   fullWidth: true,
@@ -76,42 +64,70 @@ const StyledContainer = styled.div`
   margin: 1.1rem;
 `;
 
-// TODO: form validation, Firebase hookup
+const validationSchema = Joi.object({
+  email: Joi.string()
+    .email({ tlds: { allow: false } })
+    .required(),
+  password: Joi.string().min(6).required(),
+  confirmPassword: Joi.string().required().valid(Joi.ref("password")),
+  username: Joi.string().required(),
+});
+
 const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   const classes = useStyles();
-  const [values, setValues] = useState<ProfileState>(DEFAULT_FIELDS);
-  const [errors, setErrors] = useState<ProfileErrors>(DEFAULT_ERRORS);
+  const {
+    setValue,
+    control,
+    formState: { errors },
+    setError,
+    clearErrors,
+    handleSubmit,
+  } = useForm({
+    mode: "onBlur",
+    resolver: joiResolver(validationSchema),
+    defaultValues: DEFAULT_FIELDS,
+  });
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const dispatch = useAppDispatch();
 
   const handleClose = () => {
-    setValues(DEFAULT_FIELDS);
+    Object.keys(DEFAULT_FIELDS).forEach((field) => {
+      // @ts-ignore
+      setValue(field, DEFAULT_FIELDS[field], { shouldValidate: false });
+    });
+    clearErrors();
+    setShowPassword(false);
     onClose();
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = async ({ username, email, password }) => {
     try {
-      const { username, email } = values;
+      let isValid = true;
       const validationResult = await userService.validate({
         username,
         email,
       });
-      let isValid = true;
       if (validationResult.emailExists) {
-        setErrors({ ...errors, email: "The email already exists" });
+        setError("email", {
+          type: "manual",
+          message: "The email already exists",
+        });
         isValid = false;
       }
 
       if (validationResult.usernameExists) {
-        setErrors({ ...errors, username: "The username already exists" });
+        setError("username", {
+          type: "manual",
+          message: "The username already exists",
+        });
         isValid = false;
       }
-
       if (isValid) {
         const dispatchedAction = await dispatch(
           signup({
-            username: values.username,
-            password: values.password,
-            email: values.email,
+            username: username,
+            password: password,
+            email: email,
           }),
         );
         unwrapResult(dispatchedAction);
@@ -122,32 +138,34 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
         switch (err.errorCode) {
           case SignupErrorCode.DUPLICATE_EMAIL:
           case SignupErrorCode.INVALID_EMAIL:
-            setErrors({ ...errors, email: err.message });
+            setError("email", {
+              type: "manual",
+              message: err.message,
+            });
             break;
           case SignupErrorCode.DUPLICATE_USERNAME:
-            setErrors({ ...errors, username: err.message });
+            setError("username", {
+              type: "manual",
+              message: err.message,
+            });
             break;
           case SignupErrorCode.WEAK_PASSWORD:
-            setErrors({ ...errors, password: err.message });
+            setError("password", {
+              type: "manual",
+              message: err.message,
+            });
+            break;
         }
       } else {
-        alert(
+        toast.error(
           "There was an unexpected error while signing up, please try again",
         );
       }
     }
   };
 
-  const handleChange =
-    (prop: keyof ProfileState) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      // TODO: Do validation on field
-      setErrors({ ...errors, [prop]: "" });
-      setValues({ ...values, [prop]: event.target.value });
-    };
-
   const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword });
+    setShowPassword(!showPassword);
   };
 
   const handleMouseDownPassword = (
@@ -169,75 +187,117 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
           Remember, your username represents how others see you on Alpacow.
         </DialogContentText>
         <StyledContainer>
-          <TextField
-            id="new-user-email"
-            label={errors.email ? errors.email : "Email"}
-            value={values.email}
-            onChange={handleChange("email")}
-            required
-            error={!!errors.email}
-            autoFocus
-            variant="standard"
-            {...InputFieldProps}
+          <Controller
+            control={control}
+            render={({ field }) => (
+              <TextField
+                id="new-user-email"
+                label={"Email"}
+                required
+                error={!!errors.email}
+                variant="standard"
+                {...InputFieldProps}
+                {...field}
+              />
+            )}
+            name="email"
           />
-          <TextField
-            id="new-user-username"
-            label={errors.username ? errors.username : "Username"}
-            value={values.username}
-            onChange={handleChange("username")}
-            required
-            error={!!errors.username}
-            variant="standard"
-            {...InputFieldProps}
+          {errors.email && (
+            <StyledErrorMessage>{errors.email.message}</StyledErrorMessage>
+          )}
+          <Controller
+            control={control}
+            render={({ field }) => (
+              <TextField
+                id="new-user-username"
+                label={"Username"}
+                required
+                error={!!errors.username}
+                variant="standard"
+                {...InputFieldProps}
+                {...field}
+              />
+            )}
+            name="username"
           />
-          <FormControl {...InputFieldProps}>
-            <InputLabel htmlFor="adornment-password" error={!!errors.password}>
-              {errors.password ? errors.password : "Password"}
-            </InputLabel>
-            <Input
-              id="new-user-password"
-              error={!!errors.password}
-              type={values.showPassword ? "text" : "password"}
-              onChange={handleChange("password")}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}>
-                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-          <FormControl {...InputFieldProps}>
-            <InputLabel htmlFor="adornment-password">
-              Confirm Password
-            </InputLabel>
-            <Input
-              id="new-user-confirm-password"
-              type={values.showPassword ? "text" : "password"}
-              // TODO: confirm password onChange
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}>
-                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </FormControl>
+          {errors.username && (
+            <StyledErrorMessage>{errors.username.message}</StyledErrorMessage>
+          )}
+          <Controller
+            control={control}
+            render={({ field }) => (
+              <FormControl {...InputFieldProps}>
+                <InputLabel
+                  htmlFor="adornment-password"
+                  error={!!errors.password}>
+                  {"Password"}
+                </InputLabel>
+                <Input
+                  id="new-user-password"
+                  error={!!errors.password}
+                  {...field}
+                  type={showPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}>
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                {errors.password && (
+                  <StyledErrorMessage>
+                    {errors.password.message}
+                  </StyledErrorMessage>
+                )}
+              </FormControl>
+            )}
+            name="password"
+          />
+          <Controller
+            control={control}
+            render={({ field }) => (
+              <FormControl {...InputFieldProps}>
+                <InputLabel htmlFor="adornment-password">
+                  Confirm Password
+                </InputLabel>
+                <Input
+                  id="new-user-confirm-password"
+                  type={showPassword ? "text" : "password"}
+                  {...field}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}>
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                {errors.confirmPassword && (
+                  <StyledErrorMessage>
+                    Confirm password must be the same as password
+                  </StyledErrorMessage>
+                )}
+              </FormControl>
+            )}
+            name="confirmPassword"
+          />
         </StyledContainer>
       </DialogContent>
       <DialogActions style={{ margin: "10px" }}>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSignUp} variant="contained" color="primary">
+        <Button
+          onClick={handleSubmit(handleSignUp)}
+          variant="contained"
+          color="primary">
           Sign Up
         </Button>
       </DialogActions>
