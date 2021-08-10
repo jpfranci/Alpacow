@@ -174,7 +174,11 @@ const CreateProfileDialog = ({ open, onClose }: CreateDialogProps) => {
   };
 
   return (
-    <Dialog open={open} scroll="body" aria-labelledby="form-dialog-title">
+    <Dialog
+      onBackdropClick={handleClose}
+      open={open}
+      scroll="body"
+      aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Sign up for Alpacow ✍️</DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <DialogContentText>Create your Alpacow account.</DialogContentText>

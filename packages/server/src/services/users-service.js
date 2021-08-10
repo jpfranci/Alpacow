@@ -54,6 +54,10 @@ const getUser = async (uid) => {
   return user;
 };
 
+const updateEmailAndUsername = async (payload) => {
+  return UserDb.updateEmailAndUsername(payload);
+};
+
 const validateEmailAndUsername = async ({ username, email }) => {
   const [usernameExists, emailExists] = await Promise.all([
     UserDb.doesUsernameExist(username),
@@ -68,6 +72,7 @@ const validateEmailAndUsername = async ({ username, email }) => {
 module.exports = {
   createUser,
   getUser,
+  updateEmailAndUsername,
   validateEmailAndUsername,
   logout,
 };

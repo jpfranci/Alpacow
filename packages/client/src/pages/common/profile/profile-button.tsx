@@ -13,6 +13,8 @@ import styled from "styled-components";
 import ProfileDialog from "./profile-dialog";
 import { useAppDispatch } from "../../../redux/store";
 import { logout } from "../../../redux/slices/user-slice";
+import { useHistory } from "react-router-dom";
+import { HOME_PAGE } from "../../../common/links";
 
 const ButtonContainer = styled(Button)`
   text-transform: none;
@@ -22,6 +24,7 @@ const ProfileButton = (props: any) => {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
   const dispatch = useAppDispatch();
+  let history = useHistory();
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -45,6 +48,7 @@ const ProfileButton = (props: any) => {
   const handleLogOut = () => {
     dispatch(logout());
     setOpen(false);
+    history.push(HOME_PAGE);
   };
 
   function handleListKeyDown(event: any) {

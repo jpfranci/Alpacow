@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import userService, {
   LoginCredentials,
   SignupInfo,
+  UpdateUserInfo,
 } from "../../services/users";
 import { Post } from "./post-slice";
 
@@ -35,6 +36,17 @@ export const signup = createAsyncThunk<UserState, SignupInfo>(
   async (signupInfo: SignupInfo, { rejectWithValue }) => {
     try {
       return await userService.signup(signupInfo);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
+  `${prefix}/update`,
+  async (updateUserInfo: UpdateUserInfo, { rejectWithValue }) => {
+    try {
+      return await userService.update(updateUserInfo._id, updateUserInfo);
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -75,7 +87,6 @@ export const logout = createAsyncThunk<void, void>(
 );
 
 // TODO implement getPosts action
-// TODO implement update action
 // TODO implement logout action
 
 export const userSlice = createSlice({
@@ -87,6 +98,12 @@ export const userSlice = createSlice({
       return { ...state, ...action.payload };
     });
     builder.addCase(signup.rejected, (state, action) => {
+      return { ...state };
+    });
+    builder.addCase(updateUser.fulfilled, (state, action) => {
+      return { ...state, ...action.payload };
+    });
+    builder.addCase(updateUser.rejected, (state, action) => {
       return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {
