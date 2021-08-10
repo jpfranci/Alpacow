@@ -102,7 +102,7 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         </DialogContentText>
         <StyledRowContainerNoSpace>
           <DialogContentText style={fieldStyle}>
-            <StyledUsername>Reputation: 🔥</StyledUsername>
+            <StyledUsername>Reputation: 🔥 </StyledUsername>
             {userState.reputation}
           </DialogContentText>
         </StyledRowContainerNoSpace>
