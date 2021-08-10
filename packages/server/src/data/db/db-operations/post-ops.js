@@ -6,8 +6,8 @@ const createProjectionObject = (userId, showComments = false) => {
       title: true,
       body: true,
       date: true,
-      numUpvotes: true,
-      numDownvotes: true,
+      numUpvotes: { $size: "$upvoters" },
+      numDownvotes: { $size: "$downvoters" },
       username: true,
       tag: true,
       score: { $subtract: ["$numUpvotes", "$numDownvotes"] },
@@ -104,16 +104,14 @@ const upvotePost = async (postId, userId) => {
   const updateSpec = {
     $push: { upvoters: userId },
     $pull: { downvoters: userId },
-    $inc: { numUpvotes: 1 },
   };
 
-  // TODO can avoid making mult async requests if we inferred vote counts from voter array length
-  const post = await Post.findById(postId);
-  if (post.downvoters.includes(userId)) {
-    updateSpec.$inc.numDownvotes = -1;
-  }
+  const filter = {
+    _id: postId,
+    upvoters: { $nin: [userId] },
+  };
 
-  return Post.findByIdAndUpdate(postId, updateSpec, {
+  return Post.findOneAndUpdate(filter, updateSpec, {
     new: true,
     projection: createProjectionObject(userId).$project,
   });
@@ -123,15 +121,14 @@ const downvotePost = async (postId, userId) => {
   const updateSpec = {
     $push: { downvoters: userId },
     $pull: { upvoters: userId },
-    $inc: { numDownvotes: 1 },
   };
 
-  const post = await Post.findById(postId);
-  if (post.upvoters.includes(userId)) {
-    updateSpec.$inc.numUpvotes = -1;
-  }
+  const filter = {
+    _id: postId,
+    downvoters: { $nin: [userId] },
+  };
 
-  return Post.findByIdAndUpdate(postId, updateSpec, {
+  return Post.findOneAndUpdate(filter, updateSpec, {
     new: true,
     projection: createProjectionObject(userId).$project,
   });

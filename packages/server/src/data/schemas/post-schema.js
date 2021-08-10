@@ -10,8 +10,6 @@ const PostSchema = new Schema({
   title: String,
   body: String,
   date: Date,
-  numUpvotes: Number,
-  numDownvotes: Number,
   location: LocationSchema,
   comments: [CommentSchema],
   userId: { type: String, index: true },
