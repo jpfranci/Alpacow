@@ -60,7 +60,6 @@ const updateEmailAndUsername = async (payload) => {
     payload._id,
     payload.username,
   );
-  console.log(updatedPosts);
   return newUser;
 };
 
