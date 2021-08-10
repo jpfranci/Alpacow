@@ -15,6 +15,12 @@ const emailAndUsernameExistsSchema = Joi.object().keys({
   username: Joi.string().required(),
 });
 
+const emailAndUsernameUpdateSchema = Joi.object().keys({
+  _id: Joi.string().required(),
+  email: Joi.string().email(),
+  username: Joi.string(),
+});
+
 const loginValidationFn = celebrate({
   [Segments.BODY]: loginSchema,
 });
@@ -27,8 +33,13 @@ const emailAndUsernameValidationFn = celebrate({
   [Segments.BODY]: emailAndUsernameExistsSchema,
 });
 
+const emailAndUsernameUpdateValidationFn = celebrate({
+  [Segments.BODY]: emailAndUsernameUpdateSchema,
+});
+
 module.exports = {
   loginValidationFn,
   createUserValidationFn,
   emailAndUsernameValidationFn,
+  emailAndUsernameUpdateValidationFn,
 };
