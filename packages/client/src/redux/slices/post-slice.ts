@@ -179,11 +179,10 @@ export const createComment = createAsyncThunk<
   `${prefix}/createComment`,
   async ({ newComment, postId }, { rejectWithValue }) => {
     try {
-      const response = await postService.createComment(newComment, postId);
-      console.log(response.data);
+      const comment = await postService.createComment(newComment, postId);
       return {
         postId,
-        comment: response.data,
+        comment,
       };
     } catch (error) {
       return rejectWithValue(error);

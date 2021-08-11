@@ -25,17 +25,14 @@ const callAzureApi = async (post) => {
   }
 };
 
-const checkIsMature = async (title, body) => {
+const checkIsMature = async (texts) => {
   let isMature = false;
-
-  const titleModResponse = await callAzureApi(title);
-  isMature = isMature || titleModResponse.data.Classification.ReviewRecommended;
-  await setTimeout(() => {}, 2000);
-
-  const bodyModResponse = await callAzureApi(body);
-  isMature = isMature || bodyModResponse.data.Classification.ReviewRecommended;
-  await setTimeout(() => {}, 2000);
-
+  for (const text of texts) {
+    const textModResponse = await callAzureApi(text);
+    isMature =
+      isMature || textModResponse.data.Classification.ReviewRecommended;
+    await setTimeout(() => {}, 2000);
+  }
   return isMature;
 };
 
@@ -61,7 +58,7 @@ const createPost = async (post) => {
     userId = post.userId;
   }
 
-  const isMature = await checkIsMature(post.title, post.body);
+  const isMature = await checkIsMature([post.title, post.body]);
 
   const postToInsert = {
     ...post,
@@ -115,14 +112,17 @@ const downvotePost = async (postId, userId) => {
 };
 
 const createComment = async (comment, postId) => {
-  const username = "bill"; // TODO get actual username lol
+  const user = await UserDb.getUser(comment.userId);
+  const isMature = await checkIsMature([comment.body]);
+
   const commentToInsert = {
     ...comment,
     date: new Date(),
-    username,
+    username: user.username,
     upvoters: [],
     downvoters: [],
-    // isMature:
+    isMature,
+    // isAnon: TODO do this
   };
 
   return PostDb.createComment(commentToInsert, postId);

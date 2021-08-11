@@ -277,24 +277,23 @@ const updateUsername = async (userId, newUsername) => {
 };
 
 const createComment = async (comment, postId) => {
+  // Generate new mongodb ID (mongoose doesn't set embedded doc ids automatically if we don't use .save())
   const commentId = new mongoose.Types.ObjectId();
   comment._id = commentId;
 
-  const updateSpec = {
-    $push: { comments: comment },
-  };
-
-  const filter = {
-    _id: postId,
-  };
-
+  const updateSpec = { $push: { comments: comment } };
+  const filter = { _id: postId };
   const options = {
     new: true,
     projection: createProjectionObject(comment.userId, true).$project,
   };
 
   const post = await Post.findOneAndUpdate(filter, updateSpec, options);
-  return comment;
+  const newComment = post.comments.find((comment) =>
+    commentId.equals(comment._id),
+  );
+  if (newComment) return newComment;
+  throw new Error("Comment could not be found: " + err);
 };
 
 const operations = {
