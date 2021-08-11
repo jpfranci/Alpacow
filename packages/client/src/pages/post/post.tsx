@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouteMatch } from "react-router";
 import styled from "styled-components";
 import { POST_PAGE } from "../../common/links";
-import { updatePost, Post } from "../../redux/slices/post-slice";
+import { updatePost } from "../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
 import PostView from "./post-view/post-view";

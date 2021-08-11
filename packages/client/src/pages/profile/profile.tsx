@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { HOME_PAGE, OTHER_USER_PAGE } from "../../common/links";
 import { useRouteMatch } from "react-router";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppSelector } from "../../redux/store";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Link } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -58,8 +58,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState(initialState);
 
   const userState = useAppSelector((state) => state.user);
-
   const match = useRouteMatch<{ id: string }>(OTHER_USER_PAGE);
+
   useEffect(() => {
     if (match && match.params.id) {
       userService
@@ -83,6 +83,7 @@ const ProfilePage = () => {
   const handleClose = () => {
     setEditProfileModalOpen(false);
   };
+
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
     showRecent: boolean,
