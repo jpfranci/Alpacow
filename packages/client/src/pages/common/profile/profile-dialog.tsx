@@ -177,16 +177,21 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
           user={user}
         />
       </DialogContent>
-      {/* TODO: "see full profile" is only enabled for the current user for now */}
-      {userState._id == user._id ? (
-        <DialogActions style={{ margin: "0.5rem" }}>
+      <DialogActions style={{ margin: "0.5rem" }}>
+        {userState._id == user._id ? (
           <Link component={RouterLink} to={PROFILE_PAGE}>
             <Button variant="outlined" color="primary" onClick={handleClose}>
               See full profile
             </Button>
           </Link>
-        </DialogActions>
-      ) : null}
+        ) : (
+          <Link component={RouterLink} to={`/profile/${user._id}`}>
+            <Button variant="outlined" color="primary" onClick={handleClose}>
+              See full profile
+            </Button>
+          </Link>
+        )}
+      </DialogActions>
     </Dialog>
   );
 };
