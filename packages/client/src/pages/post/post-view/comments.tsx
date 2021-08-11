@@ -1,4 +1,4 @@
-import { Select, MenuItem } from "@material-ui/core";
+import { Select, MenuItem, IconButton } from "@material-ui/core";
 import React from "react";
 import styled from "styled-components";
 import {
@@ -8,7 +8,10 @@ import {
 } from "../../../redux/slices/post-slice";
 import Comment from "./comment";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import AddIcon from "@material-ui/icons/Add";
 import moment from "moment";
+import { useState } from "react";
+import CommentDialog from "./comment-dialog";
 
 const CommentsContainer = styled.div`
   display: flex;
@@ -29,8 +32,11 @@ interface CommentsProps {
 }
 
 const Comments: React.FC<CommentsProps> = ({ comments }) => {
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+
   const dispatch = useAppDispatch();
   const commentSortType = useAppSelector((state) => state.post.commentSortType);
+  const user = useAppSelector((state) => state.user);
 
   const handleCommentSortSelect = (
     e: React.ChangeEvent<{ name?: string; value: unknown }>,
@@ -66,13 +72,21 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
           <MenuItem value={CommentSortType.NEW}>New</MenuItem>
           <MenuItem value={CommentSortType.POPULAR}>Popular</MenuItem>
         </Select>
-        {/* <Button variant="contained" color="primary" size="small">
-      Add
-    </Button> */}
+        <IconButton
+          onClick={() => setShowCommentDialog(true)}
+          disabled={!user._id}>
+          <AddIcon />
+        </IconButton>
       </CommentsHeader>
       {sortedComments.map((comment, i) => (
         <Comment key={i} comment={comment} />
       ))}
+      {showCommentDialog && (
+        <CommentDialog
+          open={showCommentDialog}
+          onClose={() => setShowCommentDialog(false)}
+        />
+      )}
     </CommentsContainer>
   );
 };
