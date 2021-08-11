@@ -10,21 +10,23 @@ import {
   DialogTitle,
   FormControlLabel,
   makeStyles,
+  Paper,
   TextField,
 } from "@material-ui/core";
 import styled from "styled-components";
 import TagSearch from "./tag-search";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { createPost } from "../../../redux/slices/post-slice";
+import Joi from "joi";
+import { Controller, useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles(() =>
   createStyles({
     dialogContent: {
       overflow: "hidden",
-    },
-    label: {
-      textTransform: "capitalize",
-      color: "gray",
     },
   }),
 );
@@ -35,51 +37,101 @@ interface PostDialogProps {
 }
 
 interface PostDialogFields {
-  title: string;
-  bodyText: string;
   tag: string | undefined;
   isAnonymous: boolean;
   inputValue: string;
 }
 
 const DEFAULT_FIELDS = {
-  title: "",
-  bodyText: "",
   tag: undefined,
   isAnonymous: false,
   inputValue: "",
 };
 
-const StyledContainer = styled.div`
+const DEFAULT_VALIDATION_FIELDS = {
+  title: "",
+  body: "",
+};
+
+const StyledPaper = styled(Paper)`
+  border-radius: 1rem;
+  min-width: 33%;
+`;
+
+const StyledFormControlLabel = styled(FormControlLabel)`
+  texttransform: capitalize;
+  color: gray;
+  margin-left: auto;
+`;
+
+const StyledErrorMessage = styled.span`
+  color: red;
+  margin-bottom: 0.25em;
+`;
+
+const StyledRowContainer = styled.div`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   margin-top: 10px;
 `;
 
+const StyledColumnContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const validationSchema = Joi.object({
+  title: Joi.string().max(256).required(),
+  body: Joi.string().max(1024).required(),
+});
+
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
+  const {
+    setValue,
+    control,
+    formState: { errors },
+    clearErrors,
+    handleSubmit,
+  } = useForm({
+    mode: "onBlur",
+    resolver: joiResolver(validationSchema),
+    defaultValues: DEFAULT_VALIDATION_FIELDS,
+  });
   const classes = useStyles();
   const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { title, bodyText, tag, isAnonymous, inputValue } = fields;
+  const { tag, inputValue, isAnonymous } = fields;
 
   const handleClose = () => {
+    Object.keys(DEFAULT_VALIDATION_FIELDS).forEach((field) => {
+      // @ts-ignore
+      setValue(field, DEFAULT_VALIDATION_FIELDS[field], {
+        shouldValidate: false,
+      });
+    });
+    clearErrors();
     setFields(DEFAULT_FIELDS);
     onClose();
   };
 
-  const handleSave = () => {
-    dispatch(
-      createPost({
-        title: title,
-        body: bodyText,
-        tag: tag as string,
-        location: location,
-        isAnonymous: isAnonymous,
-      }),
-    );
-    handleClose();
+  const handleSubmitPost = async ({ title, body }) => {
+    try {
+      const result = await dispatch(
+        createPost({
+          title: title,
+          body: body,
+          tag: tag as string,
+          location: location,
+          isAnonymous: isAnonymous,
+        }),
+      );
+      unwrapResult(result);
+      handleClose();
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handleFieldChange = (key: string, value: any) => {
@@ -90,40 +142,68 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   };
 
   return (
-    <Dialog open={open} aria-labelledby="form-dialog-title">
+    <Dialog
+      open={open}
+      aria-labelledby="form-dialog-title"
+      PaperComponent={StyledPaper}>
       <DialogTitle id="form-dialog-title">Create your post</DialogTitle>
       <DialogContent className={classes.dialogContent}>
-        <DialogContentText>
-          Please be mindful of what you post. ❤️
-        </DialogContentText>
-        <TextField
-          id="post-title"
-          label="Title"
-          variant="outlined"
-          margin="dense"
-          autoFocus
-          fullWidth
-          value={title}
-          onChange={(event) => handleFieldChange("title", event.target.value)}
-          inputProps={{ maxLength: 1024 }}
-        />
-        <TextField
-          id="post-body-text"
-          label="Content (max 1,024 chars)"
-          variant="outlined"
-          margin="dense"
-          value={bodyText}
-          required
-          multiline
-          rows={4}
-          rowsMax={6}
-          fullWidth
-          onChange={(event) =>
-            handleFieldChange("bodyText", event.target.value)
-          }
-          inputProps={{ maxLength: 1024 }}
-        />
-        <StyledContainer>
+        <StyledColumnContainer>
+          <DialogContentText>
+            Please be mindful of what you post. ❤️
+          </DialogContentText>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field }) => (
+              <>
+                <TextField
+                  id="post-title"
+                  label="Title"
+                  variant="outlined"
+                  margin="dense"
+                  autoFocus
+                  fullWidth
+                  required
+                  error={!!errors.title}
+                  inputProps={{ maxLength: 256 }}
+                  {...field}
+                />
+                {errors.title && (
+                  <StyledErrorMessage>
+                    {errors.title.message}
+                  </StyledErrorMessage>
+                )}
+              </>
+            )}
+          />
+          <Controller
+            control={control}
+            name="body"
+            render={({ field }) => (
+              <>
+                <TextField
+                  id="post-body-text"
+                  label="Content (max 1,024 chars)"
+                  variant="outlined"
+                  margin="dense"
+                  required
+                  multiline
+                  rows={4}
+                  rowsMax={6}
+                  fullWidth
+                  error={!!errors.body}
+                  inputProps={{ maxLength: 1024 }}
+                  {...field}
+                />
+                {errors.body && (
+                  <StyledErrorMessage>{errors.body.message}</StyledErrorMessage>
+                )}
+              </>
+            )}
+          />
+        </StyledColumnContainer>
+        <StyledRowContainer>
           <TagSearch
             width={200}
             size="small"
@@ -134,24 +214,24 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
             }
             onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
           />
-          <FormControlLabel
+          <StyledFormControlLabel
             control={<Checkbox name="checkedH" color="primary" />}
             label="Post Anonymously"
-            classes={{
-              label: classes.label,
-            }}
             checked={isAnonymous}
             onChange={(event: any) =>
               handleFieldChange("isAnonymous", event.target.checked)
             }
           />
-        </StyledContainer>
+        </StyledRowContainer>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSave} variant="outlined" color="primary">
+        <Button
+          onClick={handleSubmit(handleSubmitPost)}
+          variant="outlined"
+          color="primary">
           Submit
         </Button>
       </DialogActions>
