@@ -7,6 +7,24 @@ const updateUserReputation = async (userId, amount) => {
   await User.updateOne(userFilter, userUpdateSpec);
 };
 
+const updateUpvoteUserReputation = async (item, userId) => {
+  const voterIndex = item.downvoters.findIndex((voter) => voter === userId);
+  if (voterIndex != -1) {
+    updateUserReputation(item.userId, 2);
+  } else {
+    updateUserReputation(item.userId, 1);
+  }
+};
+
+const updateDownvoteUserReputation = async (item, userId) => {
+  const voterIndex = item.upvoters.findIndex((voter) => voter === userId);
+  if (voterIndex != -1) {
+    updateUserReputation(item.userId, -2);
+  } else {
+    updateUserReputation(item.userId, -1);
+  }
+};
+
 const createProjectionObject = (userId, showComments = false) => {
   const projection = {
     $project: {
@@ -126,9 +144,6 @@ const getVotedPostsByUserID = async (userId, currentUserId, upvote) => {
 };
 
 const upvotePost = async (postId, userId) => {
-  const post = await getPostByID(postId, userId);
-  updateUserReputation(post.userId, 1);
-
   const updateSpec = {
     $push: { upvoters: userId },
     $pull: { downvoters: userId },
@@ -139,16 +154,19 @@ const upvotePost = async (postId, userId) => {
     upvoters: { $nin: [userId] },
   };
 
-  return Post.findOneAndUpdate(filter, updateSpec, {
-    new: true,
-    projection: createProjectionObject(userId).$project,
-  });
+  const post = await Post.findOneAndUpdate(filter, updateSpec, { new: false });
+
+  if (post) {
+    updateUpvoteUserReputation(post, userId);
+  } else {
+    throw new Error("Post to upvote could not be found.");
+  }
+
+  const newPost = getPostByID(postId, userId);
+  return newPost;
 };
 
 const downvotePost = async (postId, userId) => {
-  const post = await getPostByID(postId, userId);
-  updateUserReputation(post.userId, -1);
-
   const updateSpec = {
     $push: { downvoters: userId },
     $pull: { upvoters: userId },
@@ -159,10 +177,16 @@ const downvotePost = async (postId, userId) => {
     downvoters: { $nin: [userId] },
   };
 
-  return Post.findOneAndUpdate(filter, updateSpec, {
-    new: true,
-    projection: createProjectionObject(userId).$project,
-  });
+  const post = await Post.findOneAndUpdate(filter, updateSpec, { new: false });
+
+  if (post) {
+    updateDownvoteUserReputation(post, userId);
+  } else {
+    throw new Error("Post to downvote could not be found");
+  }
+
+  const newPost = getPostByID(postId, userId);
+  return newPost;
 };
 
 const upvoteComment = async (postId, commentId, userId) => {
@@ -176,7 +200,7 @@ const upvoteComment = async (postId, commentId, userId) => {
   };
 
   const options = {
-    new: true,
+    new: false,
     projection: createProjectionObject(userId, true).$project,
     arrayFilters: [
       {
@@ -187,12 +211,21 @@ const upvoteComment = async (postId, commentId, userId) => {
   };
 
   const post = await Post.findOneAndUpdate(filter, updateSpec, options);
-  const comment = await post.comments.find(
-    (comment) => comment._id == commentId,
-  );
-  updateUserReputation(comment.userId, 1);
 
-  return comment;
+  try {
+    const comment = await post.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    updateUpvoteUserReputation(comment, userId);
+
+    const newPost = await getPostByID(postId, userId);
+    const newComment = await newPost.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    return newComment;
+  } catch (err) {
+    throw new Error("Comment to upvote could not be found: " + err.message);
+  }
 };
 
 const downvoteComment = async (postId, commentId, userId) => {
@@ -206,8 +239,7 @@ const downvoteComment = async (postId, commentId, userId) => {
   };
 
   const options = {
-    new: true,
-    projection: createProjectionObject(userId, true).$project,
+    new: false,
     arrayFilters: [
       {
         "comment._id": commentId,
@@ -217,12 +249,21 @@ const downvoteComment = async (postId, commentId, userId) => {
   };
 
   const post = await Post.findOneAndUpdate(filter, updateSpec, options);
-  const comment = await post.comments.find(
-    (comment) => comment._id == commentId,
-  );
-  updateUserReputation(comment.userId, -1);
 
-  return comment;
+  try {
+    const comment = await post.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    updateDownvoteUserReputation(comment, userId);
+
+    const newPost = await getPostByID(postId, userId);
+    const newComment = await newPost.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    return newComment;
+  } catch (err) {
+    throw new Error("Comment to downvote could not be found: " + err);
+  }
 };
 
 const updateUsername = async (userId, newUsername) => {
