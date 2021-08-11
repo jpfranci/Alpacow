@@ -86,7 +86,7 @@ const PostListItem: React.FC<PostProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const voteCount = post.score;
+  const voteCount = post.numUpvotes - post.numDownvotes;
   const [upvoteDisabled, setUpvoteDisabled] = useState(post.isUpvoted);
   const [downvoteDisabled, setDownvoteDisabled] = useState(post.isDownvoted);
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
@@ -125,11 +125,11 @@ const PostListItem: React.FC<PostProps> = ({
               otherVoteDisabled: downvoteDisabled,
             });
           }
-          setUpvoteDisabled(true);
-          setDownvoteDisabled(false);
         } catch (err) {
           throw err;
         }
+        setUpvoteDisabled(true);
+        setDownvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -149,11 +149,11 @@ const PostListItem: React.FC<PostProps> = ({
               otherVoteDisabled: upvoteDisabled,
             });
           }
-          setDownvoteDisabled(true);
-          setUpvoteDisabled(false);
         } catch (err) {
           throw err;
         }
+        setDownvoteDisabled(true);
+        setUpvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
