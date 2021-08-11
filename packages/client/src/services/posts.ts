@@ -1,5 +1,11 @@
 import axios from "axios";
-import { Comment, NewPost, Post, PostState } from "../redux/slices/post-slice";
+import {
+  Comment,
+  NewComment,
+  NewPost,
+  Post,
+  PostState,
+} from "../redux/slices/post-slice";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
 
@@ -88,6 +94,24 @@ const downvote = async (id: string): Promise<Post> => {
   }
 };
 
+const createComment = async (newComment: NewComment, postId: string) => {
+  try {
+    const response = await axios.post(
+      `${baseUrl}/${postId}/comments`,
+      newComment,
+    );
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to create comments",
+      );
+    }
+    throw err;
+  }
+};
+
 const upvoteComment = async (
   postId: string,
   commentId: string,
@@ -137,6 +161,7 @@ const postService = {
   deleteByID,
   upvote,
   downvote,
+  createComment,
   upvoteComment,
   downvoteComment,
 };

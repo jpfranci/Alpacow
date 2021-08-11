@@ -16,17 +16,25 @@ export const initialLocation: Location = {
   lon: -123.22,
 };
 
-export type Comment = {
+interface BaseComment {
+  body: string;
+}
+
+export interface NewComment extends BaseComment {
+  isAnonymous: boolean;
+}
+
+export interface Comment extends BaseComment {
   _id: string;
   date: string;
   numUpvotes: number;
   numDownvotes: number;
   userId: string;
   username: string;
-  body: string;
   isUpvoted: boolean;
   isDownvoted: boolean;
-};
+  isMature: boolean;
+}
 
 export interface Post extends NewPost {
   _id: string;
@@ -168,6 +176,24 @@ export const downvote = createAsyncThunk<
   }
 });
 
+export const createComment = createAsyncThunk<
+  any,
+  { newComment: NewComment; postId: string }
+>(
+  `${prefix}/createComment`,
+  async ({ newComment, postId }, { rejectWithValue }) => {
+    try {
+      const comment = await postService.createComment(newComment, postId);
+      return {
+        postId,
+        comment,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 export const upvoteComment = createAsyncThunk<
   {
     numUpvotes: number;
@@ -222,7 +248,6 @@ export const downvoteComment = createAsyncThunk<
   },
 );
 
-// TODO implement comment action
 export const postSlice = createSlice({
   name: prefix,
   initialState,
@@ -305,6 +330,15 @@ export const postSlice = createSlice({
         postToUpdate.numDownvotes = action.payload.numDownvotes;
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
+      }
+    });
+    builder.addCase(createComment.fulfilled, (state, action) => {
+      const postToUpdate = state.posts.find(
+        (post) => post._id === action.payload.postId,
+      );
+
+      if (postToUpdate) {
+        postToUpdate.comments?.unshift(action.payload.comment);
       }
     });
     builder.addCase(upvoteComment.fulfilled, (state, action) => {

@@ -1,4 +1,4 @@
-import { Button, IconButton, Typography } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import moment from "moment";
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -53,17 +53,22 @@ interface CommentProps {
 }
 
 const Comment: React.FC<CommentProps> = ({ comment }) => {
-  const dispatch = useAppDispatch();
-  const voteCount = comment.numUpvotes - comment.numDownvotes;
-  const date = moment(comment.date).fromNow();
   const [upvoteDisabled, setUpvoteDisabled] = useState(comment.isUpvoted);
   const [downvoteDisabled, setDownvoteDisabled] = useState(comment.isDownvoted);
 
+  const dispatch = useAppDispatch();
   const post = useAppSelector((state) =>
     state.post.currPostIndex === -1
       ? state.post.postViewFromProfile
       : state.post.posts[state.post.currPostIndex],
   ) as PostType;
+  const showMatureContent = useAppSelector(
+    (state) => state.post.showMatureContent,
+  );
+  const user = useAppSelector((state) => state.user);
+
+  const voteCount = comment.numUpvotes - comment.numDownvotes;
+  const date = moment(comment.date).fromNow();
 
   const handleUpvoteClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -91,10 +96,15 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
       .catch((err) => toast.error(err.message));
   };
 
+  if (!showMatureContent && comment.isMature) return null;
   return (
     <CommentContainer>
       <Header>
-        <UsernameButton username={comment.username} userId={comment.userId} />
+        <UsernameButton
+          username={comment.username}
+          userId={comment.userId}
+          shouldHighlight={user._id === comment.userId}
+        />
         {} - {date}
       </Header>
       <Body>{comment.body}</Body>

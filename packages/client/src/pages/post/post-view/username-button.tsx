@@ -14,11 +14,13 @@ const LinkButton = styled(Button)`
 interface UsernameButtonProps {
   username: string;
   userId: string;
+  shouldHighlight?: boolean;
 }
 
 const UsernameButton: React.FC<UsernameButtonProps> = ({
   username,
   userId,
+  shouldHighlight,
 }) => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
@@ -50,7 +52,9 @@ const UsernameButton: React.FC<UsernameButtonProps> = ({
     <span>
       <LinkButton variant="text" size="small" onClick={handleViewAccount}>
         <Typography variant="subtitle2">
-          <b>{username ?? "anonymous"}</b>
+          <b style={{ color: shouldHighlight ? "#0080FF" : "black" }}>
+            {username ?? "anonymous"}
+          </b>
         </Typography>
       </LinkButton>
       {showProfileDialog()}
