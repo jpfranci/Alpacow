@@ -65,6 +65,7 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
   const showMatureContent = useAppSelector(
     (state) => state.post.showMatureContent,
   );
+  const user = useAppSelector((state) => state.user);
 
   const voteCount = comment.numUpvotes - comment.numDownvotes;
   const date = moment(comment.date).fromNow();
@@ -99,7 +100,11 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
   return (
     <CommentContainer>
       <Header>
-        <UsernameButton username={comment.username} userId={comment.userId} />
+        <UsernameButton
+          username={comment.username}
+          userId={comment.userId}
+          shouldHighlight={user._id === comment.userId}
+        />
         {} - {date}
       </Header>
       <Body>{comment.body}</Body>
