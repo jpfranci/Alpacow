@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { HOME_PAGE, OTHER_PROFILE_PAGE } from "../../common/links";
+import { HOME_PAGE, OTHER_USER_PAGE } from "../../common/links";
 import { useRouteMatch } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { Link as RouterLink } from "react-router-dom";
@@ -59,9 +59,9 @@ const ProfilePage = () => {
 
   const userState = useAppSelector((state) => state.user);
 
-  const match = useRouteMatch<{ id: string }>(OTHER_PROFILE_PAGE);
+  const match = useRouteMatch<{ id: string }>(OTHER_USER_PAGE);
   useEffect(() => {
-    if (match) {
+    if (match && match.params.id) {
       userService
         .getUserProfile(match.params.id)
         .then((user) => setUser(user))
@@ -177,7 +177,7 @@ const ProfilePage = () => {
           <CircularProgress />
         </LoaderContainer>
       ) : (
-        <div>The post you're looking for doesn't exist...</div>
+        <div>This user doesn't exist...</div>
       )}
     </span>
   );
