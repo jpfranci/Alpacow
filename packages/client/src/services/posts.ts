@@ -95,10 +95,20 @@ const downvote = async (id: string): Promise<Post> => {
 };
 
 const createComment = async (newComment: NewComment, postId: string) => {
-  const response = await axios.post(`${baseUrl}/${postId}/comments`, {
-    body: newComment.body,
-  });
-  return response.data;
+  try {
+    const response = await axios.post(`${baseUrl}/${postId}/comments`, {
+      body: newComment.body,
+    });
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to create comments",
+      );
+    }
+    throw err;
+  }
 };
 
 const upvoteComment = async (

@@ -7,20 +7,22 @@ import {
   DialogActions,
   Button,
 } from "@material-ui/core";
+import { unwrapResult } from "@reduxjs/toolkit";
 import React, { useState } from "react";
-import { createComment } from "../../../redux/slices/post-slice";
+import { toast } from "react-toastify";
+import { createComment, Post } from "../../../redux/slices/post-slice";
 import { useAppDispatch } from "../../../redux/store";
 
 interface CommentDialogProps {
   open: boolean;
   onClose: () => void;
-  postId: string; // TODO refactor to consume whole post(?)
+  post: Post;
 }
 
 const CommentDialog: React.FC<CommentDialogProps> = ({
   open,
   onClose,
-  postId,
+  post,
 }) => {
   const [bodyText, setBodyText] = useState("");
   const dispatch = useAppDispatch();
@@ -28,15 +30,20 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
     onClose();
   };
 
-  const handleSubmit = () => {
-    dispatch(
-      createComment({
-        newComment: { body: bodyText },
-        postId,
-      }),
-    );
-    handleClose();
-    // TODO error handling (show toast alert)
+  const handleSubmit = async () => {
+    try {
+      const dispatchedAction = await dispatch(
+        createComment({
+          newComment: { body: bodyText },
+          postId: post._id,
+        }),
+      );
+      unwrapResult(dispatchedAction);
+      handleClose();
+    } catch (err) {
+      // TODO improve error handling (look at create profile dialog)
+      toast.error(err.message);
+    }
   };
 
   return (

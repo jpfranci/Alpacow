@@ -30,7 +30,7 @@ const CommentsHeaderText = styled.h3`
 
 interface CommentsProps {
   comments: CommentType[];
-  post: Post; // TODO refactor so you don't have to pass entire post obj (redundant)
+  post: Post;
 }
 
 const Comments: React.FC<CommentsProps> = ({ comments, post }) => {
@@ -87,7 +87,7 @@ const Comments: React.FC<CommentsProps> = ({ comments, post }) => {
         <CommentDialog
           open={showCommentDialog}
           onClose={() => setShowCommentDialog(false)}
-          postId={post._id}
+          post={post}
         />
       )}
     </CommentsContainer>
