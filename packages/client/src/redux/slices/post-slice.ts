@@ -30,6 +30,7 @@ export type Comment = {
   body: string;
   isUpvoted: boolean;
   isDownvoted: boolean;
+  isMature: boolean;
 };
 
 export interface Post extends NewPost {
