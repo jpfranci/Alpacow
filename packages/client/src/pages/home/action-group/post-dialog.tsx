@@ -74,7 +74,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
       createPost({
         title: title,
         body: bodyText,
-        tag: tag as string,
+        tag: inputValue,
         location: location,
         isAnonymous: isAnonymous,
       }),

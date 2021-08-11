@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  Comment,
   NewComment,
   NewPost,
   Post,
@@ -100,6 +101,46 @@ const createComment = async (newComment: NewComment, postId: string) => {
   return response.data;
 };
 
+const upvoteComment = async (
+  postId: string,
+  commentId: string,
+): Promise<Comment> => {
+  try {
+    const response = await axios.post(
+      `${baseUrl}/${postId}/${commentId}/upvote`,
+    );
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to upvote",
+      );
+    }
+    throw err;
+  }
+};
+
+const downvoteComment = async (
+  postId: string,
+  commentId: string,
+): Promise<Comment> => {
+  try {
+    const response = await axios.post(
+      `${baseUrl}/${postId}/${commentId}/downvote`,
+    );
+    return response.data;
+  } catch (err) {
+    if (err.response.status === 401) {
+      throw new ActionableError(
+        LoginErrorCode.USER_NOT_LOGGED_IN,
+        "You must be be logged in to downvote",
+      );
+    }
+    throw err;
+  }
+};
+
 const postService = {
   create,
   getAll,
@@ -110,6 +151,8 @@ const postService = {
   upvote,
   downvote,
   createComment,
+  upvoteComment,
+  downvoteComment,
 };
 
 export default postService;

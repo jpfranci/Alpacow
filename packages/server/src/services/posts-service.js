@@ -95,8 +95,17 @@ const getPostsByUserID = async (userId, sortType) => {
   return PostDb.getPostsByUserID(userId, sortType);
 };
 
-const upvotePost = async (postId, userId) => {
-  const post = await PostDb.upvotePost(postId, userId);
+const getPostsByUserVote = async (uid, currentUserId, isUpvoted) => {
+  const posts = await PostDb.getVotedPostsByUserID(
+    uid,
+    currentUserId,
+    isUpvoted,
+  );
+  return posts;
+};
+
+const upvotePost = async (postId, currentUserId, userId) => {
+  const post = await PostDb.upvotePost(postId, currentUserId, userId);
   return post;
 };
 
@@ -119,13 +128,26 @@ const createComment = async (comment, postId) => {
   return PostDb.createComment(commentToInsert, postId);
 };
 
+const upvoteComment = async (postId, commentId, userId) => {
+  const comment = await PostDb.upvoteComment(postId, commentId, userId);
+  return comment;
+};
+
+const downvoteComment = async (postId, commentId, userId) => {
+  const comment = await PostDb.downvoteComment(postId, commentId, userId);
+  return comment;
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostByID,
   getPostsByUserID,
+  getPostsByUserVote,
   callAzureApi,
   upvotePost,
   downvotePost,
   createComment,
+  upvoteComment,
+  downvoteComment,
 };

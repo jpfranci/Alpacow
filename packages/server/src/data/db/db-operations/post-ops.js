@@ -1,5 +1,30 @@
 const mongoose = require("mongoose");
 const Post = require("../../models/post-model");
+const User = require("../../models/user-model");
+
+const updateUserReputation = async (userId, amount) => {
+  const userUpdateSpec = { $inc: { reputation: amount } };
+  const userFilter = { _id: userId };
+  await User.updateOne(userFilter, userUpdateSpec);
+};
+
+const updateUpvoteUserReputation = async (item, userId) => {
+  const voterIndex = item.downvoters.findIndex((voter) => voter === userId);
+  if (voterIndex != -1) {
+    updateUserReputation(item.userId, 2);
+  } else {
+    updateUserReputation(item.userId, 1);
+  }
+};
+
+const updateDownvoteUserReputation = async (item, userId) => {
+  const voterIndex = item.upvoters.findIndex((voter) => voter === userId);
+  if (voterIndex != -1) {
+    updateUserReputation(item.userId, -2);
+  } else {
+    updateUserReputation(item.userId, -1);
+  }
+};
 
 const createProjectionObject = (userId, showComments = false) => {
   const projection = {
@@ -15,10 +40,28 @@ const createProjectionObject = (userId, showComments = false) => {
       isMature: true,
       isUpvoted: { $in: [userId, "$upvoters"] },
       isDownvoted: { $in: [userId, "$downvoters"] },
+      userId: true,
     },
   };
   if (showComments) {
-    projection.$project.comments = true;
+    projection.$project.comments = {
+      $map: {
+        input: "$comments",
+        as: "c",
+        in: {
+          _id: "$$c._id",
+          body: "$$c.body",
+          date: "$$c.date",
+          userId: "$$c.userId",
+          username: "$$c.username",
+          isMature: "$$c.isMature",
+          numUpvotes: { $size: "$$c.upvoters" },
+          numDownvotes: { $size: "$$c.downvoters" },
+          isUpvoted: { $in: [userId, "$$c.upvoters"] },
+          isDownvoted: { $in: [userId, "$$c.downvoters"] },
+        },
+      },
+    };
   }
   return projection;
 };
@@ -71,14 +114,14 @@ const getPostByID = (id, userId) => {
   return Post.findById(id, createProjectionObject(userId, true).$project);
 };
 
-const getPostsByUserID = async (userId, sortType) => {
+const getPostsByUserID = async (userId, currentUserId, sortType) => {
   const aggregation = [];
   aggregation.push({
     $match: {
       userId: userId,
     },
   });
-  aggregation.push(createProjectionObject(userId));
+  aggregation.push(createProjectionObject(currentUserId));
   aggregation.push({
     $sort:
       sortType === "popular"
@@ -88,7 +131,7 @@ const getPostsByUserID = async (userId, sortType) => {
   return Post.aggregate(aggregation);
 };
 
-const getVotedPostsByUserID = async (userId, upvote) => {
+const getVotedPostsByUserID = async (userId, currentUserId, upvote) => {
   const voteField = upvote ? "upvoters" : "downvoters";
 
   const aggregation = [];
@@ -97,7 +140,7 @@ const getVotedPostsByUserID = async (userId, upvote) => {
       [voteField]: { $in: [userId] },
     },
   });
-  aggregation.push(createProjectionObject(userId));
+  aggregation.push(createProjectionObject(currentUserId));
   return Post.aggregate(aggregation);
 };
 
@@ -112,10 +155,17 @@ const upvotePost = async (postId, userId) => {
     upvoters: { $nin: [userId] },
   };
 
-  return Post.findOneAndUpdate(filter, updateSpec, {
-    new: true,
-    projection: createProjectionObject(userId).$project,
+  const post = await Post.findOneAndUpdate(filter, updateSpec, {
+    new: false,
   });
+
+  if (post) {
+    updateUpvoteUserReputation(post, userId);
+  } else {
+    throw new Error("Post to upvote could not be found.");
+  }
+
+  return getPostByID(postId, userId);
 };
 
 const downvotePost = async (postId, userId) => {
@@ -129,10 +179,91 @@ const downvotePost = async (postId, userId) => {
     downvoters: { $nin: [userId] },
   };
 
-  return Post.findOneAndUpdate(filter, updateSpec, {
-    new: true,
-    projection: createProjectionObject(userId).$project,
-  });
+  const post = await Post.findOneAndUpdate(filter, updateSpec, { new: false });
+
+  if (post) {
+    updateDownvoteUserReputation(post, userId);
+  } else {
+    throw new Error("Post to downvote could not be found");
+  }
+  return getPostByID(postId, userId);
+};
+
+const upvoteComment = async (postId, commentId, userId) => {
+  const updateSpec = {
+    $push: { "comments.$[comment].upvoters": userId },
+    $pull: { "comments.$[comment].downvoters": userId },
+  };
+
+  const filter = {
+    _id: postId,
+  };
+
+  const options = {
+    new: false,
+    projection: createProjectionObject(userId, true).$project,
+    arrayFilters: [
+      {
+        "comment._id": commentId,
+        "comment.upvoters": { $nin: [userId] },
+      },
+    ],
+  };
+
+  const post = await Post.findOneAndUpdate(filter, updateSpec, options);
+
+  try {
+    const comment = await post.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    updateUpvoteUserReputation(comment, userId);
+
+    const newPost = await getPostByID(postId, userId);
+    const newComment = newPost.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    return newComment;
+  } catch (err) {
+    throw new Error("Comment to upvote could not be found: " + err.message);
+  }
+};
+
+const downvoteComment = async (postId, commentId, userId) => {
+  const updateSpec = {
+    $push: { "comments.$[comment].downvoters": userId },
+    $pull: { "comments.$[comment].upvoters": userId },
+  };
+
+  const filter = {
+    _id: postId,
+  };
+
+  const options = {
+    new: false,
+    arrayFilters: [
+      {
+        "comment._id": commentId,
+        "comment.downvoters": { $nin: [userId] },
+      },
+    ],
+  };
+
+  const post = await Post.findOneAndUpdate(filter, updateSpec, options);
+
+  try {
+    const comment = await post.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    updateDownvoteUserReputation(comment, userId);
+
+    const newPost = await getPostByID(postId, userId);
+    const newComment = newPost.comments.find(
+      (comment) => comment._id == commentId,
+    );
+    return newComment;
+  } catch (err) {
+    throw new Error("Comment to downvote could not be found: " + err);
+  }
 };
 
 const updateUsername = async (userId, newUsername) => {
@@ -174,6 +305,8 @@ const operations = {
   getVotedPostsByUserID,
   upvotePost,
   downvotePost,
+  upvoteComment,
+  downvoteComment,
   updateUsername,
   createComment,
 };

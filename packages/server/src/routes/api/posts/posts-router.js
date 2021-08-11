@@ -9,6 +9,8 @@ const {
   createPost,
   getPostByID,
   createComment,
+  upvoteComment,
+  downvoteComment,
 } = require("../../../services/posts-service");
 const {
   createPostValidationFn,
@@ -91,6 +93,40 @@ router.post(
       req.body.userId = req.uid;
       const createdComment = await createComment(req.body, req.params.id);
       res.json(createdComment);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/:id/:commentId/upvote",
+  [extractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const updatedComment = await upvoteComment(
+        req.params.id,
+        req.params.commentId,
+        req.uid,
+      );
+      res.json(updatedComment);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/:id/:commentId/downvote",
+  [extractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const updatedComment = await downvoteComment(
+        req.params.id,
+        req.params.commentId,
+        req.uid,
+      );
+      res.json(updatedComment);
     } catch (err) {
       next(err);
     }

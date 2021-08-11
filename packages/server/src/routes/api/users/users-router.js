@@ -13,7 +13,10 @@ const {
 } = require("../../../services/users-service");
 const express = require("express");
 const router = express.Router();
-const { getPostsByUserID } = require("../../../services/posts-service");
+const {
+  getPostsByUserID,
+  getPostsByUserVote,
+} = require("../../../services/posts-service");
 const {
   loginValidationFn,
   createUserValidationFn,
@@ -105,8 +108,34 @@ router.post("/logout", extractUserFromSessionCookie, async (req, res, next) => {
 
 router.get("/:id/posts", async (req, res, next) => {
   try {
-    const post = await getPostsByUserID(req.params.id, req.query.sortType);
+    const post = await getPostsByUserID(
+      req.params.id,
+      req.query.currentUserId,
+      req.query.sortType,
+    );
     res.json(post);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:id/voted", async (req, res, next) => {
+  try {
+    const post = await getPostsByUserVote(
+      req.params.id,
+      req.query.currentUserId,
+      req.query.isUpvoted,
+    );
+    res.json(post);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/:id/profile", async (req, res, next) => {
+  try {
+    const user = await getUser(req.params.id);
+    res.json(user);
   } catch (err) {
     next(err);
   }
