@@ -57,7 +57,6 @@ const ProfilePostList = ({
       (foundPost) => foundPost._id === params.post._id,
     );
     if (postToUpdate >= 0) {
-      showCreatedPosts ? fetchPostsForUser() : fetchPostsVotedByUser();
       setUpdateVote(!updateVote);
     }
   };

@@ -186,9 +186,7 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
             </Button>
           </Link>
         </DialogActions>
-      ) : (
-        <span></span>
-      )}
+      ) : null}
     </Dialog>
   );
 };
