@@ -96,7 +96,11 @@ const getPostsByUserID = async (userId, sortType) => {
 };
 
 const getPostsByUserVote = async (uid, currentUserId, isUpvoted) => {
-  const posts = await PostDb.getVotedPostsByUserID(uid, currentUserId, isUpvoted);
+  const posts = await PostDb.getVotedPostsByUserID(
+    uid,
+    currentUserId,
+    isUpvoted,
+  );
   return posts;
 };
 
