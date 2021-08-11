@@ -17,6 +17,7 @@ import styled from "styled-components";
 import LogoSVG from "../../../static/Alpacow-logo.svg";
 
 const StyledMenuButton = styled(Button)`
+  white-space: nowrap;
   margin-right: 0.5em;
   margin-left: 0.5em;
 `;
