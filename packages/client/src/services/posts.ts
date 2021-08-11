@@ -1,5 +1,10 @@
 import axios from "axios";
-import { NewPost, Post, PostState } from "../redux/slices/post-slice";
+import {
+  NewComment,
+  NewPost,
+  Post,
+  PostState,
+} from "../redux/slices/post-slice";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
 
@@ -88,6 +93,13 @@ const downvote = async (id: string): Promise<Post> => {
   }
 };
 
+const createComment = async (newComment: NewComment, postId: string) => {
+  const response = await axios.post(`${baseUrl}/${postId}/comments`, {
+    body: newComment.body,
+  });
+  return response.data;
+};
+
 const postService = {
   create,
   getAll,
@@ -97,6 +109,7 @@ const postService = {
   deleteByID,
   upvote,
   downvote,
+  createComment,
 };
 
 export default postService;

@@ -4,6 +4,7 @@ import styled from "styled-components";
 import {
   Comment as CommentType,
   CommentSortType,
+  Post,
   setCommentSortType,
 } from "../../../redux/slices/post-slice";
 import Comment from "./comment";
@@ -29,9 +30,10 @@ const CommentsHeaderText = styled.h3`
 
 interface CommentsProps {
   comments: CommentType[];
+  post: Post; // TODO refactor so you don't have to pass entire post obj (redundant)
 }
 
-const Comments: React.FC<CommentsProps> = ({ comments }) => {
+const Comments: React.FC<CommentsProps> = ({ comments, post }) => {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -85,6 +87,7 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
         <CommentDialog
           open={showCommentDialog}
           onClose={() => setShowCommentDialog(false)}
+          postId={post._id}
         />
       )}
     </CommentsContainer>

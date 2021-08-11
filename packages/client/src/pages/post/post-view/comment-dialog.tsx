@@ -8,30 +8,35 @@ import {
   Button,
 } from "@material-ui/core";
 import React, { useState } from "react";
+import { createComment } from "../../../redux/slices/post-slice";
+import { useAppDispatch } from "../../../redux/store";
 
 interface CommentDialogProps {
   open: boolean;
   onClose: () => void;
+  postId: string; // TODO refactor to consume whole post(?)
 }
 
-const CommentDialog: React.FC<CommentDialogProps> = ({ open, onClose }) => {
+const CommentDialog: React.FC<CommentDialogProps> = ({
+  open,
+  onClose,
+  postId,
+}) => {
   const [bodyText, setBodyText] = useState("");
-
+  const dispatch = useAppDispatch();
   const handleClose = () => {
     onClose();
   };
 
   const handleSubmit = () => {
-    // dispatch(
-    //   createPost({
-    //     title: title,
-    //     body: bodyText,
-    //     tag: tag as string,
-    //     location: location,
-    //     isAnonymous: isAnonymous,
-    //   }),
-    // );
+    dispatch(
+      createComment({
+        newComment: { body: bodyText },
+        postId,
+      }),
+    );
     handleClose();
+    // TODO error handling (show toast alert)
   };
 
   return (

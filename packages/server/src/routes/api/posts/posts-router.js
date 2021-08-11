@@ -8,10 +8,12 @@ const {
   getPosts,
   createPost,
   getPostByID,
+  createComment,
 } = require("../../../services/posts-service");
 const {
   createPostValidationFn,
   getPostValidationFn,
+  createCommentValidationFn,
 } = require("./posts-validation");
 const { upvotePost, downvotePost } = require("../../../services/posts-service");
 
@@ -75,6 +77,20 @@ router.post(
     try {
       const updatedPost = await downvotePost(req.params.id, req.uid);
       res.json(updatedPost);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.post(
+  "/:id/comments",
+  [createCommentValidationFn, extractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      req.body.userId = req.uid;
+      const createdComment = await createComment(req.body, req.params.id);
+      res.json(createdComment);
     } catch (err) {
       next(err);
     }

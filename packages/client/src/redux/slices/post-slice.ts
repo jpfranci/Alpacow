@@ -17,6 +17,10 @@ export const initialLocation: Location = {
   lon: -123.22,
 };
 
+export interface NewComment {
+  body: string;
+}
+
 export type Comment = {
   _id: string;
   date: string;
@@ -164,6 +168,25 @@ export const downvote = createAsyncThunk<
   }
 });
 
+export const createComment = createAsyncThunk<
+  any,
+  { newComment: NewComment; postId: string }
+>(
+  `${prefix}/createComment`,
+  async ({ newComment, postId }, { rejectWithValue }) => {
+    try {
+      const response = await postService.createComment(newComment, postId);
+      console.log(response.data);
+      return {
+        postId,
+        comment: response.data,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // TODO implement comment action
 export const postSlice = createSlice({
   name: prefix,
@@ -246,6 +269,15 @@ export const postSlice = createSlice({
         postToUpdate.numDownvotes = action.payload.numDownvotes;
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
+      }
+    });
+    builder.addCase(createComment.fulfilled, (state, action) => {
+      const postToUpdate = state.posts.find(
+        (post) => post._id === action.payload.postId,
+      );
+
+      if (postToUpdate) {
+        postToUpdate.comments?.unshift(action.payload.comment);
       }
     });
   },

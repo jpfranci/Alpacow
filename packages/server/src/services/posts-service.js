@@ -105,6 +105,20 @@ const downvotePost = async (postId, userId) => {
   return post;
 };
 
+const createComment = async (comment, postId) => {
+  const username = "bill"; // TODO get actual username lol
+  const commentToInsert = {
+    ...comment,
+    date: new Date(),
+    username,
+    upvoters: [],
+    downvoters: [],
+    // isMature:
+  };
+
+  return PostDb.createComment(commentToInsert, postId);
+};
+
 module.exports = {
   createPost,
   getPosts,
@@ -113,4 +127,5 @@ module.exports = {
   callAzureApi,
   upvotePost,
   downvotePost,
+  createComment,
 };

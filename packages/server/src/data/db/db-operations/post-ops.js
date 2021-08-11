@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Post = require("../../models/post-model");
 
 const createProjectionObject = (userId, showComments = false) => {
@@ -144,6 +145,27 @@ const updateUsername = async (userId, newUsername) => {
   );
 };
 
+const createComment = async (comment, postId) => {
+  const commentId = new mongoose.Types.ObjectId();
+  comment._id = commentId;
+
+  const updateSpec = {
+    $push: { comments: comment },
+  };
+
+  const filter = {
+    _id: postId,
+  };
+
+  const options = {
+    new: true,
+    projection: createProjectionObject(comment.userId, true).$project,
+  };
+
+  const post = await Post.findOneAndUpdate(filter, updateSpec, options);
+  return comment;
+};
+
 const operations = {
   getPostsByFilter,
   createPost,
@@ -153,6 +175,7 @@ const operations = {
   upvotePost,
   downvotePost,
   updateUsername,
+  createComment,
 };
 
 module.exports = operations;
