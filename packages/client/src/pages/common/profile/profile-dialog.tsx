@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -12,15 +12,20 @@ import {
 } from "@material-ui/core";
 import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab";
 import styled from "styled-components";
-import { useAppSelector } from "../../../redux/store";
 import CloseIcon from "@material-ui/icons/Close";
 import ProfilePostList from "./profile-post-list";
+import { LoaderContainer } from "../../post/post";
 import { Link as RouterLink } from "react-router-dom";
 import { PROFILE_PAGE } from "../../../common/links";
+import { initialState } from "../../../redux/slices/user-slice";
+import userService from "../../../services/users";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import { useAppSelector } from "../../../redux/store";
 
 interface ProfileDialogProps {
   open: boolean;
   onClose: () => any;
+  userId: string;
 }
 
 const StyledPaper = styled(Paper)`
@@ -60,12 +65,21 @@ const StyledTitle = styled.span`
   font-size: 1.5em;
 `;
 
-const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
+const StyledSpinner = styled(LoaderContainer)`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+`;
+
+const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
+  const [user, setUser] = useState(initialState);
   const userState = useAppSelector((state) => state.user);
 
   const handleClose = () => {
     onClose();
+    setUser(initialState);
   };
 
   const handleChange = (
@@ -76,6 +90,33 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
   };
 
   const fieldStyle = { margin: "0.5rem 0rem", color: "#595959" };
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      const userProfile = await userService.getUserProfile(userId);
+      setUser(userProfile);
+    };
+    getUserProfile();
+  }, [user._id]);
+
+  if (!user.username) {
+    return (
+      <Dialog
+        open={open}
+        fullScreen={true}
+        onBackdropClick={handleClose}
+        PaperProps={{
+          style: {
+            backgroundColor: "transparent",
+            boxShadow: "none",
+          },
+        }}>
+        <StyledSpinner>
+          <CircularProgress />
+        </StyledSpinner>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
@@ -89,21 +130,23 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
         <StyledRowContainer>
           <StyledInnerRowContainer>
             <StyledTitle>
-              <StyledUsername>{userState.username}'s </StyledUsername> profile
+              <StyledUsername>{user.username}'s </StyledUsername> profile
             </StyledTitle>
           </StyledInnerRowContainer>
           <IconButton aria-label="close" onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>
-        <DialogContentText style={fieldStyle}>
-          <StyledUsername>Email: </StyledUsername>
-          {userState.email}
-        </DialogContentText>
+        {userState._id === user._id ? (
+          <DialogContentText style={fieldStyle}>
+            <StyledUsername>Email: </StyledUsername>
+            {user.email}
+          </DialogContentText>
+        ) : null}
         <StyledRowContainerNoSpace>
           <DialogContentText style={fieldStyle}>
-            <StyledUsername>Reputation: 🔥 </StyledUsername>
-            {userState.reputation}
+            <StyledUsername>Reputation: 🔥</StyledUsername>
+            {user.reputation}
           </DialogContentText>
         </StyledRowContainerNoSpace>
       </DialogTitle>
@@ -134,15 +177,23 @@ const ProfileDialog = ({ open, onClose }: ProfileDialogProps) => {
           showCreatedPosts={showCreatedPosts}
           handleClose={handleClose}
           maxSize={2}
-          user={userState}
+          user={user}
         />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>
-        <Link component={RouterLink} to={PROFILE_PAGE}>
-          <Button variant="outlined" color="primary" onClick={handleClose}>
-            See full profile
-          </Button>
-        </Link>
+        {userState._id === user._id ? (
+          <Link component={RouterLink} to={PROFILE_PAGE}>
+            <Button variant="outlined" color="primary" onClick={handleClose}>
+              See full profile
+            </Button>
+          </Link>
+        ) : (
+          <Link component={RouterLink} to={`/user/${user._id}`}>
+            <Button variant="outlined" color="primary" onClick={handleClose}>
+              See full profile
+            </Button>
+          </Link>
+        )}
       </DialogActions>
     </Dialog>
   );

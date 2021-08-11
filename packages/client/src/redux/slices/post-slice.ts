@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import postService from "../../services/posts";
 import { RootState } from "../store";
-import { updateUser } from "./user-slice";
 
 const prefix = "post";
 
@@ -25,6 +24,8 @@ export type Comment = {
   userId: string;
   username: string;
   body: string;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
 };
 
 export interface Post extends NewPost {
@@ -32,10 +33,12 @@ export interface Post extends NewPost {
   numUpvotes: number;
   numDownvotes: number;
   date: string;
+  userId: string;
   isUpvoted: boolean;
   isDownvoted: boolean;
   username: string;
   comments?: Comment[]; // optional b/c posts fetched on home page don't have comments
+  score: number;
 }
 
 export interface NewPost {
@@ -65,6 +68,7 @@ export type PostState = {
   currentPostID?: string;
   tagInput: string;
   showMatureContent?: boolean;
+  postViewFromProfile?: Post;
   currPostIndex: number;
 };
 
@@ -164,6 +168,60 @@ export const downvote = createAsyncThunk<
   }
 });
 
+export const upvoteComment = createAsyncThunk<
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+    commentId: string;
+  },
+  { postId: string; commentId: string }
+>(
+  `${prefix}/upvoteComment`,
+  async ({ postId, commentId }, { rejectWithValue }) => {
+    try {
+      const response = await postService.upvoteComment(postId, commentId);
+      return {
+        numUpvotes: response.numUpvotes,
+        numDownvotes: response.numDownvotes,
+        isUpvoted: response.isUpvoted,
+        isDownvoted: response.isDownvoted,
+        commentId: commentId,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const downvoteComment = createAsyncThunk<
+  {
+    numUpvotes: number;
+    numDownvotes: number;
+    isUpvoted: boolean;
+    isDownvoted: boolean;
+    commentId: string;
+  },
+  { postId: string; commentId: string }
+>(
+  `${prefix}/downvoteComment`,
+  async ({ postId, commentId }, { rejectWithValue }) => {
+    try {
+      const response = await postService.downvoteComment(postId, commentId);
+      return {
+        numUpvotes: response.numUpvotes,
+        numDownvotes: response.numDownvotes,
+        isUpvoted: response.isUpvoted,
+        isDownvoted: response.isDownvoted,
+        commentId: commentId,
+      };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 // TODO implement comment action
 export const postSlice = createSlice({
   name: prefix,
@@ -184,6 +242,9 @@ export const postSlice = createSlice({
     },
     setShowMatureContent: (state, action: PayloadAction<boolean>) => {
       state.showMatureContent = action.payload;
+    },
+    setPostViewFromProfile: (state, action: PayloadAction<Post>) => {
+      state.postViewFromProfile = action.payload;
     },
     setCurrPostIndex: (state, action: PayloadAction<number>) => {
       state.currPostIndex = action.payload;
@@ -227,7 +288,6 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-
       if (postToUpdate) {
         // we update both in case user is upvoting a post that they previously downvoted
         postToUpdate.numUpvotes = action.payload.numUpvotes;
@@ -240,12 +300,45 @@ export const postSlice = createSlice({
       const postToUpdate = state.posts.find(
         (post) => post._id === action.payload.postId,
       );
-
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
         postToUpdate.numDownvotes = action.payload.numDownvotes;
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
+      }
+    });
+    builder.addCase(upvoteComment.fulfilled, (state, action) => {
+      const postToUpdate =
+        state.currPostIndex === -1
+          ? state.postViewFromProfile
+          : state.posts[state.currPostIndex];
+      if (postToUpdate) {
+        const commentToUpdate = postToUpdate.comments?.find((comment) => {
+          return comment._id === action.payload.commentId;
+        });
+        if (commentToUpdate) {
+          commentToUpdate.numUpvotes = action.payload.numUpvotes;
+          commentToUpdate.numDownvotes = action.payload.numDownvotes;
+          commentToUpdate.isUpvoted = action.payload.isUpvoted;
+          commentToUpdate.isDownvoted = action.payload.isDownvoted;
+        }
+      }
+    });
+    builder.addCase(downvoteComment.fulfilled, (state, action) => {
+      const postToUpdate =
+        state.currPostIndex === -1
+          ? state.postViewFromProfile
+          : state.posts[state.currPostIndex];
+      if (postToUpdate) {
+        const commentToUpdate = postToUpdate.comments?.find((comment) => {
+          return comment._id === action.payload.commentId;
+        });
+        if (commentToUpdate) {
+          commentToUpdate.numUpvotes = action.payload.numUpvotes;
+          commentToUpdate.numDownvotes = action.payload.numDownvotes;
+          commentToUpdate.isUpvoted = action.payload.isUpvoted;
+          commentToUpdate.isDownvoted = action.payload.isDownvoted;
+        }
       }
     });
   },
@@ -258,6 +351,7 @@ export const {
   setTagInput,
   setShowMatureContent,
   setCurrPostIndex,
+  setPostViewFromProfile,
   setCommentSortType,
   updatePost,
 } = postSlice.actions;

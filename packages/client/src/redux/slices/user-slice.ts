@@ -24,7 +24,7 @@ export type LoginState = {
   reputation: number;
 };
 
-const initialState: UserState = {
+export const initialState: UserState = {
   _id: undefined,
   username: undefined,
   email: undefined,

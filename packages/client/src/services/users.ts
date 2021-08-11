@@ -122,6 +122,11 @@ const login = async (
   return response.data;
 };
 
+const getUserProfile = async (userId: string): Promise<UserState> => {
+  const response = await axios.get(`${baseUrl}/${userId}/profile`);
+  return response.data;
+};
+
 const loginFromCookie = async (): Promise<LoginState> => {
   const response = await axios.post(`${baseUrl}/loginFromCookie`);
   return response.data;
@@ -163,11 +168,27 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
 
 const getPostsByUser = async (
   id: string,
+  currentUserId: string,
   sortType: string,
 ): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/posts`, {
     params: {
       sortType: sortType,
+      currentUserId: currentUserId,
+    },
+  });
+  return response.data;
+};
+
+const getPostsByUserVote = async (
+  id: string,
+  currentUserId: string,
+  isUpvoted: boolean,
+): Promise<Post[]> => {
+  const response = await axios.get(`${baseUrl}/${id}/voted`, {
+    params: {
+      isUpvoted: isUpvoted,
+      currentUserId: currentUserId,
     },
   });
   return response.data;
@@ -177,7 +198,9 @@ const userService = {
   signup,
   login,
   update,
+  getUserProfile,
   getPostsByUser,
+  getPostsByUserVote,
   validate,
   loginFromCookie,
   logout,

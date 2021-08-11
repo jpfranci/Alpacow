@@ -1,15 +1,22 @@
-import { IconButton } from "@material-ui/core";
+import { Button, IconButton, Typography } from "@material-ui/core";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import {
   Comment as CommentType,
-  downvote,
-  upvote,
+  Post as PostType,
 } from "../../../redux/slices/post-slice";
 import { StyledHR } from "../../common/common";
 import DownvoteIcon from "@material-ui/icons/Details";
 import UpvoteIcon from "@material-ui/icons/ChangeHistory";
+import UsernameButton from "./username-button";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { unwrapResult } from "@reduxjs/toolkit";
+import {
+  downvoteComment,
+  upvoteComment,
+} from "../../../redux/slices/post-slice";
+import { toast } from "react-toastify";
 
 const CommentContainer = styled.div`
   display: flex;
@@ -46,28 +53,58 @@ interface CommentProps {
 }
 
 const Comment: React.FC<CommentProps> = ({ comment }) => {
+  const dispatch = useAppDispatch();
   const voteCount = comment.numUpvotes - comment.numDownvotes;
   const date = moment(comment.date).fromNow();
+  const [upvoteDisabled, setUpvoteDisabled] = useState(comment.isUpvoted);
+  const [downvoteDisabled, setDownvoteDisabled] = useState(comment.isDownvoted);
+
+  const post = useAppSelector((state) =>
+    state.post.currPostIndex === -1
+      ? state.post.postViewFromProfile
+      : state.post.posts[state.post.currPostIndex],
+  ) as PostType;
+
+  const handleUpvoteClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.stopPropagation();
+    dispatch(upvoteComment({ postId: post?._id, commentId: comment._id }))
+      .then((result) => {
+        unwrapResult(result);
+        setUpvoteDisabled(true);
+        setDownvoteDisabled(false);
+      })
+      .catch((err) => toast.error(err.message));
+  };
+
+  const handleDownvoteClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.stopPropagation();
+    dispatch(downvoteComment({ postId: post?._id, commentId: comment._id }))
+      .then((result) => {
+        unwrapResult(result);
+        setDownvoteDisabled(true);
+        setUpvoteDisabled(false);
+      })
+      .catch((err) => toast.error(err.message));
+  };
 
   return (
     <CommentContainer>
       <Header>
-        <b>{comment.username}</b> - {date}
+        <UsernameButton username={comment.username} userId={comment.userId} />
+        {} - {date}
       </Header>
       <Body>{comment.body}</Body>
       <Footer>
         <VoteButtonSection>
-          <IconButton
-          // onClick={() => dispatch(upvote({ post, user }))}
-          // disabled={shouldDisableUpvote}
-          >
+          <IconButton onClick={handleUpvoteClick} disabled={upvoteDisabled}>
             <UpvoteIcon />
           </IconButton>
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
-          <IconButton
-          // onClick={() => dispatch(downvote({ post, user }))}
-          // disabled={shouldDisableDownvote}
-          >
+          <IconButton onClick={handleDownvoteClick} disabled={downvoteDisabled}>
             <DownvoteIcon />
           </IconButton>
         </VoteButtonSection>

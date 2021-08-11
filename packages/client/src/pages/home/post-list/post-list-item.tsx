@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, IconButton } from "@material-ui/core";
 import styled from "styled-components";
 import {
   downvote,
   Post,
   setCurrPostIndex,
+  setPostViewFromProfile,
   setTagFilter,
   upvote,
 } from "../../../redux/slices/post-slice";
@@ -60,11 +61,20 @@ const DateText = styled.div`
   margin-right: 2em;
 `;
 
+// upvote updates the posts in the post state, but view profile
+// displays posts which may not be in the post state
+export interface VoteUpdateParams {
+  post: Post;
+  isUpvote: boolean;
+  otherVoteDisabled: boolean;
+}
+
 interface PostProps {
   post: Post;
   index: number;
   showPostBody: boolean;
   postClickCallback?: () => void;
+  voteClickCallback?: (params: VoteUpdateParams) => void;
 }
 
 const PostListItem: React.FC<PostProps> = ({
@@ -72,13 +82,13 @@ const PostListItem: React.FC<PostProps> = ({
   index,
   showPostBody,
   postClickCallback,
+  voteClickCallback,
 }) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-
   const voteCount = post.numUpvotes - post.numDownvotes;
-  const shouldDisableUpvote = post.isUpvoted;
-  const shouldDisableDownvote = post.isDownvoted;
+  const [upvoteDisabled, setUpvoteDisabled] = useState(post.isUpvoted);
+  const [downvoteDisabled, setDownvoteDisabled] = useState(post.isDownvoted);
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (
@@ -91,8 +101,11 @@ const PostListItem: React.FC<PostProps> = ({
   const handlePostClick = () => {
     if (postClickCallback) {
       postClickCallback();
+      dispatch(setCurrPostIndex(-1));
+      dispatch(setPostViewFromProfile(post));
+    } else {
+      dispatch(setCurrPostIndex(index));
     }
-    dispatch(setCurrPostIndex(index));
     history.push(`/posts/${post._id}`);
     window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes
   };
@@ -102,7 +115,22 @@ const PostListItem: React.FC<PostProps> = ({
   ) => {
     e.stopPropagation();
     dispatch(upvote({ post }))
-      .then(unwrapResult)
+      .then((result) => {
+        unwrapResult(result);
+        try {
+          if (voteClickCallback) {
+            voteClickCallback({
+              post: post,
+              isUpvote: true,
+              otherVoteDisabled: downvoteDisabled,
+            });
+          }
+        } catch (err) {
+          throw err;
+        }
+        setUpvoteDisabled(true);
+        setDownvoteDisabled(false);
+      })
       .catch((err) => toast.error(err.message));
   };
 
@@ -111,7 +139,22 @@ const PostListItem: React.FC<PostProps> = ({
   ) => {
     e.stopPropagation();
     dispatch(downvote({ post }))
-      .then(unwrapResult)
+      .then((result) => {
+        unwrapResult(result);
+        try {
+          if (voteClickCallback) {
+            voteClickCallback({
+              post: post,
+              isUpvote: false,
+              otherVoteDisabled: upvoteDisabled,
+            });
+          }
+        } catch (err) {
+          throw err;
+        }
+        setDownvoteDisabled(true);
+        setUpvoteDisabled(false);
+      })
       .catch((err) => toast.error(err.message));
   };
 
@@ -143,17 +186,13 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton
-            onClick={handleUpvoteClick}
-            disabled={shouldDisableUpvote}>
+          <IconButton onClick={handleUpvoteClick} disabled={upvoteDisabled}>
             <UpvoteIcon />
           </IconButton>
 
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
-          <IconButton
-            onClick={handleDownvoteClick}
-            disabled={shouldDisableDownvote}>
+          <IconButton onClick={handleDownvoteClick} disabled={downvoteDisabled}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>

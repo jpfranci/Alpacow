@@ -117,13 +117,7 @@ const NavBar = () => {
         </div>
         <FormGroup>
           <FormControlLabel
-            control={
-              <Switch
-                checked={isMature}
-                onChange={handleChange}
-                name="checkedA"
-              />
-            }
+            control={<Switch checked={isMature} onChange={handleChange} />}
             label="Show mature content"
           />
         </FormGroup>
