@@ -76,7 +76,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
         <PostContent>
           <TitleText>{post.title}</TitleText>
           <SubTitleText>
-            Posted on {date} by {}{" "}
+            Posted on {date} by{" "}
             <UsernameButton username={post.username} userId={post.userId} />
           </SubTitleText>
           <BodyText>{post.body}</BodyText>
