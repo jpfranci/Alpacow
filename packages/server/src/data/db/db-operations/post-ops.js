@@ -154,7 +154,9 @@ const upvotePost = async (postId, userId) => {
     upvoters: { $nin: [userId] },
   };
 
-  const post = await Post.findOneAndUpdate(filter, updateSpec, { new: false });
+  const post = await Post.findOneAndUpdate(filter, updateSpec, {
+    new: false,
+  });
 
   if (post) {
     updateUpvoteUserReputation(post, userId);
@@ -162,8 +164,7 @@ const upvotePost = async (postId, userId) => {
     throw new Error("Post to upvote could not be found.");
   }
 
-  const newPost = getPostByID(postId, userId);
-  return newPost;
+  return getPostByID(postId, userId);
 };
 
 const downvotePost = async (postId, userId) => {
@@ -184,9 +185,7 @@ const downvotePost = async (postId, userId) => {
   } else {
     throw new Error("Post to downvote could not be found");
   }
-
-  const newPost = getPostByID(postId, userId);
-  return newPost;
+  return getPostByID(postId, userId);
 };
 
 const upvoteComment = async (postId, commentId, userId) => {
@@ -219,7 +218,7 @@ const upvoteComment = async (postId, commentId, userId) => {
     updateUpvoteUserReputation(comment, userId);
 
     const newPost = await getPostByID(postId, userId);
-    const newComment = await newPost.comments.find(
+    const newComment = newPost.comments.find(
       (comment) => comment._id == commentId,
     );
     return newComment;
@@ -257,7 +256,7 @@ const downvoteComment = async (postId, commentId, userId) => {
     updateDownvoteUserReputation(comment, userId);
 
     const newPost = await getPostByID(postId, userId);
-    const newComment = await newPost.comments.find(
+    const newComment = newPost.comments.find(
       (comment) => comment._id == commentId,
     );
     return newComment;
