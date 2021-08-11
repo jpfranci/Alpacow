@@ -117,15 +117,19 @@ const PostListItem: React.FC<PostProps> = ({
     dispatch(upvote({ post }))
       .then((result) => {
         unwrapResult(result);
-        if (voteClickCallback) {
-          voteClickCallback({
-            post: post,
-            isUpvote: true,
-            otherVoteDisabled: downvoteDisabled,
-          });
+        try {
+          if (voteClickCallback) {
+            voteClickCallback({
+              post: post,
+              isUpvote: true,
+              otherVoteDisabled: downvoteDisabled,
+            });
+          }
+          setUpvoteDisabled(true);
+          setDownvoteDisabled(false);
+        } catch (err) {
+          throw err;
         }
-        setUpvoteDisabled(true);
-        setDownvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -137,15 +141,19 @@ const PostListItem: React.FC<PostProps> = ({
     dispatch(downvote({ post }))
       .then((result) => {
         unwrapResult(result);
-        if (voteClickCallback) {
-          voteClickCallback({
-            post: post,
-            isUpvote: false,
-            otherVoteDisabled: upvoteDisabled,
-          });
+        try {
+          if (voteClickCallback) {
+            voteClickCallback({
+              post: post,
+              isUpvote: false,
+              otherVoteDisabled: upvoteDisabled,
+            });
+          }
+          setDownvoteDisabled(true);
+          setUpvoteDisabled(false);
+        } catch (err) {
+          throw err;
         }
-        setDownvoteDisabled(true);
-        setUpvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };

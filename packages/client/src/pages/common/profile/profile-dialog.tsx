@@ -79,6 +79,7 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
 
   const handleClose = () => {
     onClose();
+    setUser(initialState);
   };
 
   const handleChange = (
@@ -96,7 +97,7 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
       setUser(userProfile);
     };
     getUserProfile();
-  }, []);
+  }, [user._id]);
 
   if (!user.username) {
     return (
@@ -136,10 +137,12 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>
-        <DialogContentText style={fieldStyle}>
-          <StyledUsername>Email: </StyledUsername>
-          {user.email}
-        </DialogContentText>
+        {userState._id === user._id ? (
+          <DialogContentText style={fieldStyle}>
+            <StyledUsername>Email: </StyledUsername>
+            {user.email}
+          </DialogContentText>
+        ) : null}
         <StyledRowContainerNoSpace>
           <DialogContentText style={fieldStyle}>
             <StyledUsername>Reputation: 🔥</StyledUsername>
