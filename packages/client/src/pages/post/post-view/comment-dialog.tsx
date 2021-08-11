@@ -6,12 +6,28 @@ import {
   TextField,
   DialogActions,
   Button,
+  FormControlLabel,
+  Checkbox,
+  createStyles,
+  makeStyles,
 } from "@material-ui/core";
 import { unwrapResult } from "@reduxjs/toolkit";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { createComment, Post } from "../../../redux/slices/post-slice";
 import { useAppDispatch } from "../../../redux/store";
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    dialogContent: {
+      overflow: "hidden",
+    },
+    label: {
+      textTransform: "capitalize",
+      color: "gray",
+    },
+  }),
+);
 
 interface CommentDialogProps {
   open: boolean;
@@ -25,16 +41,20 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
   post,
 }) => {
   const [bodyText, setBodyText] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
   const dispatch = useAppDispatch();
   const handleClose = () => {
     onClose();
   };
 
+  const classes = useStyles();
+
   const handleSubmit = async () => {
     try {
       const dispatchedAction = await dispatch(
         createComment({
-          newComment: { body: bodyText },
+          newComment: { body: bodyText, isAnonymous },
           postId: post._id,
         }),
       );
@@ -47,7 +67,11 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} maxWidth="sm" fullWidth={true}>
+    <Dialog
+      open={open}
+      maxWidth="sm"
+      fullWidth={true}
+      className={classes.dialogContent}>
       <DialogTitle>Create your comment</DialogTitle>
       <DialogContent>
         <DialogContentText>
@@ -65,6 +89,13 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
           fullWidth
           onChange={(e) => setBodyText(e.target.value)}
           inputProps={{ maxLength: 1024 }}
+        />
+        <FormControlLabel
+          control={<Checkbox name="checkedH" color="primary" />}
+          label="Comment Anonymously"
+          classes={{ label: classes.label }}
+          checked={isAnonymous}
+          onChange={(e: any) => setIsAnonymous(e.target.checked)}
         />
       </DialogContent>
       <DialogActions>

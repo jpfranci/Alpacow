@@ -16,22 +16,25 @@ export const initialLocation: Location = {
   lon: -123.22,
 };
 
-export interface NewComment {
+interface BaseComment {
   body: string;
 }
 
-export type Comment = {
+export interface NewComment extends BaseComment {
+  isAnonymous: boolean;
+}
+
+export interface Comment extends BaseComment {
   _id: string;
   date: string;
   numUpvotes: number;
   numDownvotes: number;
   userId: string;
   username: string;
-  body: string;
   isUpvoted: boolean;
   isDownvoted: boolean;
   isMature: boolean;
-};
+}
 
 export interface Post extends NewPost {
   _id: string;
@@ -245,7 +248,6 @@ export const downvoteComment = createAsyncThunk<
   },
 );
 
-// TODO implement comment action
 export const postSlice = createSlice({
   name: prefix,
   initialState,

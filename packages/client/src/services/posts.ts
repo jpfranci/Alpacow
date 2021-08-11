@@ -96,9 +96,10 @@ const downvote = async (id: string): Promise<Post> => {
 
 const createComment = async (newComment: NewComment, postId: string) => {
   try {
-    const response = await axios.post(`${baseUrl}/${postId}/comments`, {
-      body: newComment.body,
-    });
+    const response = await axios.post(
+      `${baseUrl}/${postId}/comments`,
+      newComment,
+    );
     return response.data;
   } catch (err) {
     if (err.response.status === 401) {

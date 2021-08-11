@@ -20,6 +20,7 @@ const getPostSchema = Joi.object().keys({
 
 const createCommentSchema = Joi.object().keys({
   body: Joi.string().min(1).max(1024).required(),
+  isAnonymous: Joi.boolean().required(),
 });
 
 const createPostValidationFn = celebrate({
