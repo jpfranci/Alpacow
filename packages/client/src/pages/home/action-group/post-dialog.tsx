@@ -37,13 +37,11 @@ interface PostDialogProps {
 }
 
 interface PostDialogFields {
-  tag: string | undefined;
   isAnonymous: boolean;
   inputValue: string;
 }
 
 const DEFAULT_FIELDS = {
-  tag: undefined,
   isAnonymous: false,
   inputValue: "",
 };
@@ -51,6 +49,7 @@ const DEFAULT_FIELDS = {
 const DEFAULT_VALIDATION_FIELDS = {
   title: "",
   body: "",
+  tag: undefined,
 };
 
 const StyledPaper = styled(Paper)`
@@ -84,6 +83,7 @@ const StyledColumnContainer = styled.div`
 const validationSchema = Joi.object({
   title: Joi.string().max(256).required(),
   body: Joi.string().max(1024).required(),
+  tag: Joi.string().required(),
 });
 
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
@@ -102,7 +102,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { tag, inputValue, isAnonymous } = fields;
+  const { isAnonymous, inputValue } = fields;
 
   const handleClose = () => {
     Object.keys(DEFAULT_VALIDATION_FIELDS).forEach((field) => {
@@ -116,7 +116,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
     onClose();
   };
 
-  const handleSubmitPost = async ({ title, body }) => {
+  const handleSubmitPost = async ({ title, body, tag }) => {
     try {
       const result = await dispatch(
         createPost({
@@ -130,14 +130,15 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
       unwrapResult(result);
       handleClose();
     } catch (error) {
-      toast.error(error.message);
+      let message = error.response?.data?.message;
+      toast.error(message ?? error);
     }
   };
 
   const handleFieldChange = (key: string, value: any) => {
     setFields({
       ...fields,
-      [key]: value,
+      [key]: value ?? "",
     });
   };
 
@@ -204,15 +205,23 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           />
         </StyledColumnContainer>
         <StyledRowContainer>
-          <TagSearch
-            width={200}
-            size="small"
-            selectedTag={tag}
-            inputValue={inputValue}
-            onInputChange={(newInputValue: any) =>
-              handleFieldChange("inputValue", newInputValue)
-            }
-            onTagSelect={(newTag) => handleFieldChange("tag", newTag)}
+          <Controller
+            control={control}
+            name="tag"
+            render={({ field: { onChange, value } }) => (
+              <>
+                <TagSearch
+                  width={200}
+                  size="small"
+                  selectedTag={value}
+                  inputValue={inputValue}
+                  onInputChange={(newInputValue: any) =>
+                    handleFieldChange("inputValue", newInputValue)
+                  }
+                  onTagSelect={onChange}
+                />
+              </>
+            )}
           />
           <StyledFormControlLabel
             control={<Checkbox name="checkedH" color="primary" />}
@@ -223,6 +232,9 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
             }
           />
         </StyledRowContainer>
+        {errors.tag && (
+          <StyledErrorMessage>{'"tag" cannot be empty'}</StyledErrorMessage>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
