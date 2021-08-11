@@ -124,6 +124,7 @@ const ProfileButton = (props: any) => {
                       <StyledSwitch
                         checked={isMature}
                         onChange={handleSetShowMatureContent}
+                        color={"primary"}
                       />
                     }
                     label="Show mature content"
