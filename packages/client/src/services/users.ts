@@ -1,6 +1,6 @@
 import axios from "axios";
 import { LoginState, UserState } from "../redux/slices/user-slice";
-import { Post } from "../redux/slices/post-slice";
+import { Post, PostSortType } from "../redux/slices/post-slice";
 import firebase from "firebase/app";
 import "firebase/auth";
 import SignupErrorCode from "../errors/signup-errors";
@@ -170,29 +170,40 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
   return response.data;
 };
 
-const getPostsByUser = async (
-  id: string,
-  currentUserId: string,
-  sortType: string,
-): Promise<Post[]> => {
+const getPostsByUser = async ({
+  id,
+  sortType,
+  showMatureContent,
+}: {
+  id: string;
+  sortType: PostSortType;
+  showMatureContent: boolean;
+}): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/posts`, {
     params: {
-      sortType: sortType,
-      currentUserId: currentUserId,
+      sortType,
+      showMatureContent,
     },
   });
   return response.data;
 };
 
-const getPostsByUserVote = async (
-  id: string,
-  currentUserId: string,
-  isUpvoted: boolean,
-): Promise<Post[]> => {
+const getPostsByUserVote = async ({
+  id,
+  sortType,
+  isUpvoted,
+  showMatureContent,
+}: {
+  id: string;
+  sortType: PostSortType;
+  isUpvoted: boolean;
+  showMatureContent: boolean;
+}): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/voted`, {
     params: {
-      isUpvoted: isUpvoted,
-      currentUserId: currentUserId,
+      isUpvoted,
+      sortType,
+      showMatureContent,
     },
   });
   return response.data;
