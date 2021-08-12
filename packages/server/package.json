@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "NODE_ENV=production node src/bin/www",
-    "dev": "NODE_ENV=development node setup/start-mongo.js & nodemon src/bin/www",
+    "dev": "node setup/start-mongo.js & NODE_ENV=development nodemon src/bin/www",
     "prettier": "lint-staged",
     "setup": "node setup/datagen.js",
     "datagen": "node setup/datagen.js"
