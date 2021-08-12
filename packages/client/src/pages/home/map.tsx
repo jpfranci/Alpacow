@@ -13,7 +13,6 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 const { REACT_APP_GOOGLE_API_KEY } = process.env;
 
-//TODO: Move out of component because it causes performance issue
 const GOOGLE_LIBRARIES: Libraries = ["places"];
 
 /**
