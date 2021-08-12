@@ -151,9 +151,11 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   };
 
   const handleFieldChange = (key: string, value: any) => {
-    setFields({
-      ...fields,
-      [key]: value,
+    setFields((prevState: any) => {
+      return {
+        ...prevState,
+        [key]: value,
+      };
     });
   };
 
