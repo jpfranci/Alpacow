@@ -59,12 +59,8 @@ const DateText = styled.div`
   margin-right: 2em;
 `;
 
-// upvote updates the posts in the post state, but view profile
-// displays posts which may not be in the post state
 export interface VoteUpdateParams {
   post: Post;
-  isUpvote: boolean;
-  otherVoteDisabled: boolean;
 }
 
 interface PostProps {
@@ -84,8 +80,6 @@ const PostListItem: React.FC<PostProps> = ({
   const dispatch = useAppDispatch();
   const history = useHistory();
   const voteCount = post.numUpvotes - post.numDownvotes;
-  const [upvoteDisabled, setUpvoteDisabled] = useState(post.isUpvoted);
-  const [downvoteDisabled, setDownvoteDisabled] = useState(post.isDownvoted);
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (
@@ -109,20 +103,16 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(upvote({ post }))
       .then((result) => {
-        unwrapResult(result);
+        const updatedVotes = unwrapResult(result);
         try {
           if (voteClickCallback) {
             voteClickCallback({
-              post: post,
-              isUpvote: true,
-              otherVoteDisabled: downvoteDisabled,
+              post: { ...post, ...updatedVotes },
             });
           }
         } catch (err) {
           throw err;
         }
-        setUpvoteDisabled(true);
-        setDownvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -133,20 +123,16 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(downvote({ post }))
       .then((result) => {
-        unwrapResult(result);
+        const updatedVotes = unwrapResult(result);
         try {
           if (voteClickCallback) {
             voteClickCallback({
-              post: post,
-              isUpvote: false,
-              otherVoteDisabled: upvoteDisabled,
+              post: { ...post, ...updatedVotes },
             });
           }
         } catch (err) {
           throw err;
         }
-        setDownvoteDisabled(true);
-        setUpvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -179,13 +165,13 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton onClick={handleUpvoteClick} disabled={upvoteDisabled}>
+          <IconButton onClick={handleUpvoteClick} disabled={post.isUpvoted}>
             <UpvoteIcon />
           </IconButton>
 
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
-          <IconButton onClick={handleDownvoteClick} disabled={downvoteDisabled}>
+          <IconButton onClick={handleDownvoteClick} disabled={post.isDownvoted}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>

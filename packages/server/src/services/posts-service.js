@@ -88,27 +88,20 @@ const getPostByID = async (id, userId) => {
   return PostDb.getPostByID(id, userId);
 };
 
-const getPostsByUserID = async (userId, sortType) => {
-  return PostDb.getPostsByUserID(userId, sortType);
+const getPostsByUserID = (query) => {
+  return PostDb.getPostsByUserID(query);
 };
 
-const getPostsByUserVote = async (uid, currentUserId, isUpvoted) => {
-  const posts = await PostDb.getVotedPostsByUserID(
-    uid,
-    currentUserId,
-    isUpvoted,
-  );
-  return posts;
+const getPostsByUserVote = (query) => {
+  return PostDb.getVotedPostsByUserID(query);
 };
 
-const upvotePost = async (postId, currentUserId, userId) => {
-  const post = await PostDb.upvotePost(postId, currentUserId, userId);
-  return post;
+const upvotePost = (postId, currentUserId, userId) => {
+  return PostDb.upvotePost(postId, currentUserId, userId);
 };
 
-const downvotePost = async (postId, userId) => {
-  const post = await PostDb.downvotePost(postId, userId);
-  return post;
+const downvotePost = (postId, userId) => {
+  return PostDb.downvotePost(postId, userId);
 };
 
 const createComment = async (comment, postId) => {
@@ -136,14 +129,12 @@ const createComment = async (comment, postId) => {
   return PostDb.createComment(commentToInsert, postId);
 };
 
-const upvoteComment = async (postId, commentId, userId) => {
-  const comment = await PostDb.upvoteComment(postId, commentId, userId);
-  return comment;
+const upvoteComment = (postId, commentId, userId) => {
+  return PostDb.upvoteComment(postId, commentId, userId);
 };
 
-const downvoteComment = async (postId, commentId, userId) => {
-  const comment = await PostDb.downvoteComment(postId, commentId, userId);
-  return comment;
+const downvoteComment = (postId, commentId, userId) => {
+  return PostDb.downvoteComment(postId, commentId, userId);
 };
 
 module.exports = {

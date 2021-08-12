@@ -36,9 +36,32 @@ const emailAndUsernameUpdateValidationFn = celebrate({
   [Segments.BODY]: emailAndUsernameUpdateSchema,
 });
 
+const getPostByUserIdValidationFn = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().min(1).required(),
+  }),
+  [Segments.QUERY]: Joi.object().keys({
+    sortType: Joi.string().valid("popular", "new").default("new"),
+    showMatureContent: Joi.boolean().default(false),
+  }),
+});
+
+const getVotedPostsByUserIdValidationFn = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().min(1).required(),
+  }),
+  [Segments.QUERY]: Joi.object().keys({
+    sortType: Joi.string().valid("popular", "new").default("new"),
+    isUpvoted: Joi.boolean().default(false),
+    showMatureContent: Joi.boolean().default(false),
+  }),
+});
+
 module.exports = {
   loginValidationFn,
   createUserValidationFn,
   emailAndUsernameValidationFn,
   emailAndUsernameUpdateValidationFn,
+  getPostByUserIdValidationFn,
+  getVotedPostsByUserIdValidationFn,
 };

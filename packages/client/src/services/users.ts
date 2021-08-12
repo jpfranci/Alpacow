@@ -1,6 +1,6 @@
 import axios from "axios";
 import { LoginState, UserState } from "../redux/slices/user-slice";
-import { Post } from "../redux/slices/post-slice";
+import { Post, PostSortType } from "../redux/slices/post-slice";
 import firebase from "firebase/app";
 import "firebase/auth";
 import SignupErrorCode from "../errors/signup-errors";
@@ -147,11 +147,17 @@ const validate = async (
 };
 
 const update = async (updateUserInfo: UpdateUserInfo) => {
-  const currentUser = firebase.auth().currentUser;
+  let currentUser = firebase.auth().currentUser;
   if (updateUserInfo.email) {
+    if (!currentUser) {
+      throw new ActionableError(
+        UpdateErrorCode.SESSION_TOO_OLD,
+        "Please login again to update email",
+      );
+    }
     try {
-      await currentUser?.updateEmail(updateUserInfo.email);
-      const idToken = await currentUser?.getIdToken();
+      await currentUser.updateEmail(updateUserInfo.email);
+      const idToken = await currentUser.getIdToken();
       await axios.post(`${baseUrl}/login`, { idToken });
     } catch (err) {
       switch (err.code) {
@@ -159,6 +165,11 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
           throw new ActionableError(
             UpdateErrorCode.EMAIL_IN_USE,
             "Email already in use",
+          );
+        case "auth/requires-recent-login":
+          throw new ActionableError(
+            UpdateErrorCode.SESSION_TOO_OLD,
+            "Please login again to update email",
           );
         default:
           throw err;
@@ -170,29 +181,40 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
   return response.data;
 };
 
-const getPostsByUser = async (
-  id: string,
-  currentUserId: string,
-  sortType: string,
-): Promise<Post[]> => {
+const getPostsByUser = async ({
+  id,
+  sortType,
+  showMatureContent,
+}: {
+  id: string;
+  sortType: PostSortType;
+  showMatureContent: boolean;
+}): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/posts`, {
     params: {
-      sortType: sortType,
-      currentUserId: currentUserId,
+      sortType,
+      showMatureContent,
     },
   });
   return response.data;
 };
 
-const getPostsByUserVote = async (
-  id: string,
-  currentUserId: string,
-  isUpvoted: boolean,
-): Promise<Post[]> => {
+const getPostsByUserVote = async ({
+  id,
+  sortType,
+  isUpvoted,
+  showMatureContent,
+}: {
+  id: string;
+  sortType: PostSortType;
+  isUpvoted: boolean;
+  showMatureContent: boolean;
+}): Promise<Post[]> => {
   const response = await axios.get(`${baseUrl}/${id}/voted`, {
     params: {
-      isUpvoted: isUpvoted,
-      currentUserId: currentUserId,
+      isUpvoted,
+      sortType,
+      showMatureContent,
     },
   });
   return response.data;

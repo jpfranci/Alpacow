@@ -104,27 +104,17 @@ export const createPost = createAsyncThunk<
   }
 });
 
-export const getPosts = createAsyncThunk<Post[]>(
-  `${prefix}/getPosts`,
-  async (_, { rejectWithValue }) => {
-    try {
-      return await postService.getAll();
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
-
-export const getPostsByFilter = createAsyncThunk<Post[], PostState>(
-  `${prefix}/getPostsByFilter`,
-  async (postState: PostState, { rejectWithValue }) => {
-    try {
-      return await postService.getPostsByFilter(postState);
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  },
-);
+export const getPostsByFilter = createAsyncThunk<
+  Post[],
+  void,
+  { state: RootState }
+>(`${prefix}/getPostsByFilter`, async (_, { rejectWithValue, getState }) => {
+  try {
+    return await postService.getPostsByFilter(getState().post);
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
 export const upvote = createAsyncThunk<
   {
@@ -283,12 +273,6 @@ export const postSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getPosts.fulfilled, (state, action) => {
-      state.posts = action.payload;
-    });
-    builder.addCase(getPosts.rejected, (state, action) => {
-      return { ...initialState };
-    });
     builder.addCase(getPostsByFilter.fulfilled, (state, action) => {
       state.posts = action.payload;
     });
