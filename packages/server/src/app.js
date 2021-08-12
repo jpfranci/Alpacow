@@ -8,6 +8,9 @@ const { getDb } = require("./data/db/db-connect");
 const { errors } = require("celebrate");
 const apiRouter = require("./routes/api/api-router");
 const admin = require("firebase-admin");
+const {
+  httpsRedirect,
+} = require("./routes/api/auth/middleware/https-middleware");
 const { HttpError } = require("./errors/http-error");
 
 // init firebase
@@ -61,6 +64,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(httpsRedirect);
 app.use("/api", apiRouter);
 
 // for heroku github action health checks
