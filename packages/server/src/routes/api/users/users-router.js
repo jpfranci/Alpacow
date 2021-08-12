@@ -3,6 +3,7 @@ const {
   createSessionCookieFromIdToken,
   extractUserFromIdToken,
   extractUserFromSessionCookie,
+  tryToExtractUserFromSessionCookie,
 } = require("../auth/middleware/user-validation-middleware");
 const {
   createUser,
@@ -132,13 +133,18 @@ router.get("/:id/voted", async (req, res, next) => {
   }
 });
 
-router.get("/:id/profile", async (req, res, next) => {
-  try {
-    const user = await getUser(req.params.id);
-    res.json(user);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get(
+  "/:id/profile",
+  [tryToExtractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const currentUser = req.uid;
+      const user = await getUser(req.params.id, currentUser === req.params.id);
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 module.exports = router;

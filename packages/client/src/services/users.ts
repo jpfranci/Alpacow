@@ -1,11 +1,11 @@
 import axios from "axios";
 import { LoginState, UserState } from "../redux/slices/user-slice";
 import { Post } from "../redux/slices/post-slice";
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/auth";
 import SignupErrorCode from "../errors/signup-errors";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
-import { current } from "@reduxjs/toolkit";
 import UpdateErrorCode from "../errors/update-errors";
 
 const baseUrl = "/api/users";
@@ -158,10 +158,14 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
             UpdateErrorCode.EMAIL_IN_USE,
             "Email already in use",
           );
+        default:
+          throw err;
       }
     }
   }
 
+  const idToken = await currentUser?.getIdToken();
+  await axios.post(`${baseUrl}/login`, { idToken });
   const response = await axios.post(`${baseUrl}/update`, updateUserInfo);
   return response.data;
 };

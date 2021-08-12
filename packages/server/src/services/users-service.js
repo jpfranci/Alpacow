@@ -49,17 +49,14 @@ const createUser = async (payload) => {
   }
 };
 
-const getUser = async (uid) => {
-  const user = await UserDb.getUser(uid);
+const getUser = async (uid, fetchEmail) => {
+  const user = await UserDb.getUser(uid, fetchEmail);
   return user;
 };
 
 const updateEmailAndUsername = async (payload) => {
   const newUser = UserDb.updateEmailAndUsername(payload);
-  const updatedPosts = await PostDb.updateUsername(
-    payload._id,
-    payload.username,
-  );
+  await PostDb.updateUsername(payload._id, payload.username);
   return newUser;
 };
 

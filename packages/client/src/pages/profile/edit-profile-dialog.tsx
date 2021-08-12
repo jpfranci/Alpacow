@@ -163,7 +163,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
       <DialogTitle id="form-dialog-title">
         <StyledRowContainer>
           <StyledTitle>Update your profile</StyledTitle>
-          <IconButton aria-label="close" onClick={onClose}>
+          <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>

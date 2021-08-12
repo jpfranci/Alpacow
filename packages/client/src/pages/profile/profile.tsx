@@ -58,6 +58,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState(initialState);
 
   const userState = useAppSelector((state) => state.user);
+  const isCurrentUser = !!user._id && userState._id;
+  const userToUse = isCurrentUser ? userState : user;
 
   const match = useRouteMatch<{ id: string }>(OTHER_USER_PAGE);
   useEffect(() => {
@@ -99,8 +101,8 @@ const ProfilePage = () => {
           <StyledProfileContainer>
             <StyledColumnContainer>
               <StyledRowContainer>
-                <h1 style={fieldColor}>{user.username}'s profile</h1>
-                {userState._id === user._id ? (
+                <h1 style={fieldColor}>{userToUse.username}'s profile</h1>
+                {isCurrentUser ? (
                   <span>
                     <EditButton
                       variant="outlined"
@@ -111,24 +113,26 @@ const ProfilePage = () => {
                     <EditProfileDialog
                       open={editProfileModalOpen}
                       onClose={handleEditProfileModalClose}
-                      username={user.username}
-                      email={user.email}
+                      username={userToUse.username}
+                      email={userToUse.email}
                     />
                   </span>
                 ) : null}
               </StyledRowContainer>
 
-              <StyledColumnContainer>
-                <StyledText>Email Address</StyledText>
-                <text style={fieldColor}>{user.email}</text>
-              </StyledColumnContainer>
+              {userToUse.email && (
+                <StyledColumnContainer>
+                  <StyledText>Email Address</StyledText>
+                  <text style={fieldColor}>{userToUse.email}</text>
+                </StyledColumnContainer>
+              )}
 
               <StyledColumnContainer>
                 <StyledText>Username </StyledText>
-                <text style={fieldColor}>{user.username}</text>
+                <text style={fieldColor}>{userToUse.username}</text>
               </StyledColumnContainer>
 
-              <StyledText>Reputation: 🔥 {user.reputation}</StyledText>
+              <StyledText>Reputation: 🔥 {userToUse.reputation}</StyledText>
             </StyledColumnContainer>
           </StyledProfileContainer>
 

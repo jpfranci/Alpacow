@@ -115,7 +115,7 @@ const createComment = async (comment, postId) => {
   let username = null;
   let userId = null;
   if (!comment.isAnonymous) {
-    const user = await UserDb.getUser(post.userId);
+    const user = await UserDb.getUser(comment.userId);
     username = user.username;
     userId = comment.userId;
   }
