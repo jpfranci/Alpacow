@@ -5,7 +5,6 @@ import firebase from "firebase";
 import SignupErrorCode from "../errors/signup-errors";
 import ActionableError from "../errors/actionable-error";
 import LoginErrorCode from "../errors/login-errors";
-import { current } from "@reduxjs/toolkit";
 import UpdateErrorCode from "../errors/update-errors";
 
 const baseUrl = "/api/users";

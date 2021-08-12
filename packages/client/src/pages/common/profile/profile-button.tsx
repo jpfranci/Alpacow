@@ -1,12 +1,14 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   ClickAwayListener,
-  MenuItem,
+  FormControlLabel,
   Grow,
+  MenuItem,
+  MenuList,
   Paper,
   Popper,
-  MenuList,
+  Switch,
 } from "@material-ui/core";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import styled from "styled-components";
@@ -15,16 +17,26 @@ import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { logout } from "../../../redux/slices/user-slice";
 import { useHistory } from "react-router-dom";
 import { HOME_PAGE } from "../../../common/links";
+import { setShowMatureContent } from "../../../redux/slices/post-slice";
 
 const ButtonContainer = styled(Button)`
   text-transform: none;
+  min-width: 1em;
+  margin-right: 1em;
+`;
+
+const StyledSwitch = styled(Switch)`
+  width: 3.5em;
+  margin-right: 1em;
 `;
 
 const ProfileButton = (props: any) => {
-  const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
   const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
+  const isMature = useAppSelector((state: any) => state.post.showMatureContent);
+
+  const [open, setOpen] = React.useState(false);
 
   let history = useHistory();
 
@@ -67,6 +79,10 @@ const ProfileButton = (props: any) => {
     }
   };
 
+  const handleSetShowMatureContent = () => {
+    dispatch(setShowMatureContent(!isMature));
+  };
+
   function handleListKeyDown(event: any) {
     if (event.key === "Tab") {
       event.preventDefault();
@@ -103,8 +119,25 @@ const ProfileButton = (props: any) => {
                   autoFocusItem={open}
                   id="menu-list-grow"
                   onKeyDown={handleListKeyDown}>
-                  <MenuItem onClick={handleViewAccount}>My account</MenuItem>
-                  <MenuItem onClick={handleLogOut}>Logout</MenuItem>
+                  <FormControlLabel
+                    control={
+                      <StyledSwitch
+                        checked={isMature}
+                        onChange={handleSetShowMatureContent}
+                        color={"primary"}
+                      />
+                    }
+                    label="Show mature content"
+                    labelPlacement={"start"}
+                  />
+                  {props.username ? (
+                    <div>
+                      <MenuItem onClick={handleViewAccount}>
+                        My account
+                      </MenuItem>
+                      <MenuItem onClick={handleLogOut}>Logout</MenuItem>
+                    </div>
+                  ) : null}
                 </MenuList>
               </ClickAwayListener>
             </Paper>
