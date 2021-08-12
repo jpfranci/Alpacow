@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   Button,
   Checkbox,
+  CircularProgress,
   createStyles,
   Dialog,
   DialogActions,
@@ -9,6 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   FormControlLabel,
+  LinearProgress,
   makeStyles,
   Paper,
   TextField,
@@ -37,11 +39,13 @@ interface PostDialogProps {
 }
 
 interface PostDialogFields {
+  selectedTag: string | undefined;
   isAnonymous: boolean;
   inputValue: string;
 }
 
 const DEFAULT_FIELDS = {
+  selectedTag: undefined,
   isAnonymous: false,
   inputValue: "",
 };
@@ -49,7 +53,6 @@ const DEFAULT_FIELDS = {
 const DEFAULT_VALIDATION_FIELDS = {
   title: "",
   body: "",
-  tag: undefined,
 };
 
 const StyledPaper = styled(Paper)`
@@ -83,7 +86,6 @@ const StyledColumnContainer = styled.div`
 const validationSchema = Joi.object({
   title: Joi.string().max(256).required(),
   body: Joi.string().max(1024).required(),
-  tag: Joi.string().required(),
 });
 
 const PostDialog = ({ open, onClose }: PostDialogProps) => {
@@ -102,7 +104,9 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const location = useAppSelector((state) => state.post.locationFilter);
   const dispatch = useAppDispatch();
   const [fields, setFields]: [PostDialogFields, any] = useState(DEFAULT_FIELDS);
-  const { isAnonymous, inputValue } = fields;
+  const { selectedTag, inputValue, isAnonymous } = fields;
+  const [isLoading, setIsLoading] = useState(false);
+  const [tagError, setTagError] = useState(false);
 
   const handleClose = () => {
     Object.keys(DEFAULT_VALIDATION_FIELDS).forEach((field) => {
@@ -111,28 +115,39 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
         shouldValidate: false,
       });
     });
+    setIsLoading(false);
     clearErrors();
     setFields(DEFAULT_FIELDS);
     onClose();
   };
 
-  const handleSubmitPost = async ({ title, body, tag }) => {
-    try {
-      const result = await dispatch(
-        createPost({
-          title: title,
-          body: body,
-          tag: tag as string,
-          location: location,
-          isAnonymous: isAnonymous,
-        }),
-      );
-      unwrapResult(result);
-      handleClose();
-    } catch (error) {
-      let message = error.response?.data?.message;
-      toast.error(message ?? error);
+  const handleSubmitPost = async ({ title, body }) => {
+    let validTag = isValidTag();
+    setTagError(!validTag);
+    if (validTag) {
+      try {
+        setIsLoading(true);
+        const result = await dispatch(
+          createPost({
+            title: title,
+            body: body,
+            tag: selectedTag ? (selectedTag as string) : inputValue,
+            location: location,
+            isAnonymous: isAnonymous,
+          }),
+        );
+        unwrapResult(result);
+        handleClose();
+      } catch (error) {
+        setIsLoading(false);
+        let message = error.response?.data?.message;
+        toast.error(message ?? error.message);
+      }
     }
+  };
+
+  const isValidTag = () => {
+    return !!selectedTag || inputValue.length > 0;
   };
 
   const handleFieldChange = (key: string, value: any) => {
@@ -203,38 +218,31 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
               </>
             )}
           />
+          <StyledRowContainer>
+            <TagSearch
+              width={200}
+              size="small"
+              selectedTag={selectedTag}
+              inputValue={inputValue}
+              onInputChange={(newInputValue: any) =>
+                handleFieldChange("inputValue", newInputValue)
+              }
+              onTagSelect={(newTag) => handleFieldChange("selectedTag", newTag)}
+              freeSolo={true}
+            />
+            <StyledFormControlLabel
+              control={<Checkbox name="checkedH" color="primary" />}
+              label="Post Anonymously"
+              checked={isAnonymous}
+              onChange={(event: any) =>
+                handleFieldChange("isAnonymous", event.target.checked)
+              }
+            />
+          </StyledRowContainer>
+          {tagError && (
+            <StyledErrorMessage>{'"tag" cannot be empty'}</StyledErrorMessage>
+          )}
         </StyledColumnContainer>
-        <StyledRowContainer>
-          <Controller
-            control={control}
-            name="tag"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <TagSearch
-                  width={200}
-                  size="small"
-                  selectedTag={value}
-                  inputValue={inputValue}
-                  onInputChange={(newInputValue: any) =>
-                    handleFieldChange("inputValue", newInputValue)
-                  }
-                  onTagSelect={onChange}
-                />
-              </>
-            )}
-          />
-          <StyledFormControlLabel
-            control={<Checkbox name="checkedH" color="primary" />}
-            label="Post Anonymously"
-            checked={isAnonymous}
-            onChange={(event: any) =>
-              handleFieldChange("isAnonymous", event.target.checked)
-            }
-          />
-        </StyledRowContainer>
-        {errors.tag && (
-          <StyledErrorMessage>{'"tag" cannot be empty'}</StyledErrorMessage>
-        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
@@ -247,6 +255,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
           Submit
         </Button>
       </DialogActions>
+      {isLoading && <LinearProgress />}
     </Dialog>
   );
 };
