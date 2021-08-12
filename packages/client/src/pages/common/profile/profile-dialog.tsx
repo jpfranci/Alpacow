@@ -17,10 +17,12 @@ import ProfilePostList from "./profile-post-list";
 import { LoaderContainer } from "../../post/post";
 import { Link as RouterLink } from "react-router-dom";
 import { PROFILE_PAGE } from "../../../common/links";
-import { initialState } from "../../../redux/slices/user-slice";
+import { initialState, refreshUser } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { useAppSelector } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 
 interface ProfileDialogProps {
   open: boolean;
@@ -75,7 +77,9 @@ const StyledSpinner = styled(LoaderContainer)`
 const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
   const [user, setUser] = useState(initialState);
+  const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
+  const isCurrentUser = !!user._id && userState._id === user._id;
 
   const handleClose = () => {
     onClose();
@@ -90,12 +94,22 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
   };
 
   const fieldStyle = { margin: "0.5rem 0rem", color: "#595959" };
+  const getUserProfile = async () => {
+    try {
+      if (!isCurrentUser) {
+        const userProfile = await userService.getUserProfile(userId);
+        setUser(userProfile);
+      } else {
+        const result = await dispatch(refreshUser());
+        const user = unwrapResult(result);
+        setUser(user);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   useEffect(() => {
-    const getUserProfile = async () => {
-      const userProfile = await userService.getUserProfile(userId);
-      setUser(userProfile);
-    };
     getUserProfile();
   }, [user._id]);
 
@@ -137,7 +151,7 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>
-        {userState._id === user._id ? (
+        {isCurrentUser ? (
           <DialogContentText style={fieldStyle}>
             <StyledUsername>Email: </StyledUsername>
             {user.email}
@@ -178,10 +192,11 @@ const ProfileDialog = ({ open, onClose, userId }: ProfileDialogProps) => {
           handleClose={handleClose}
           maxSize={2}
           user={user}
+          onVote={getUserProfile}
         />
       </DialogContent>
       <DialogActions style={{ margin: "0.5rem" }}>
-        {userState._id === user._id ? (
+        {isCurrentUser ? (
           <Link component={RouterLink} to={PROFILE_PAGE}>
             <Button variant="outlined" color="primary" onClick={handleClose}>
               See full profile

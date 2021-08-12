@@ -5,6 +5,7 @@ import userService, {
   UpdateUserInfo,
 } from "../../services/users";
 import { Post } from "./post-slice";
+import { RootState } from "../store";
 
 const prefix = "user";
 
@@ -47,6 +48,19 @@ export const updateUser = createAsyncThunk<any, UpdateUserInfo>(
   async (updateUserInfo: UpdateUserInfo, { rejectWithValue }) => {
     try {
       return await userService.update(updateUserInfo);
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
+export const refreshUser = createAsyncThunk<any, void, { state: RootState }>(
+  `${prefix}/refresh`,
+  (_, { rejectWithValue, getState }) => {
+    try {
+      if (getState().user?._id) {
+        return userService.getUserProfile(getState().user._id as string);
+      }
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -101,6 +115,12 @@ export const userSlice = createSlice({
       return { ...state, ...action.payload };
     });
     builder.addCase(updateUser.rejected, (state, action) => {
+      return { ...state };
+    });
+    builder.addCase(refreshUser.fulfilled, (state, action) => {
+      return { ...state, ...action.payload };
+    });
+    builder.addCase(refreshUser.rejected, (state, action) => {
       return { ...state };
     });
     builder.addCase(login.fulfilled, (state, action) => {

@@ -57,11 +57,7 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
   const [downvoteDisabled, setDownvoteDisabled] = useState(comment.isDownvoted);
 
   const dispatch = useAppDispatch();
-  const post = useAppSelector((state) =>
-    state.post.currPostIndex === -1
-      ? state.post.postViewFromProfile
-      : state.post.posts[state.post.currPostIndex],
-  ) as PostType;
+  const post = useAppSelector((state) => state.post.activePost) as PostType;
   const showMatureContent = useAppSelector(
     (state) => state.post.showMatureContent,
   );

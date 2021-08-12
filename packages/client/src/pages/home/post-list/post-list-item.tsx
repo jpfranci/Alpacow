@@ -4,8 +4,6 @@ import styled from "styled-components";
 import {
   downvote,
   Post,
-  setCurrPostIndex,
-  setPostViewFromProfile,
   setTagFilter,
   upvote,
 } from "../../../redux/slices/post-slice";
@@ -79,7 +77,6 @@ interface PostProps {
 
 const PostListItem: React.FC<PostProps> = ({
   post,
-  index,
   showPostBody,
   postClickCallback,
   voteClickCallback,
@@ -101,10 +98,6 @@ const PostListItem: React.FC<PostProps> = ({
   const handlePostClick = () => {
     if (postClickCallback) {
       postClickCallback();
-      dispatch(setCurrPostIndex(-1));
-      dispatch(setPostViewFromProfile(post));
-    } else {
-      dispatch(setCurrPostIndex(index));
     }
     history.push(`/posts/${post._id}`);
     window.scrollTo({ top: 0 }); // we need this o/w scroll position doesn't change when page view changes

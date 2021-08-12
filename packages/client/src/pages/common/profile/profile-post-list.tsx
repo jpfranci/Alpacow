@@ -7,6 +7,7 @@ import { UserState } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
 import { Post } from "../../../redux/slices/post-slice";
 import { useAppSelector } from "../../../redux/store";
+import { on } from "cluster";
 
 const StyledContainer = styled.div`
   display: flex;
@@ -19,6 +20,7 @@ interface ProfilePostListProps {
   handleClose: any;
   maxSize: number;
   user: UserState;
+  onVote?: () => any;
 }
 
 const ProfilePostList = ({
@@ -26,6 +28,7 @@ const ProfilePostList = ({
   handleClose,
   maxSize,
   user,
+  onVote,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [updateVote, setUpdateVote] = useState(false);
@@ -53,11 +56,9 @@ const ProfilePostList = ({
   };
 
   const handleVote = (params: VoteUpdateParams) => {
-    const postToUpdate = posts.findIndex(
-      (foundPost) => foundPost._id === params.post._id,
-    );
-    if (postToUpdate >= 0) {
-      setUpdateVote(!updateVote);
+    setUpdateVote(!updateVote);
+    if (onVote) {
+      onVote();
     }
   };
 

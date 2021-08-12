@@ -76,8 +76,7 @@ export type PostState = {
   currentPostID?: string;
   tagInput: string;
   showMatureContent?: boolean;
-  postViewFromProfile?: Post;
-  currPostIndex: number;
+  activePost?: Post;
 };
 
 let locationFilter: Location = initialLocation;
@@ -89,7 +88,6 @@ const initialState: PostState = {
   locationFilter: locationFilter,
   tagInput: "",
   showMatureContent: false,
-  currPostIndex: -1,
 };
 
 export const createPost = createAsyncThunk<
@@ -132,7 +130,7 @@ export const upvote = createAsyncThunk<
   {
     numUpvotes: number;
     numDownvotes: number;
-    postId: string;
+    _id: string;
     isUpvoted: boolean;
     isDownvoted: boolean;
   },
@@ -145,7 +143,7 @@ export const upvote = createAsyncThunk<
       numDownvotes: response.numDownvotes,
       isUpvoted: response.isUpvoted,
       isDownvoted: response.isDownvoted,
-      postId: post._id,
+      _id: post._id,
     };
   } catch (error) {
     return rejectWithValue(error);
@@ -156,7 +154,7 @@ export const downvote = createAsyncThunk<
   {
     numUpvotes: number;
     numDownvotes: number;
-    postId: string;
+    _id: string;
     isUpvoted: boolean;
     isDownvoted: boolean;
   },
@@ -169,7 +167,7 @@ export const downvote = createAsyncThunk<
       numDownvotes: response.numDownvotes,
       isUpvoted: response.isUpvoted,
       isDownvoted: response.isDownvoted,
-      postId: post._id,
+      _id: post._id,
     };
   } catch (error) {
     return rejectWithValue(error);
@@ -268,29 +266,20 @@ export const postSlice = createSlice({
     setShowMatureContent: (state, action: PayloadAction<boolean>) => {
       state.showMatureContent = action.payload;
     },
-    setPostViewFromProfile: (state, action: PayloadAction<Post>) => {
-      state.postViewFromProfile = action.payload;
-    },
-    setCurrPostIndex: (state, action: PayloadAction<number>) => {
-      state.currPostIndex = action.payload;
-    },
     setCommentSortType: (state, action: PayloadAction<CommentSortType>) => {
       state.commentSortType = action.payload;
     },
-    updatePost: (state, action: PayloadAction<Post>) => {
-      const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload._id,
+    updateActivePost: (state, action: PayloadAction<Post | undefined>) => {
+      const postIndex = state.posts.findIndex(
+        (post) => post._id === action.payload?._id,
       );
 
-      if (postToUpdate) {
-        state.posts = state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post,
-        );
-      } else {
-        // this case solely exists to handle workflow where user navs to single post view via url
-        state.posts = [action.payload];
-        state.currPostIndex = 0;
+      if (postIndex !== -1) {
+        state.posts[postIndex] = action.payload as Post;
+        state.posts = [...state.posts];
       }
+
+      state.activePost = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -311,7 +300,7 @@ export const postSlice = createSlice({
     });
     builder.addCase(upvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.postId,
+        (post) => post._id === action.payload._id,
       );
       if (postToUpdate) {
         // we update both in case user is upvoting a post that they previously downvoted
@@ -320,10 +309,13 @@ export const postSlice = createSlice({
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
+      if (state.activePost?._id === action.payload._id) {
+        state.activePost = { ...state.activePost, ...action.payload };
+      }
     });
     builder.addCase(downvote.fulfilled, (state, action) => {
       const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.postId,
+        (post) => post._id === action.payload._id,
       );
       if (postToUpdate) {
         postToUpdate.numUpvotes = action.payload.numUpvotes;
@@ -331,21 +323,22 @@ export const postSlice = createSlice({
         postToUpdate.isUpvoted = action.payload.isUpvoted;
         postToUpdate.isDownvoted = action.payload.isDownvoted;
       }
+      if (state.activePost?._id === action.payload._id) {
+        state.activePost = { ...state.activePost, ...action.payload };
+      }
     });
     builder.addCase(createComment.fulfilled, (state, action) => {
-      const postToUpdate = state.posts.find(
-        (post) => post._id === action.payload.postId,
-      );
+      const postToUpdate = state.activePost;
 
       if (postToUpdate) {
-        postToUpdate.comments?.unshift(action.payload.comment);
+        if (!postToUpdate.comments) {
+          postToUpdate.comments = [];
+        }
+        postToUpdate.comments.unshift(action.payload.comment);
       }
     });
     builder.addCase(upvoteComment.fulfilled, (state, action) => {
-      const postToUpdate =
-        state.currPostIndex === -1
-          ? state.postViewFromProfile
-          : state.posts[state.currPostIndex];
+      const postToUpdate = state.activePost;
       if (postToUpdate) {
         const commentToUpdate = postToUpdate.comments?.find((comment) => {
           return comment._id === action.payload.commentId;
@@ -359,10 +352,7 @@ export const postSlice = createSlice({
       }
     });
     builder.addCase(downvoteComment.fulfilled, (state, action) => {
-      const postToUpdate =
-        state.currPostIndex === -1
-          ? state.postViewFromProfile
-          : state.posts[state.currPostIndex];
+      const postToUpdate = state.activePost;
       if (postToUpdate) {
         const commentToUpdate = postToUpdate.comments?.find((comment) => {
           return comment._id === action.payload.commentId;
@@ -384,9 +374,7 @@ export const {
   setTagFilter,
   setTagInput,
   setShowMatureContent,
-  setCurrPostIndex,
-  setPostViewFromProfile,
   setCommentSortType,
-  updatePost,
+  updateActivePost,
 } = postSlice.actions;
 export default postSlice.reducer;
