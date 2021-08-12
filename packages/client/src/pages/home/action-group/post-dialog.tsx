@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Button,
   Checkbox,
-  CircularProgress,
   createStyles,
   Dialog,
   DialogActions,
@@ -116,6 +115,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
       });
     });
     setIsLoading(false);
+    setTagError(false);
     clearErrors();
     setFields(DEFAULT_FIELDS);
     onClose();
@@ -153,7 +153,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
   const handleFieldChange = (key: string, value: any) => {
     setFields({
       ...fields,
-      [key]: value ?? "",
+      [key]: value,
     });
   };
 
