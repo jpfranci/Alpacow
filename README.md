@@ -43,19 +43,22 @@ We used **styled-components** to style our React components in code. Styled-comp
 
 We also opted for **TypeScript** over JavaScript on the front-end thanks to its static error-checking, type-checking, and improvements to code readability/understandability. We took advantage of type inference where possible and stuck to primitive over general types. We also used union types and optional parameters whenever possible over creating multiple overloads of the same function.
 
-We used **JavaScript** (**Node.js**) on the backend with **Express** to handle database operations with MongoDB and session validation/authentication with Firebase. We structured our backend into different API routers for tags, posts, users, and data validation. 
-
 #### Unit 2 - React
 
 We used primarily functional **React** components. Of course, we maintained the state of our UI on the frontend, and we took advantage of our reusable react components wherever possible, such as the TagSearch component (used in the home page and post creation UI) and PostList component (home page and view profile dialog/page).
 
 We also divided that state on the front end by using **Redux**. Essentially, it allowed us to keep information related to a user’s session, such as their login state and post filters, separate from state that was more relevant to the UI, all while keeping that user information accessible across the front-end application. This made handling state more modular, and easier to conceptualize while implementing new features.
 
-#### Unit 3 - Node & Express  +  Unit 4 - NoSQL with MongoDB
+#### Unit 3 - Node & Express
 
 We used **Express**, a **Node.js** web app framework, for our backend. It handled database operations with our **MongoDB** to store posts, tags, users, and perform validation on data for various endpoints. It also handled queries for listing posts, listing tags, and viewing user information.
 
 We trusted no user request and used Express middleware on every api request to make sure that request payloads were well formed and to verify that user session cookies are valid for requests that require authentication such as post creation. Any requests with a bad payload were responded with a 400 Bad Request error with the specifics of what the malformed payload was, while any unauthorized request was responded with a 401 Forbidden error. 
+
+#### Unit 4 - NoSQL with MongoDB
+When designing our database schema in MongoDB, we made indices of fields that are queried often such as the user id of a user that created a post or whether a post is mature or not and unique indices for fields such as usernames and emails. We also nested documents when possible to ensure that operations in a document were atomic and included extra data such as usernames in our post schema to minimize the number of queries to fetch data. 
+
+In our queries, we tried to accomplish as much in one atomic transaction as possible by using a pipeline of filters and aggregations for more complex queries rather than splitting it into multiple queries that could fall prey to race conditions. This helped us maintain invariants in our data such as the invariant that users can only vote on a particular post or comment once. 
 
 #### Unit 5 - Release Engineering
 
