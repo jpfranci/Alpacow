@@ -88,8 +88,8 @@ const getPostByID = async (id, userId) => {
   return PostDb.getPostByID(id, userId);
 };
 
-const getPostsByUserID = async (userId, sortType) => {
-  return PostDb.getPostsByUserID(userId, sortType);
+const getPostsByUserID = async (userId, currentUserId, sortType) => {
+  return PostDb.getPostsByUserID(userId, currentUserId, sortType);
 };
 
 const getPostsByUserVote = async (uid, currentUserId, isUpvoted) => {

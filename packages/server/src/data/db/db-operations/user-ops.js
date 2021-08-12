@@ -1,7 +1,13 @@
+const ObjectId = require("mongodb").ObjectId;
 const User = require("../../models/user-model");
 
 const getUser = async (userId) => {
-  const users = await User.find({ _id: userId }).limit(1);
+  let users = await User.find({ _id: userId }).limit(1);
+
+  if (users.length === 0) {
+    users = await User.find(new ObjectId(userId)).limit(1);
+  }
+
   return users[0].toJSON(); // converts mongo model object to stripped down JSON containing only schema fields
 };
 
