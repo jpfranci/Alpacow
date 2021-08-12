@@ -237,12 +237,14 @@ const upvoteComment = async (postId, commentId, userId) => {
 
   try {
     const comment = await post.comments.find(
-      (comment) => comment._id === commentId,
+      (comment) => comment._id.toString() === commentId,
     );
     updateUpvoteUserReputation(comment, userId);
 
     const newPost = await getPostByID(postId, userId);
-    return newPost.comments.find((comment) => comment._id === commentId);
+    return newPost.comments.find(
+      (comment) => comment._id.toString() === commentId,
+    );
   } catch (err) {
     throw new Error("Comment to upvote could not be found: " + err.message);
   }
@@ -272,12 +274,14 @@ const downvoteComment = async (postId, commentId, userId) => {
 
   try {
     const comment = await post.comments.find(
-      (comment) => comment._id === commentId,
+      (comment) => comment._id.toString() === commentId,
     );
     updateDownvoteUserReputation(comment, userId);
 
     const newPost = await getPostByID(postId, userId);
-    return newPost.comments.find((comment) => comment._id === commentId);
+    return newPost.comments.find(
+      (comment) => comment._id.toString() === commentId,
+    );
   } catch (err) {
     throw new Error("Comment to downvote could not be found: " + err);
   }

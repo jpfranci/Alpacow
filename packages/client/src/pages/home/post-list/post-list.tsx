@@ -14,22 +14,18 @@ const StyledContainer = styled.div`
 const PostList: React.FC = () => {
   const dispatch = useAppDispatch();
 
-  const posts = useAppSelector((state) => {
-    return state.post.posts;
+  const postState = useAppSelector((state) => {
+    return state.post;
+  });
+  const { locationFilter, sortType, tagFilter, showMatureContent, posts } =
+    postState;
+  const userId = useAppSelector((state) => {
+    return state.user._id;
   });
 
-  const postState = useAppSelector((state) => state.post);
-
-  const location = useAppSelector((state) => state.post.locationFilter);
-  const sortType = useAppSelector((state) => state.post.sortType);
-  const tagFilter = useAppSelector((state) => state.post.tagFilter);
-  const showMatureContent = useAppSelector(
-    (state) => state.post.showMatureContent,
-  );
-
   useEffect(() => {
-    dispatch(getPostsByFilter(postState));
-  }, [location, sortType, tagFilter, showMatureContent]);
+    dispatch(getPostsByFilter());
+  }, [locationFilter, sortType, tagFilter, showMatureContent, userId]);
 
   return (
     <StyledContainer>

@@ -84,8 +84,6 @@ const PostListItem: React.FC<PostProps> = ({
   const dispatch = useAppDispatch();
   const history = useHistory();
   const voteCount = post.numUpvotes - post.numDownvotes;
-  const [upvoteDisabled, setUpvoteDisabled] = useState(post.isUpvoted);
-  const [downvoteDisabled, setDownvoteDisabled] = useState(post.isDownvoted);
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
 
   const handleTagClick = (
@@ -115,14 +113,12 @@ const PostListItem: React.FC<PostProps> = ({
             voteClickCallback({
               post: post,
               isUpvote: true,
-              otherVoteDisabled: downvoteDisabled,
+              otherVoteDisabled: post.isDownvoted,
             });
           }
         } catch (err) {
           throw err;
         }
-        setUpvoteDisabled(true);
-        setDownvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -139,14 +135,12 @@ const PostListItem: React.FC<PostProps> = ({
             voteClickCallback({
               post: post,
               isUpvote: false,
-              otherVoteDisabled: upvoteDisabled,
+              otherVoteDisabled: post.isUpvoted,
             });
           }
         } catch (err) {
           throw err;
         }
-        setDownvoteDisabled(true);
-        setUpvoteDisabled(false);
       })
       .catch((err) => toast.error(err.message));
   };
@@ -179,13 +173,13 @@ const PostListItem: React.FC<PostProps> = ({
           </Button>
         </PostFooterSection>
         <PostFooterSection>
-          <IconButton onClick={handleUpvoteClick} disabled={upvoteDisabled}>
+          <IconButton onClick={handleUpvoteClick} disabled={post.isUpvoted}>
             <UpvoteIcon />
           </IconButton>
 
           {`${voteCount > 0 ? "+" : ""}${voteCount}`}
 
-          <IconButton onClick={handleDownvoteClick} disabled={downvoteDisabled}>
+          <IconButton onClick={handleDownvoteClick} disabled={post.isDownvoted}>
             <DownvoteIcon />
           </IconButton>
         </PostFooterSection>
