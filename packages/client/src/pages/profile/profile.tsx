@@ -14,6 +14,7 @@ import { LoaderContainer } from "../post/post";
 import { initialState, refreshUser } from "../../redux/slices/user-slice";
 import { toast } from "react-toastify";
 import { unwrapResult } from "@reduxjs/toolkit";
+import LoginDialog from "../common/nav/login-dialog";
 
 const StyledTopContainer = styled.div`
   margin: 7.5vh 14vw;
@@ -55,7 +56,8 @@ const StyledPostContainer = styled.div`
 
 const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [editProfileModalOpen, setEditProfileModalOpen] = React.useState(false);
+  const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
   const [user, setUser] = useState(initialState);
   const dispatch = useAppDispatch();
@@ -126,8 +128,7 @@ const ProfilePage = () => {
                     <EditProfileDialog
                       open={editProfileModalOpen}
                       onClose={handleEditProfileModalClose}
-                      username={userToUse.username}
-                      email={userToUse.email}
+                      onSessionTooOldError={() => setLoginDialogOpen(true)}
                     />
                   </span>
                 ) : null}
@@ -137,6 +138,10 @@ const ProfilePage = () => {
                 <StyledColumnContainer>
                   <StyledText>Email Address</StyledText>
                   <text style={fieldColor}>{userToUse.email}</text>
+                  <LoginDialog
+                    open={loginDialogOpen}
+                    onClose={() => setLoginDialogOpen(false)}
+                  />
                 </StyledColumnContainer>
               )}
 

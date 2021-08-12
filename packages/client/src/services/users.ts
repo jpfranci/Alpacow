@@ -147,11 +147,17 @@ const validate = async (
 };
 
 const update = async (updateUserInfo: UpdateUserInfo) => {
-  const currentUser = firebase.auth().currentUser;
+  let currentUser = firebase.auth().currentUser;
   if (updateUserInfo.email) {
+    if (!currentUser) {
+      throw new ActionableError(
+        UpdateErrorCode.SESSION_TOO_OLD,
+        "Please login again to update email",
+      );
+    }
     try {
-      await currentUser?.updateEmail(updateUserInfo.email);
-      const idToken = await currentUser?.getIdToken();
+      await currentUser.updateEmail(updateUserInfo.email);
+      const idToken = await currentUser.getIdToken();
       await axios.post(`${baseUrl}/login`, { idToken });
     } catch (err) {
       switch (err.code) {
@@ -159,6 +165,11 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
           throw new ActionableError(
             UpdateErrorCode.EMAIL_IN_USE,
             "Email already in use",
+          );
+        case "auth/requires-recent-login":
+          throw new ActionableError(
+            UpdateErrorCode.SESSION_TOO_OLD,
+            "Please login again to update email",
           );
         default:
           throw err;
