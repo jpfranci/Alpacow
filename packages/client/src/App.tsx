@@ -6,6 +6,7 @@ import { Redirect, Route, Switch } from "react-router";
 import {
   EXAMPLE_PAGE,
   HOME_PAGE,
+  OTHER_USER_PAGE,
   POST_PAGE,
   PROFILE_PAGE,
 } from "./common/links";
@@ -77,7 +78,11 @@ const App = () => {
         <Switch>
           <Route path={POST_PAGE} component={PostPage} />
           <Route path={HOME_PAGE} component={HomePage} />
-          <Route path={PROFILE_PAGE} component={ProfilePage} />
+          <Route
+            path={PROFILE_PAGE}
+            component={(props) => <ProfilePage {...props} />}
+          />
+          <Route path={OTHER_USER_PAGE} component={ProfilePage} />
           <Route path={EXAMPLE_PAGE} component={ExamplePage} />
           <Redirect to={HOME_PAGE} />
         </Switch>
