@@ -5,7 +5,7 @@ import UpvoteIcon from "@material-ui/icons/ChangeHistory";
 import moment from "moment";
 import styled from "styled-components";
 import { downvote, Post, upvote } from "../../../redux/slices/post-slice";
-import { useAppDispatch } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import { StyledHR } from "../../common/common";
 import Comments from "./comments";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -64,6 +64,7 @@ interface PostViewProps {
 
 const PostView: React.FC<PostViewProps> = ({ post }) => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
 
   const voteCount = post.numUpvotes - post.numDownvotes;
   const date = moment(post.date).format("MM-DD-YYYY @ hh:mm A");
@@ -77,7 +78,11 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
           <TitleText>{post.title}</TitleText>
           <SubTitleText>
             Posted on {date} by{" "}
-            <UsernameButton username={post.username} userId={post.userId} />
+            <UsernameButton
+              username={post.username}
+              userId={post.userId}
+              shouldHighlight={user._id === post.userId}
+            />
           </SubTitleText>
           <BodyText>{post.body}</BodyText>
           <PostContentFooter>

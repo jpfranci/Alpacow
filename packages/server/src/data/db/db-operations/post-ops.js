@@ -289,14 +289,19 @@ const downvoteComment = async (postId, commentId, userId) => {
   }
 };
 
-const updateUsername = async (userId, newUsername) => {
-  return Post.updateMany(
+const updateUsername = (userId, newUsername) => {
+  const updatePostsPromise = Post.updateMany(
     { userId },
     {
       username: newUsername,
     },
     { new: true },
   );
+  const updateCommentsPromise = Post.updateMany(
+    { "comments.userId": userId },
+    { "comments.$.username": newUsername },
+  );
+  return Promise.all([updateCommentsPromise, updatePostsPromise]);
 };
 
 const createComment = async (comment, postId) => {
