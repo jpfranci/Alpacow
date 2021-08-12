@@ -72,7 +72,7 @@ On the backend, we also performed schema validation with **Joi** on incoming req
 
 Finally we used location services to filter posts based on the distance from the current user to the coordinates (location) of where the post was made.
 
-# 5. Next Steps
+## 5. Next Steps
 
 The next natural step would be to allow users to delete and edit their posts and comments. To make the forum experience more engaging, we would look into hot reloading posts and comments to provide users with live updates on new content, as well as supporting more personalized interactions (e.g. emoji reacts). We considered implementing reports for offensive/malicious posts or users. We also envisioned a cash and crypto gifting system to allow users to show support for their favourite Alpacow content (JipTip).
 
