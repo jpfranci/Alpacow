@@ -60,9 +60,10 @@ const ProfilePage = () => {
   const [user, setUser] = useState(initialState);
   const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
-  const isCurrentUser = !!user._id && userState._id === user._id;
-
   const match = useRouteMatch<{ id: string }>(OTHER_USER_PAGE);
+  const isCurrentUser = !match?.params?.id;
+  const userToUse = isCurrentUser ? userState : user;
+
   const getUserProfile = async () => {
     try {
       setIsLoading(true);
@@ -71,8 +72,7 @@ const ProfilePage = () => {
         setUser(userProfile);
       } else {
         const result = await dispatch(refreshUser());
-        const user = unwrapResult(result);
-        setUser(user);
+        unwrapResult(result);
       }
     } catch (error) {
       toast.error(error.message);
@@ -107,12 +107,12 @@ const ProfilePage = () => {
 
   return (
     <span>
-      {user._id ? (
+      {userToUse._id ? (
         <StyledTopContainer>
           <StyledProfileContainer>
             <StyledColumnContainer>
               <StyledRowContainer>
-                <h1 style={fieldColor}>{user.username}'s profile</h1>
+                <h1 style={fieldColor}>{userToUse.username}'s profile</h1>
                 {isCurrentUser ? (
                   <span>
                     <EditButton
@@ -124,26 +124,26 @@ const ProfilePage = () => {
                     <EditProfileDialog
                       open={editProfileModalOpen}
                       onClose={handleEditProfileModalClose}
-                      username={user.username}
-                      email={user.email}
+                      username={userToUse.username}
+                      email={userToUse.email}
                     />
                   </span>
                 ) : null}
               </StyledRowContainer>
 
-              {user.email && (
+              {userToUse.email && (
                 <StyledColumnContainer>
                   <StyledText>Email Address</StyledText>
-                  <text style={fieldColor}>{user.email}</text>
+                  <text style={fieldColor}>{userToUse.email}</text>
                 </StyledColumnContainer>
               )}
 
               <StyledColumnContainer>
                 <StyledText>Username </StyledText>
-                <text style={fieldColor}>{user.username}</text>
+                <text style={fieldColor}>{userToUse.username}</text>
               </StyledColumnContainer>
 
-              <StyledText>Reputation: 🔥 {user.reputation}</StyledText>
+              <StyledText>Reputation: 🔥 {userToUse.reputation}</StyledText>
             </StyledColumnContainer>
           </StyledProfileContainer>
 
@@ -175,8 +175,8 @@ const ProfilePage = () => {
               <ProfilePostList
                 showCreatedPosts={showCreatedPosts}
                 handleClose={handleClose}
-                maxSize={10}
-                user={user}
+                maxSize={Infinity}
+                user={userToUse}
                 onVote={getUserProfile}
               />
             </StyledPostContainer>

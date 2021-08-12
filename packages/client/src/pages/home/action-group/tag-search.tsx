@@ -14,6 +14,7 @@ interface TagSearchProps {
   onTagSelect: (selectedTag: string) => any;
   inputValue: string;
   onInputChange: (inputValue: string) => any;
+  label?: string;
   // any other props
   [key: string]: any;
 }
@@ -24,6 +25,7 @@ const TagSearch = ({
   onTagSelect,
   inputValue,
   onInputChange,
+  label = "Find a tag",
   ...otherProps
 }: TagSearchProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -67,12 +69,7 @@ const TagSearch = ({
       inputValue={inputValue ?? ""}
       noOptionsText={noOptionsText}
       renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Find a Tag"
-          variant="outlined"
-          fullWidth
-        />
+        <TextField {...params} label={label} variant="outlined" fullWidth />
       )}
       onChange={handleTagFilterChange}
       onInputChange={(event, newInputValue) => {

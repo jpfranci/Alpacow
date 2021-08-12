@@ -16,16 +16,17 @@ const createUser = (payload) => {
 };
 
 const updateEmailAndUsername = ({ _id, username, email }) => {
-  return User.findByIdAndUpdate(
-    _id,
-    {
-      username,
-      email,
-    },
-    {
-      new: true,
-    },
-  );
+  const updateObject = {};
+  if (username) {
+    updateObject.username = username;
+  }
+  if (email) {
+    updateObject.email = email;
+  }
+
+  return User.findByIdAndUpdate(_id, updateObject, {
+    new: true,
+  });
 };
 
 const doesUsernameExist = async (username) => {

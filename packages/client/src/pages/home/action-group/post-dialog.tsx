@@ -224,6 +224,7 @@ const PostDialog = ({ open, onClose }: PostDialogProps) => {
             <TagSearch
               width={200}
               size="small"
+              label="Find or create a tag"
               selectedTag={selectedTag}
               inputValue={inputValue}
               onInputChange={(newInputValue: any) =>

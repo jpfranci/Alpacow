@@ -151,6 +151,8 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
   if (updateUserInfo.email) {
     try {
       await currentUser?.updateEmail(updateUserInfo.email);
+      const idToken = await currentUser?.getIdToken();
+      await axios.post(`${baseUrl}/login`, { idToken });
     } catch (err) {
       switch (err.code) {
         case "auth/email-already-in-use":
@@ -164,8 +166,6 @@ const update = async (updateUserInfo: UpdateUserInfo) => {
     }
   }
 
-  const idToken = await currentUser?.getIdToken();
-  await axios.post(`${baseUrl}/login`, { idToken });
   const response = await axios.post(`${baseUrl}/update`, updateUserInfo);
   return response.data;
 };
