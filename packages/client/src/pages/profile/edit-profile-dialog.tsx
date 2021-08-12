@@ -49,8 +49,7 @@ const StyledErrorMessage = styled.span`
 interface EditProfileDialogProps {
   open: boolean;
   onClose: () => any;
-  username: string | undefined;
-  email: string | undefined;
+  onSessionTooOldError?: () => any;
 }
 
 const validationSchema = Joi.object({
@@ -59,7 +58,11 @@ const validationSchema = Joi.object({
     .required(),
   username: Joi.string().required(),
 });
-const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
+const EditProfileDialog = ({
+  open,
+  onClose,
+  onSessionTooOldError,
+}: EditProfileDialogProps) => {
   const { username: currentUsername, email: currentEmail } = useAppSelector(
     (state) => state.user,
   );
@@ -138,6 +141,15 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
             type: "manual",
             message: "The new email already exists",
           });
+          break;
+        case UpdateErrorCode.SESSION_TOO_OLD:
+          toast.error(
+            "For security reasons please login again to update your email",
+          );
+          if (onSessionTooOldError) {
+            onSessionTooOldError();
+          }
+          handleClose();
           break;
         default:
           toast.error("There was an unexpected error while updating user");

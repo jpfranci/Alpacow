@@ -23,6 +23,8 @@ const {
   createUserValidationFn,
   emailAndUsernameValidationFn,
   emailAndUsernameUpdateValidationFn,
+  getPostByUserIdValidationFn,
+  getVotedPostsByUserIdValidationFn,
 } = require("./users-validation");
 
 const login = async (req, res, next) => {
@@ -107,31 +109,39 @@ router.post("/logout", extractUserFromSessionCookie, async (req, res, next) => {
   }
 });
 
-router.get("/:id/posts", async (req, res, next) => {
-  try {
-    const post = await getPostsByUserID(
-      req.params.id,
-      req.query.currentUserId,
-      req.query.sortType,
-    );
-    res.json(post);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get(
+  "/:id/posts",
+  [getPostByUserIdValidationFn, tryToExtractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const post = await getPostsByUserID({
+        userId: req.params.id,
+        currentUserId: req.uid,
+        ...req.query,
+      });
+      res.json(post);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
-router.get("/:id/voted", async (req, res, next) => {
-  try {
-    const post = await getPostsByUserVote(
-      req.params.id,
-      req.query.currentUserId,
-      req.query.isUpvoted,
-    );
-    res.json(post);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get(
+  "/:id/voted",
+  [getVotedPostsByUserIdValidationFn, tryToExtractUserFromSessionCookie],
+  async (req, res, next) => {
+    try {
+      const post = await getPostsByUserVote({
+        userId: req.params.id,
+        currentUserId: req.uid,
+        ...req.query,
+      });
+      res.json(post);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 router.get(
   "/:id/profile",

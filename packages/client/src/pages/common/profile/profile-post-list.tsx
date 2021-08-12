@@ -5,13 +5,19 @@ import PostListItem, {
 } from "../../home/post-list/post-list-item";
 import { UserState } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
-import { Post } from "../../../redux/slices/post-slice";
+import { Post, PostSortType } from "../../../redux/slices/post-slice";
 import { useAppSelector } from "../../../redux/store";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+`;
+
+const StyledSpinnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 interface ProfilePostListProps {
@@ -30,40 +36,62 @@ const ProfilePostList = ({
   onVote,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [updateVote, setUpdateVote] = useState(false);
-
-  const currentUserState = useAppSelector((state) => {
-    return state.user;
-  });
+  const showMatureContent = useAppSelector(
+    (state) => state.post.showMatureContent,
+  );
 
   const fetchPostsForUser = async () => {
-    const fetchedPosts = await userService.getPostsByUser(
-      String(user._id),
-      currentUserState._id as string,
-      "new",
-    );
+    const fetchedPosts = await userService.getPostsByUser({
+      id: user._id as string,
+      sortType: PostSortType.NEW,
+      showMatureContent: !!showMatureContent,
+    });
     setPosts(fetchedPosts);
   };
 
   const fetchPostsVotedByUser = async () => {
-    const fetchedPosts = await userService.getPostsByUserVote(
-      String(user._id),
-      currentUserState._id as string,
-      true,
-    );
+    const fetchedPosts = await userService.getPostsByUserVote({
+      id: user._id as string,
+      sortType: PostSortType.NEW,
+      isUpvoted: true,
+      showMatureContent: !!showMatureContent,
+    });
     setPosts(fetchedPosts);
   };
 
-  const handleVote = (params: VoteUpdateParams) => {
-    setUpdateVote(!updateVote);
+  const handleVote = ({ post: newPost }) => {
+    const postIndex = posts.findIndex((post) => post._id === newPost._id);
+    const newPosts = [...posts];
+    newPosts[postIndex] = newPost;
+    setPosts(newPosts);
     if (onVote) {
       onVote();
     }
   };
 
   useEffect(() => {
-    showCreatedPosts ? fetchPostsForUser() : fetchPostsVotedByUser();
-  }, [showCreatedPosts, updateVote]);
+    const loadPosts = async () => {
+      try {
+        setIsLoading(true);
+        showCreatedPosts
+          ? await fetchPostsForUser()
+          : await fetchPostsVotedByUser();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPosts();
+  }, [showCreatedPosts, updateVote, showMatureContent]);
+
+  if (isLoading) {
+    return (
+      <StyledSpinnerContainer>
+        <CircularProgress />
+      </StyledSpinnerContainer>
+    );
+  }
 
   return (
     <StyledContainer>
