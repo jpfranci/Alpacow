@@ -61,8 +61,11 @@ const ProfilePostList = ({
     setPosts(fetchedPosts);
   };
 
-  const handleVote = (params: VoteUpdateParams) => {
-    setUpdateVote(!updateVote);
+  const handleVote = ({ post: newPost }) => {
+    const postIndex = posts.findIndex((post) => post._id === newPost._id);
+    const newPosts = [...posts];
+    newPosts[postIndex] = newPost;
+    setPosts(newPosts);
     if (onVote) {
       onVote();
     }

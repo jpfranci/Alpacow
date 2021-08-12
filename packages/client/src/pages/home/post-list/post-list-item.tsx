@@ -59,12 +59,8 @@ const DateText = styled.div`
   margin-right: 2em;
 `;
 
-// upvote updates the posts in the post state, but view profile
-// displays posts which may not be in the post state
 export interface VoteUpdateParams {
   post: Post;
-  isUpvote: boolean;
-  otherVoteDisabled: boolean;
 }
 
 interface PostProps {
@@ -107,13 +103,11 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(upvote({ post }))
       .then((result) => {
-        unwrapResult(result);
+        const updatedVotes = unwrapResult(result);
         try {
           if (voteClickCallback) {
             voteClickCallback({
-              post: post,
-              isUpvote: true,
-              otherVoteDisabled: post.isDownvoted,
+              post: { ...post, ...updatedVotes },
             });
           }
         } catch (err) {
@@ -129,13 +123,11 @@ const PostListItem: React.FC<PostProps> = ({
     e.stopPropagation();
     dispatch(downvote({ post }))
       .then((result) => {
-        unwrapResult(result);
+        const updatedVotes = unwrapResult(result);
         try {
           if (voteClickCallback) {
             voteClickCallback({
-              post: post,
-              isUpvote: false,
-              otherVoteDisabled: post.isUpvoted,
+              post: { ...post, ...updatedVotes },
             });
           }
         } catch (err) {
