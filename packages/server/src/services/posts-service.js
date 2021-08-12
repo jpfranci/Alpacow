@@ -112,20 +112,21 @@ const downvotePost = async (postId, userId) => {
 };
 
 const createComment = async (comment, postId) => {
+  let { body, isAnonymous, userId } = comment;
   let username = null;
-  let userId = null;
-  if (!comment.isAnonymous) {
-    const user = await UserDb.getUser(post.userId);
+  let commentUserId = null;
+  if (!isAnonymous) {
+    const user = await UserDb.getUser(userId);
     username = user.username;
-    userId = comment.userId;
+    commentUserId = userId;
   }
 
-  const isMature = await checkIsMature([comment.body]);
+  const isMature = await checkIsMature([body]);
 
   const commentToInsert = {
     ...comment,
     date: new Date(),
-    userId,
+    userId: commentUserId,
     username,
     upvoters: [],
     downvoters: [],
