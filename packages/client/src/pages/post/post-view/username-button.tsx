@@ -50,7 +50,11 @@ const UsernameButton: React.FC<UsernameButtonProps> = ({
 
   return (
     <span>
-      <LinkButton variant="text" size="small" onClick={handleViewAccount}>
+      <LinkButton
+        variant="text"
+        size="small"
+        onClick={handleViewAccount}
+        disabled={!userId}>
         <Typography variant="subtitle2">
           <b style={{ color: shouldHighlight ? "#0080FF" : "black" }}>
             {username ?? "anonymous"}

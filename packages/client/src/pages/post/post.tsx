@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouteMatch } from "react-router";
 import styled from "styled-components";
 import { POST_PAGE } from "../../common/links";
-import { updatePost } from "../../redux/slices/post-slice";
+import { updateActivePost } from "../../redux/slices/post-slice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import postService from "../../services/posts";
 import PostView from "./post-view/post-view";
@@ -22,11 +22,7 @@ export const LoaderContainer = styled.div`
 const PostPage = () => {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const post = useAppSelector((state) =>
-    state.post.currPostIndex === -1
-      ? state.post.postViewFromProfile
-      : state.post.posts[state.post.currPostIndex],
-  );
+  const post = useAppSelector((state) => state.post.activePost);
 
   const match = useRouteMatch<{ id: string }>(POST_PAGE);
 
@@ -35,11 +31,17 @@ const PostPage = () => {
   // This also handles workflow where user naved here via url and store is empty
   useEffect(() => {
     if (!match) return;
+    setIsLoading(true);
     postService
       .getByID(match.params.id)
-      .then((res) => dispatch(updatePost(res.data)))
+      .then((res) => dispatch(updateActivePost(res.data)))
       .catch((error) => console.error(error))
       .finally(() => setIsLoading(false));
+
+    // removes active post on unmount
+    return () => {
+      dispatch(updateActivePost(undefined));
+    };
   }, [match?.params.id]);
 
   return (

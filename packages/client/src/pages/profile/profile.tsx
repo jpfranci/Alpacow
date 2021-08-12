@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { HOME_PAGE, OTHER_USER_PAGE } from "../../common/links";
 import { useRouteMatch } from "react-router";
-import { useAppSelector } from "../../redux/store";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { Link as RouterLink } from "react-router-dom";
 import { Button, Link } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
@@ -11,7 +11,9 @@ import EditProfileDialog from "./edit-profile-dialog";
 import userService from "../../services/users";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { LoaderContainer } from "../post/post";
-import { initialState } from "../../redux/slices/user-slice";
+import { initialState, refreshUser } from "../../redux/slices/user-slice";
+import { toast } from "react-toastify";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const StyledTopContainer = styled.div`
   margin: 7.5vh 14vw;
@@ -56,20 +58,32 @@ const ProfilePage = () => {
   const [editProfileModalOpen, setEditProfileModalOpen] = React.useState(false);
   const [showCreatedPosts, setShowCreatedPosts] = useState(true);
   const [user, setUser] = useState(initialState);
-
+  const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
+
   const match = useRouteMatch<{ id: string }>(OTHER_USER_PAGE);
+  const isCurrentUser = !match?.params?.id;
+  const userToUse = isCurrentUser ? userState : user;
+
+  const getUserProfile = async () => {
+    try {
+      setIsLoading(true);
+      if (match && match.params.id) {
+        const userProfile = await userService.getUserProfile(match.params.id);
+        setUser(userProfile);
+      } else {
+        const result = await dispatch(refreshUser());
+        unwrapResult(result);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (match && match.params.id) {
-      userService
-        .getUserProfile(match.params.id)
-        .then((user) => setUser(user))
-        .catch((error) => console.error(error))
-        .finally(() => setIsLoading(false));
-    } else {
-      setUser(userState);
-    }
+    getUserProfile();
   }, []);
 
   const handleEditProfileModalOpen = () => {
@@ -95,13 +109,13 @@ const ProfilePage = () => {
 
   return (
     <span>
-      {user._id ? (
+      {userToUse._id ? (
         <StyledTopContainer>
           <StyledProfileContainer>
             <StyledColumnContainer>
               <StyledRowContainer>
-                <h1 style={fieldColor}>{user.username}'s profile</h1>
-                {userState._id === user._id ? (
+                <h1 style={fieldColor}>{userToUse.username}'s profile</h1>
+                {isCurrentUser ? (
                   <span>
                     <EditButton
                       variant="outlined"
@@ -112,24 +126,26 @@ const ProfilePage = () => {
                     <EditProfileDialog
                       open={editProfileModalOpen}
                       onClose={handleEditProfileModalClose}
-                      username={user.username}
-                      email={user.email}
+                      username={userToUse.username}
+                      email={userToUse.email}
                     />
                   </span>
                 ) : null}
               </StyledRowContainer>
 
-              <StyledColumnContainer>
-                <StyledText>Email Address</StyledText>
-                <text style={fieldColor}>{user.email}</text>
-              </StyledColumnContainer>
+              {userToUse.email && (
+                <StyledColumnContainer>
+                  <StyledText>Email Address</StyledText>
+                  <text style={fieldColor}>{userToUse.email}</text>
+                </StyledColumnContainer>
+              )}
 
               <StyledColumnContainer>
                 <StyledText>Username </StyledText>
-                <text style={fieldColor}>{user.username}</text>
+                <text style={fieldColor}>{userToUse.username}</text>
               </StyledColumnContainer>
 
-              <StyledText>Reputation: 🔥 {user.reputation}</StyledText>
+              <StyledText>Reputation: 🔥 {userToUse.reputation}</StyledText>
             </StyledColumnContainer>
           </StyledProfileContainer>
 
@@ -161,8 +177,9 @@ const ProfilePage = () => {
               <ProfilePostList
                 showCreatedPosts={showCreatedPosts}
                 handleClose={handleClose}
-                maxSize={10}
-                user={user}
+                maxSize={Infinity}
+                user={userToUse}
+                onVote={getUserProfile}
               />
             </StyledPostContainer>
           </StyledColumnContainer>

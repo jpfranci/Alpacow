@@ -13,7 +13,7 @@ import {
 import styled from "styled-components";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import userService from "../../services/users";
+import userService, { UpdateUserInfo } from "../../services/users";
 import { updateUser } from "../../redux/slices/user-slice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useHistory } from "react-router-dom";
@@ -119,12 +119,11 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
         }
 
         if (isValid) {
-          const dispatchedAction = await dispatch(
-            updateUser({
-              username: username,
-              email: email,
-            }),
-          );
+          const updateObject: UpdateUserInfo = { username };
+          if (email !== currentEmail) {
+            updateObject.email = email;
+          }
+          const dispatchedAction = await dispatch(updateUser(updateObject));
           unwrapResult(dispatchedAction);
           handleClose();
           history.push(PROFILE_PAGE);
@@ -163,7 +162,7 @@ const EditProfileDialog = ({ open, onClose }: EditProfileDialogProps) => {
       <DialogTitle id="form-dialog-title">
         <StyledRowContainer>
           <StyledTitle>Update your profile</StyledTitle>
-          <IconButton aria-label="close" onClick={onClose}>
+          <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>

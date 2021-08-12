@@ -19,6 +19,7 @@ interface ProfilePostListProps {
   handleClose: any;
   maxSize: number;
   user: UserState;
+  onVote?: () => any;
 }
 
 const ProfilePostList = ({
@@ -26,6 +27,7 @@ const ProfilePostList = ({
   handleClose,
   maxSize,
   user,
+  onVote,
 }: ProfilePostListProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [updateVote, setUpdateVote] = useState(false);
@@ -53,11 +55,9 @@ const ProfilePostList = ({
   };
 
   const handleVote = (params: VoteUpdateParams) => {
-    const postToUpdate = posts.findIndex(
-      (foundPost) => foundPost._id === params.post._id,
-    );
-    if (postToUpdate >= 0) {
-      setUpdateVote(!updateVote);
+    setUpdateVote(!updateVote);
+    if (onVote) {
+      onVote();
     }
   };
 

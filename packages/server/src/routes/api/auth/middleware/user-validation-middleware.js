@@ -45,7 +45,6 @@ const extractUserFromIdToken = async (req, res, next) => {
 
 const extractUserFromSessionCookie = async (req, res, next) => {
   try {
-    // TODO CRSF validation
     const firebaseSessionCookie =
       req.cookies[FIREBASE_SESSION_COOKIE_NAME] ?? "";
     const decodedToken = await admin

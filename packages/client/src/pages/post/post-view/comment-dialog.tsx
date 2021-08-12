@@ -16,6 +16,10 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { createComment, Post } from "../../../redux/slices/post-slice";
 import { useAppDispatch } from "../../../redux/store";
+import Joi from "joi";
+import { Controller, useForm } from "react-hook-form";
+import { joiResolver } from "@hookform/resolvers/joi";
+import styled from "styled-components";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -29,28 +33,51 @@ const useStyles = makeStyles(() =>
   }),
 );
 
+const StyledErrorMessage = styled.span`
+  color: red;
+`;
+
 interface CommentDialogProps {
   open: boolean;
   onClose: () => void;
   post: Post;
 }
 
+const DEFAULT_FIELDS = {
+  bodyText: "",
+  isAnonymous: false,
+};
+
+const validationSchema = Joi.object({
+  bodyText: Joi.string().max(1024).required(),
+  isAnonymous: Joi.boolean().required(),
+});
+
 const CommentDialog: React.FC<CommentDialogProps> = ({
   open,
   onClose,
   post,
 }) => {
-  const [bodyText, setBodyText] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const {
+    control,
+    formState: { errors },
+    clearErrors,
+    handleSubmit,
+  } = useForm({
+    mode: "onBlur",
+    resolver: joiResolver(validationSchema),
+    defaultValues: DEFAULT_FIELDS,
+  });
 
   const dispatch = useAppDispatch();
   const handleClose = () => {
+    clearErrors();
     onClose();
   };
 
   const classes = useStyles();
 
-  const handleSubmit = async () => {
+  const handleSubmitClicked = async ({ bodyText, isAnonymous }) => {
     try {
       const dispatchedAction = await dispatch(
         createComment({
@@ -61,7 +88,6 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
       unwrapResult(dispatchedAction);
       handleClose();
     } catch (err) {
-      // TODO improve error handling (look at create profile dialog)
       toast.error(err.message);
     }
   };
@@ -69,6 +95,7 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
   return (
     <Dialog
       open={open}
+      onClose={handleClose}
       maxWidth="sm"
       fullWidth={true}
       className={classes.dialogContent}>
@@ -77,32 +104,56 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
         <DialogContentText>
           Please be mindful of what you comment. ❤️
         </DialogContentText>
-        <TextField
-          label="Content (max 1,024 chars)"
-          variant="outlined"
-          margin="dense"
-          value={bodyText}
-          required
-          multiline
-          rows={4}
-          rowsMax={6}
-          fullWidth
-          onChange={(e) => setBodyText(e.target.value)}
-          inputProps={{ maxLength: 1024 }}
+        <Controller
+          control={control}
+          name="bodyText"
+          render={({ field }) => (
+            <>
+              <TextField
+                label="Content (max 1,024 chars)"
+                variant="outlined"
+                margin="dense"
+                required
+                multiline
+                rows={4}
+                rowsMax={6}
+                fullWidth
+                inputProps={{ maxLength: 1024 }}
+                {...field}
+              />
+              {errors.bodyText && (
+                <>
+                  <StyledErrorMessage>
+                    {errors.bodyText.message}
+                  </StyledErrorMessage>
+                  <br />
+                </>
+              )}
+            </>
+          )}
         />
-        <FormControlLabel
-          control={<Checkbox name="checkedH" color="primary" />}
-          label="Comment Anonymously"
-          classes={{ label: classes.label }}
-          checked={isAnonymous}
-          onChange={(e: any) => setIsAnonymous(e.target.checked)}
+        <Controller
+          name="isAnonymous"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Checkbox name="checkedH" color="primary" />}
+              label="Comment Anonymously"
+              classes={{ label: classes.label }}
+              checked={field.value}
+              onChange={(e: any) => field.onChange(e.target.checked)}
+            />
+          )}
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="outlined" color="primary">
+        <Button
+          onClick={handleSubmit(handleSubmitClicked)}
+          variant="outlined"
+          color="primary">
           Submit
         </Button>
       </DialogActions>

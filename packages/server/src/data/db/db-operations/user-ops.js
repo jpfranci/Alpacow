@@ -1,8 +1,14 @@
 const User = require("../../models/user-model");
 
-const getUser = async (userId) => {
-  const users = await User.find({ _id: userId }).limit(1);
-  return users[0].toJSON(); // converts mongo model object to stripped down JSON containing only schema fields
+const getUser = async (userId, fetchEmail = true) => {
+  const projection = {
+    username: true,
+    reputation: true,
+  };
+  if (fetchEmail) {
+    projection.email = true;
+  }
+  return User.findById(userId, projection);
 };
 
 const createUser = (payload) => {
@@ -10,16 +16,17 @@ const createUser = (payload) => {
 };
 
 const updateEmailAndUsername = ({ _id, username, email }) => {
-  return User.findByIdAndUpdate(
-    _id,
-    {
-      username,
-      email,
-    },
-    {
-      new: true,
-    },
-  );
+  const updateObject = {};
+  if (username) {
+    updateObject.username = username;
+  }
+  if (email) {
+    updateObject.email = email;
+  }
+
+  return User.findByIdAndUpdate(_id, updateObject, {
+    new: true,
+  });
 };
 
 const doesUsernameExist = async (username) => {

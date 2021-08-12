@@ -155,7 +155,7 @@ const LoginDialog = ({ open, onClose }: LoginDialogProps) => {
       <DialogTitle id="form-dialog-title">
         <StyledRowContainer>
           Login to Alpacow
-          <IconButton aria-label="close" onClick={onClose}>
+          <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
         </StyledRowContainer>

@@ -57,14 +57,7 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
   const [downvoteDisabled, setDownvoteDisabled] = useState(comment.isDownvoted);
 
   const dispatch = useAppDispatch();
-  const post = useAppSelector((state) =>
-    state.post.currPostIndex === -1
-      ? state.post.postViewFromProfile
-      : state.post.posts[state.post.currPostIndex],
-  ) as PostType;
-  const showMatureContent = useAppSelector(
-    (state) => state.post.showMatureContent,
-  );
+  const post = useAppSelector((state) => state.post.activePost) as PostType;
   const user = useAppSelector((state) => state.user);
 
   const voteCount = comment.numUpvotes - comment.numDownvotes;
@@ -96,7 +89,6 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
       .catch((err) => toast.error(err.message));
   };
 
-  if (!showMatureContent && comment.isMature) return null;
   return (
     <CommentContainer>
       <Header>
