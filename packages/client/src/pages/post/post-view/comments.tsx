@@ -38,6 +38,9 @@ const Comments: React.FC<CommentsProps> = ({ comments, post }) => {
 
   const dispatch = useAppDispatch();
   const commentSortType = useAppSelector((state) => state.post.commentSortType);
+  const showMatureContent = useAppSelector(
+    (state) => state.post.showMatureContent,
+  );
   const user = useAppSelector((state) => state.user);
 
   const handleCommentSortSelect = (
@@ -46,7 +49,10 @@ const Comments: React.FC<CommentsProps> = ({ comments, post }) => {
     dispatch(setCommentSortType(e.target.value as CommentSortType));
   };
 
-  const sortedComments = [...comments].sort((comment1, comment2) => {
+  const filteredComments = showMatureContent
+    ? [...comments]
+    : comments.filter((comment) => !comment.isMature);
+  const sortedComments = filteredComments.sort((comment1, comment2) => {
     if (commentSortType === CommentSortType.POPULAR) {
       const netVotes1 = comment1.numUpvotes - comment1.numDownvotes;
       const netVotes2 = comment2.numUpvotes - comment2.numDownvotes;

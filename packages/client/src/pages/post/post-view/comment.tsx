@@ -58,9 +58,6 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
 
   const dispatch = useAppDispatch();
   const post = useAppSelector((state) => state.post.activePost) as PostType;
-  const showMatureContent = useAppSelector(
-    (state) => state.post.showMatureContent,
-  );
   const user = useAppSelector((state) => state.user);
 
   const voteCount = comment.numUpvotes - comment.numDownvotes;
@@ -92,7 +89,6 @@ const Comment: React.FC<CommentProps> = ({ comment }) => {
       .catch((err) => toast.error(err.message));
   };
 
-  if (!showMatureContent && comment.isMature) return null;
   return (
     <CommentContainer>
       <Header>

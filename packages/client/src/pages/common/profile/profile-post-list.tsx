@@ -7,7 +7,6 @@ import { UserState } from "../../../redux/slices/user-slice";
 import userService from "../../../services/users";
 import { Post } from "../../../redux/slices/post-slice";
 import { useAppSelector } from "../../../redux/store";
-import { on } from "cluster";
 
 const StyledContainer = styled.div`
   display: flex;
