@@ -5,38 +5,37 @@ import {
   Typography,
   Button,
   ButtonBase,
-  Switch,
   Link,
 } from "@material-ui/core";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import { makeStyles } from "@material-ui/core/styles";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { useAppSelector } from "../../../redux/store";
 import ProfileButton from "../profile/profile-button";
 import CreateProfileDialog from "./create-profile-dialog";
 import LoginDialog from "./login-dialog";
-import { setShowMatureContent } from "../../../redux/slices/post-slice";
 import { Link as RouterLink } from "react-router-dom";
 import { HOME_PAGE } from "../../../common/links";
 import styled from "styled-components";
 import LogoSVG from "../../../static/Alpacow-logo.svg";
 
-// Using mui theme for consistent spacing
-const useStyles = makeStyles((theme: any) => ({
-  root: {
-    flexGrow: 1,
-  },
-  iconContainer: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginLeft: theme.spacing(2),
-  },
-}));
+const StyledMenuButton = styled(Button)`
+  white-space: nowrap;
+  margin-right: 0.5em;
+  margin-left: 0.5em;
+`;
+
+const StyledIconContainer = styled.div`
+  flex-grow: 1;
+  margin-left: -0.5em;
+`;
+
+const StyledRowContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
 
 const profileOptions = (
   user: any,
-  classes: any,
   setSignUpModalOpen: any,
   setLoginModalOpen: any,
 ) => {
@@ -44,32 +43,24 @@ const profileOptions = (
     return <ProfileButton username={user.username} />;
   } else {
     return (
-      <div>
-        <Button
+      <StyledRowContainer>
+        <ProfileButton username={undefined} />
+        <StyledMenuButton
           variant="outlined"
           color="inherit"
-          className={classes.menuButton}
           onClick={() => setLoginModalOpen(true)}>
           Login
-        </Button>
-        <Button
+        </StyledMenuButton>
+        <StyledMenuButton
           variant="outlined"
           color="inherit"
-          className={classes.menuButton}
           onClick={() => setSignUpModalOpen(true)}>
           Sign up
-        </Button>
-      </div>
+        </StyledMenuButton>
+      </StyledRowContainer>
     );
   }
 };
-
-const BrandName = styled.h6`
-  & > a {
-    color: black;
-    text-decoration: none;
-  }
-`;
 
 const NavBar = () => {
   const [signUpModalOpen, setSignUpModalOpen]: [
@@ -90,15 +81,7 @@ const NavBar = () => {
     setLoginModalOpen(false);
   };
 
-  const dispatch = useAppDispatch();
-
   const user = useAppSelector((state: any) => state.user);
-  const isMature = useAppSelector((state: any) => state.post.showMatureContent);
-  const classes = useStyles();
-
-  const handleChange = () => {
-    dispatch(setShowMatureContent(!isMature));
-  };
 
   return (
     <AppBar position="static" color="primary">
@@ -110,18 +93,12 @@ const NavBar = () => {
             </Link>
           </Typography>
         </ButtonBase>
-        <div className={classes.iconContainer}>
-          <ButtonBase className={classes.menuButton}>
+        <StyledIconContainer>
+          <StyledMenuButton>
             <img src={LogoSVG} alt="official alpacow logo" height={45} />
-          </ButtonBase>
-        </div>
-        <FormGroup>
-          <FormControlLabel
-            control={<Switch checked={isMature} onChange={handleChange} />}
-            label="Show mature content"
-          />
-        </FormGroup>
-        {profileOptions(user, classes, setSignUpModalOpen, setLoginModalOpen)}
+          </StyledMenuButton>
+        </StyledIconContainer>
+        {profileOptions(user, setSignUpModalOpen, setLoginModalOpen)}
         <LoginDialog open={loginModalOpen} onClose={handleLoginModalClose} />
         <CreateProfileDialog
           open={signUpModalOpen}
