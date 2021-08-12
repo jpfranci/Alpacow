@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import NavBar from "./pages/common/nav/nav";
 import { Redirect, Route, Switch } from "react-router";
 import {
-  EXAMPLE_PAGE,
   HOME_PAGE,
   OTHER_USER_PAGE,
   POST_PAGE,
@@ -15,7 +14,6 @@ import { toast, ToastContainer } from "react-toastify";
 import HomePage from "./pages/home/home";
 import PostPage from "./pages/post/post";
 import darkTheme from "./common/theme";
-import ExamplePage from "./pages/example/example";
 import { ThemeProvider } from "styled-components";
 import { useAppDispatch } from "./redux/store";
 import { loginFromCookie } from "./redux/slices/user-slice";
@@ -83,7 +81,6 @@ const App = () => {
             component={(props) => <ProfilePage {...props} />}
           />
           <Route path={OTHER_USER_PAGE} component={ProfilePage} />
-          <Route path={EXAMPLE_PAGE} component={ExamplePage} />
           <Redirect to={HOME_PAGE} />
         </Switch>
       </ThemeProvider>
