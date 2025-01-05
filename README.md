@@ -103,8 +103,6 @@ Some interesting parts of the project I worked on include setting location using
 
 ### Main Screen with Posts
 
-![main screen posts](https://user-images.githubusercontent.com/43103720/122508610-1698a780-cfb7-11eb-8e9f-a4cfe1a91da0.jpg)
-
 Shown are key features including voting on posts with the most reputable being shown first to the user.
 It also includes the navigation bar where the user can further filter posts and also visit/edit their profile.
 Users can click on the replies text to view replies and participate.
